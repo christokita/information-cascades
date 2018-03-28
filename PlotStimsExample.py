@@ -15,12 +15,13 @@ import matplotlib
 
 
 mu = 0 #mean for thresholds
-gamma = 0.2 # correlation between two information sources
+gamma = -0.5 # correlation between two information sources
 
-stims = list()
-
-for i in range(100):
+for i in range(100):      
     stim_sources = generate_stimuli(correlation = gamma, mean = mu)
-    stims.append(stim_sources)
+    if i == 1:
+        stims = stim_sources
+    else:
+        stims = np.vstack([stims, stim_sources])
     
-matplotlib.pyplot.scatter(x)
+matplotlib.pyplot.scatter(stims[:,0], stims[:,1])
