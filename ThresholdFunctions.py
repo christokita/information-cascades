@@ -20,7 +20,7 @@ def seed_thresholds(n, mean, sd, low, high):
     # Generate thresholds and return
     #thresholds = truncnorm.rvs(a = a, b = b, loc = mean, scale = sd, size = n)
     thresholds = np.random.normal(loc = mean, scale = sd, size = n)
-    thresholds = np.matrix(thresholds)
+    thresholds = np.array(thresholds)
     thresholds = np.reshape(thresholds, (n, 1))
     return thresholds
 
@@ -31,7 +31,7 @@ def assign_type(n):
     for i in range(n):
         ind_type = np.random.choice([1, 0], size = 2, replace = False)
         types.append(ind_type)
-    types = np.matrix(types)
+    types = np.array(types)
     return(types)
 
 # Response threshold function

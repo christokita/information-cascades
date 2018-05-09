@@ -13,8 +13,8 @@ import numpy as np
 def seed_social_network(n, low, high):
     # create array of edges
     connections = np.random.uniform(low, high, n * n)
-    # turn into matrix and set diagonal to 0 (no self-connection)
+    # turn into array and set diagonal to 0 (no self-connection)
     network = np.split(connections, n)
-    network = np.matrix(network)
+    network = np.array(network)
     np.fill_diagonal(network, 0)
     return(network)

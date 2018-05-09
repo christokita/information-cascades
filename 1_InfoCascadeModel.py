@@ -17,9 +17,9 @@ import copy
 ##########
 # Set parameters
 ##########
-n = 100 #number of individuals
-low = -0.1 #lowerbound for interaction strength
-high = 0.1 #upperbound for interaction strength
+n = 1000 #number of individuals
+low = -1 #lowerbound for interaction strength
+high = 1 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
 gamma = 0 # correlation between two information sources
@@ -49,16 +49,16 @@ for round in range(rounds):
     sampler_individual = np.random.choice(range(0, n), size = 1)
     # Get individual's type and therefore select correct stimulus
     sampler_individual_type = type_mat[sampler_individual]
-    effective_stim = np.dot(sampler_individual_type, stim_sources)
+    effective_stim = np.dot(sampler_individual_type, np.transpose(stim_sources))
     # Assess with response threshold
     sampler_reaction = response_threshold(stimulus = effective_stim, 
                                         threshold = thresh_mat[sampler_individual])
     # If action allow cascade
-    if focal_reaction == 1:
+    if sampler_reaction == 1:
         # Start action state matrix
         state_mat = np.zeros((n, 1))
-        state_mat_sum  = np.zeros((n, 1))
         state_mat[sampler_individual, 0] = 1
+        state_mat_sum  = copy.copy(state_mat)
         # simulate cascade 
         for t in range(1000000):
             # Weight neighbor info
@@ -75,7 +75,11 @@ for round in range(rounds):
             if np.array_equal(state_mat, state_mat_last) == True:
                 break
          # Evaluate stable state vs actual threshold
-        state_mat_sum = state_mat_sum / (t + 1)
+         true_stim = np.dot(type_mat, np.transpose(stim_sources))
+         correct_state = true_stim > thresh_mat
+         correct_state = correct_state.astype(int)
+         eval_response = state_mat == correct_state
+        
         
             
 

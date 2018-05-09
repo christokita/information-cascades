@@ -16,5 +16,5 @@ def generate_stimuli(correlation, mean):
     covar = [[1,correlation ], [correlation, 1]]
     # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    stims = stims[0]
+    #stims = stims[0]
     return(stims)
