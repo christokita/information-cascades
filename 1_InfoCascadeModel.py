@@ -18,12 +18,12 @@ import copy
 # Set parameters
 ##########
 n = 100 #number of individuals
-low = -1 #lowerbound for interaction strength
-high = 1 #upperbound for interaction strength
+low = -0.1 #lowerbound for interaction strength
+high = 0.1 #upperbound for interaction strength
 mu = 0 #mean for thresholds
-sigma = 2 #relative standard deviation for thresholds
-gamma = 0.2 # correlation between two information sources
-rounds = 100 #number of rounds simulation will run
+sigma = 1 #relative standard deviation for thresholds
+gamma = 0 # correlation between two information sources
+rounds = 10000 #number of rounds simulation will run
 
 
 ##########
@@ -46,32 +46,30 @@ for round in range(rounds):
     # Generate stimuli for the round
     stim_sources = generate_stimuli(correlation = gamma, mean = mu)
     # Choose random individual to sample stimulus
-    focal_individual = np.random.choice(range(0, n), size = 1)
+    sampler_individual = np.random.choice(range(0, n), size = 1)
     # Get individual's type and therefore select correct stimulus
-    focal_individual_type = type_mat[focal_individual]
-    effective_stim = np.dot(focal_individual_type, stim_sources)
+    sampler_individual_type = type_mat[sampler_individual]
+    effective_stim = np.dot(sampler_individual_type, stim_sources)
     # Assess with response threshold
-    focal_reaction = response_threshold(stimulus = effective_stim, 
-                                        threshold = thresh_mat[focal_individual])
+    sampler_reaction = response_threshold(stimulus = effective_stim, 
+                                        threshold = thresh_mat[sampler_individual])
     # If action allow cascade
     if focal_reaction == 1:
         # Start action state matrix
         state_mat = np.zeros((n, 1))
         state_mat_sum  = np.zeros((n, 1))
-        state_mat[focal_individual, 0] = 1
+        state_mat[sampler_individual, 0] = 1
         # simulate cascade 
         for t in range(1000000):
             # Weight neighbor info
             neighbor_state = np.dot(adjacency, state_mat)
-            # Randomly sample individual
-            focal_individual = np.random.choice(range(0, n), size = 1)
             # Threshold calculation
             turn_on = neighbor_state > thresh_mat
             turn_off = neighbor_state < thresh_mat
             # Update
             state_mat_last = copy.copy(state_mat)
             state_mat[turn_on] = 1
-            state_mat[turn_off] = 0
+            #state_mat[turn_off] = 0
             state_mat_sum = state_mat + state_mat_sum
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
