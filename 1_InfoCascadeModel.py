@@ -18,12 +18,12 @@ import copy
 # Set parameters
 ##########
 n = 1000 #number of individuals
-low = -1 #lowerbound for interaction strength
-high = 1 #upperbound for interaction strength
+low = -0.05 #lowerbound for interaction strength
+high = 0.05 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
-gamma = 0 # correlation between two information sources
-rounds = 10000 #number of rounds simulation will run
+gamma = -1 # correlation between two information sources
+rounds = 10 #number of rounds simulation will run
 
 
 ##########
@@ -55,6 +55,7 @@ for round in range(rounds):
                                         threshold = thresh_mat[sampler_individual])
     # If action allow cascade
     if sampler_reaction == 1:
+        print("CASCADE!")
         # Start action state matrix
         state_mat = np.zeros((n, 1))
         state_mat[sampler_individual, 0] = 1
@@ -74,11 +75,11 @@ for round in range(rounds):
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
                 break
-         # Evaluate stable state vs actual threshold
-         true_stim = np.dot(type_mat, np.transpose(stim_sources))
-         correct_state = true_stim > thresh_mat
-         correct_state = correct_state.astype(int)
-         eval_response = state_mat == correct_state
+        # Evaluate stable state vs actual threshold
+        true_stim = np.dot(type_mat, np.transpose(stim_sources))
+        correct_state = true_stim > thresh_mat
+        correct_state = correct_state.astype(int)
+        eval_response = state_mat == correct_state
         
         
             
