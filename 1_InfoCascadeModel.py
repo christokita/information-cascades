@@ -18,13 +18,13 @@ import copy
 # Set parameters
 ##########
 n = 1000 #number of individuals
-low = -0.05 #lowerbound for interaction strength
-high = 0.05 #upperbound for interaction strength
+low = -0.5 #lowerbound for interaction strength
+high = 0.5 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
-gamma = -1 # correlation between two information sources
-phi = 0.01 #change in value of interactions when indviduals adjust ties
-rounds = 100 #number of rounds simulation will run
+gamma = 1 # correlation between two information sources
+phi = 0.1 #change in value of interactions when indviduals adjust ties
+timesteps = 10000 #number of rounds simulation will run
 
 
 ##########
@@ -40,11 +40,13 @@ type_mat = assign_type(n = n)
 adjacency = seed_social_network(n, low, high)
 adjacency_initial = copy.copy(adjacency)
 
+# Cascade counter
+cascade_count = 0
 
 ##########
 # Run simulation
 ##########
-for round in range(rounds):
+for t in range(timesteps):
     # Generate stimuli for the round
     stim_sources = generate_stimuli(correlation = gamma, mean = mu)
     # Choose random individual to sample stimulus
@@ -57,7 +59,10 @@ for round in range(rounds):
                                         threshold = thresh_mat[sampler_individual])
     # If action allow cascade
     if sampler_reaction == 1:
-        print("CASCADE!")
+        # Printout for progress
+        cascade_count = cascade_count + 1
+        if cascade_count % 500 == 0:
+            print("CASCADE", cascade_count, "at t =", t)
         # Start action state matrix
         state_mat = np.zeros((n, 1))
         state_mat[sampler_individual, 0] = 1
@@ -93,7 +98,12 @@ for round in range(rounds):
         adjacency[focal_individual, perceived_incorrect] = adjacency[focal_individual, perceived_incorrect] - phi
         adjacency[focal_individual, perceived_correct] = adjacency[focal_individual, perceived_correct] + phi
         
-            
+##########
+# Assess output
+##########       
+# Chance in adjacency
+adjacency_delta = adjacency - adjacency_initial
 
+plt.hist(np.ndarray.flatten(adjacency_delta))
 
 
