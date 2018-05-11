@@ -23,6 +23,7 @@ high = 0.05 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
 gamma = -1 # correlation between two information sources
+phi = 0.01 #change in value of interactions when indviduals adjust ties
 rounds = 10 #number of rounds simulation will run
 
 
@@ -37,6 +38,7 @@ type_mat = assign_type(n = n)
 
 # Set up social network
 adjacency = seed_social_network(n, low, high)
+adjacency_initial = copy.copy(adjacency)
 
 
 ##########
@@ -80,7 +82,12 @@ for round in range(rounds):
         correct_state = true_stim > thresh_mat
         correct_state = correct_state.astype(int)
         eval_response = state_mat == correct_state
+        # Grab incorrect responses and randomly select one
+        incorrect_responses = np.where(np.invert(eval_response))[0]
+        focal_individual = np.random.choice(incorrect_responses, size = 1)
+        # Assess interaction partners of focal individual
         
+        focal_individual_interactions = adjacency[focal_individual, :]
         
             
 
