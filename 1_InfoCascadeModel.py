@@ -24,7 +24,7 @@ mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
 gamma = -1 # correlation between two information sources
 phi = 0.01 #change in value of interactions when indviduals adjust ties
-rounds = 10 #number of rounds simulation will run
+rounds = 100 #number of rounds simulation will run
 
 
 ##########
@@ -85,9 +85,13 @@ for round in range(rounds):
         # Grab incorrect responses and randomly select one
         incorrect_responses = np.where(np.invert(eval_response))[0]
         focal_individual = np.random.choice(incorrect_responses, size = 1)
-        # Assess interaction partners of focal individual
-        
-        focal_individual_interactions = adjacency[focal_individual, :]
+        # Assess behavior of interaction partners of focal individual
+        perceived_incorrect = np.where(state_mat == state_mat[focal_individual])[0] 
+        perceived_incorrect = perceived_incorrect[perceived_incorrect != focal_individual] #don't coutn self
+        perceived_correct = np.where(state_mat == (1 - state_mat[focal_individual]))[0] 
+        # Adjust ties
+        adjacency[focal_individual, perceived_incorrect] = adjacency[focal_individual, perceived_incorrect] - phi
+        adjacency[focal_individual, perceived_correct] = adjacency[focal_individual, perceived_correct] + phi
         
             
 
