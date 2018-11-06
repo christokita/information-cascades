@@ -18,11 +18,11 @@ import copy
 # Set parameters
 ##########
 n = 1000 #number of individuals
-low = -0.5 #lowerbound for interaction strength
-high = 0.5 #upperbound for interaction strength
+low = -1 #lowerbound for interaction strength
+high = 1 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
-gamma = 1 # correlation between two information sources
+gamma = -1 # correlation between two information sources
 phi = 0.1 #change in value of interactions when indviduals adjust ties
 timesteps = 10000 #number of rounds simulation will run
 
@@ -105,5 +105,8 @@ for t in range(timesteps):
 adjacency_delta = adjacency - adjacency_initial
 
 plt.hist(np.ndarray.flatten(adjacency_delta))
+
+plt.hist(np.ndarray.flatten(adjacency_initial))
+plt.hist(np.ndarray.flatten(adjacency))
 
 
