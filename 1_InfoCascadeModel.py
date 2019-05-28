@@ -9,22 +9,25 @@ Created on Sat Dec  9 12:42:29 2017
 """
 
 import numpy as np
+import pandas as pd
 from SocialNetworkFunctions import *
 from ThresholdFunctions import *
 from StimulusFunctions import *
 import copy
 
+import matplotlib.pyplot as plt
+
 ##########
 # Set parameters
 ##########
-n = 1000 #number of individuals
+n = 500 #number of individuals
 low = -1 #lowerbound for interaction strength
 high = 1 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
-gamma = -1 # correlation between two information sources
-phi = 0.1 #change in value of interactions when indviduals adjust ties
-timesteps = 10000 #number of rounds simulation will run
+gamma = 1 #correlation between two information sources
+phi = 0.25 #change in value of interactions when indviduals adjust ties
+timesteps = 500000 #number of rounds simulation will run
 
 
 ##########
@@ -61,7 +64,7 @@ for t in range(timesteps):
     if sampler_reaction == 1:
         # Printout for progress
         cascade_count = cascade_count + 1
-        if cascade_count % 500 == 0:
+        if cascade_count % 5000 == 0:
             print("CASCADE", cascade_count, "at t =", t)
         # Start action state matrix
         state_mat = np.zeros((n, 1))
@@ -97,7 +100,32 @@ for t in range(timesteps):
         # Adjust ties
         adjacency[focal_individual, perceived_incorrect] = adjacency[focal_individual, perceived_incorrect] - phi
         adjacency[focal_individual, perceived_correct] = adjacency[focal_individual, perceived_correct] + phi
+  
+##########
+# Save files
+##########
+# Convert adjacency matrix to edgelist
+edgelist = []
+for i in range(0, n):
+    for j in range(0, n):
+        row = [i, j, adjacency[i, j]]
+        edgelist.append(row)
         
+edgelist = pd.DataFrame(edgelist, columns = ['Source', 'Target', 'Weight'])
+edgelist = edgelist[edgelist.Weight > 0] #keep only positive edges
+
+# make node list
+nodelist = pd.DataFrame({'Id': range(0, n),
+                         'Threshold': thresh_mat[:,0],
+                         'Type': type_mat[:,1]})
+       
+# Save
+dir_path = 'output/social_networks/'
+edge_file_name = dir_path + 'Edge-Gamma_' + str(gamma) + '.csv'
+node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
+edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
+nodelist.to_csv(node_file_name, index = False, header = True, sep = ",")
+      
 ##########
 # Assess output
 ##########       
@@ -108,5 +136,7 @@ plt.hist(np.ndarray.flatten(adjacency_delta))
 
 plt.hist(np.ndarray.flatten(adjacency_initial))
 plt.hist(np.ndarray.flatten(adjacency))
+
+
 
 

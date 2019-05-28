@@ -13,7 +13,7 @@ import numpy as np
 # Generate correlated stimuli
 def generate_stimuli(correlation, mean):
     # Create covariation matrix
-    covar = [[1,correlation ], [correlation, 1]]
+    covar = [[1, correlation ], [correlation, 1]]
     # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
     #stims = stims[0]
