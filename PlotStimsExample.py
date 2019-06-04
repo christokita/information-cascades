@@ -15,11 +15,11 @@ import matplotlib
 
 
 mu = 0 #mean for thresholds
-gamma = -0.5 # correlation between two information sources
+gamma = 0.5 # correlation between two information sources
 
-for i in range(100):      
+for i in range(1000):      
     stim_sources = generate_stimuli(correlation = gamma, mean = mu)
-    if i == 1:
+    if i == 0:
         stims = stim_sources
     else:
         stims = np.vstack([stims, stim_sources])

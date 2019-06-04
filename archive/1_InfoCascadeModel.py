@@ -21,9 +21,12 @@ import matplotlib.pyplot as plt
 # Set parameters
 ##########
 n = 500 #number of individuals
+low = -1 #lowerbound for interaction strength
+high = 1 #upperbound for interaction strength
 mu = 0 #mean for thresholds
 sigma = 1 #relative standard deviation for thresholds
 gamma = 1 #correlation between two information sources
+phi = 0.25 #change in value of interactions when indviduals adjust ties
 timesteps = 500000 #number of rounds simulation will run
 
 

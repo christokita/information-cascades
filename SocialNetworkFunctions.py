@@ -10,11 +10,18 @@ Social Network Functions
 import numpy as np
 
 # Seed random weighted network 
-def seed_social_network(n, low, high):
-    # create array of edges
-    connections = np.random.uniform(low, high, n * n)
-    # turn into array and set diagonal to 0 (no self-connection)
-    network = np.split(connections, n)
-    network = np.array(network)
-    np.fill_diagonal(network, 0)
+def seed_social_network(n, k):
+    # create eventual 2d array
+    network = []
+    # go through individuals and select partners randomly
+    individuals = np.array(range(0, n))
+    for i in individuals:
+        # drop self
+        pot_partners = np.delete(individuals, i)
+        sel_partners = np.random.choice(pot_partners, size = k, replace = False)
+        row = np.repeat(0, n)
+        row[sel_partners] = 1
+        network.append(row)
+    # bind and return
+    network = np.vstack(network)
     return(network)
