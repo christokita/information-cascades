@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -20,10 +21,12 @@ import matplotlib.pyplot as plt
 ##########
 # Set parameters
 ##########
-n = 500 #number of individuals
+n = 1000 #number of individuals
+k = 5 #mean degree on networks
 mu = 0 #mean for thresholds
-sigma = 1 #relative standard deviation for thresholds
-gamma = 1 #correlation between two information sources
+sigma = 1 # standard deviation for thresholds
+gamma = 0 #correlation between two information sources
+psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
 
 
@@ -31,17 +34,18 @@ timesteps = 500000 #number of rounds simulation will run
 # Seed initial conditions
 ##########
 # Seed individual's thresholds
-thresh_mat = seed_thresholds(n = n, mean = mu, sd = sigma, low = 0, high = 1000)
+thresh_mat = seed_thresholds(n = n, mean = mu, sd = sigma)
 
 # Assign type
 type_mat = assign_type(n = n)
 
 # Set up social network
-adjacency = seed_social_network(n, low, high)
+adjacency = seed_social_network(n, k)
 adjacency_initial = copy.copy(adjacency)
 
-# Cascade counter
-cascade_count = 0
+# Sampler number
+psi_num = int(round(psi*n))
+
 
 ##########
 # Run simulation
@@ -49,54 +53,51 @@ cascade_count = 0
 for t in range(timesteps):
     # Generate stimuli for the round
     stim_sources = generate_stimuli(correlation = gamma, mean = mu)
-    # Choose random individual to sample stimulus
-    sampler_individual = np.random.choice(range(0, n), size = 1)
-    # Get individual's type and therefore select correct stimulus
-    sampler_individual_type = type_mat[sampler_individual]
-    effective_stim = np.dot(sampler_individual_type, np.transpose(stim_sources))
-    # Assess with response threshold
-    sampler_reaction = response_threshold(stimulus = effective_stim, 
-                                        threshold = thresh_mat[sampler_individual])
-    # If action allow cascade
-    if sampler_reaction == 1:
-        # Printout for progress
-        cascade_count = cascade_count + 1
-        if cascade_count % 5000 == 0:
-            print("CASCADE", cascade_count, "at t =", t)
-        # Start action state matrix
-        state_mat = np.zeros((n, 1))
-        state_mat[sampler_individual, 0] = 1
-        state_mat_sum  = copy.copy(state_mat)
-        # simulate cascade 
-        for t in range(1000000):
-            # Weight neighbor info
-            neighbor_state = np.dot(adjacency, state_mat)
-            # Threshold calculation
-            turn_on = neighbor_state > thresh_mat
-            turn_off = neighbor_state < thresh_mat
-            # Update
-            state_mat_last = copy.copy(state_mat)
-            state_mat[turn_on] = 1
-            #state_mat[turn_off] = 0
-            state_mat_sum = state_mat + state_mat_sum
-            # Break if it reaches stable state
-            if np.array_equal(state_mat, state_mat_last) == True:
-                break
-        # Evaluate stable state vs actual threshold
-        true_stim = np.dot(type_mat, np.transpose(stim_sources))
-        correct_state = true_stim > thresh_mat
-        correct_state = correct_state.astype(int)
-        eval_response = state_mat == correct_state
-        # Grab incorrect responses and randomly select one
-        incorrect_responses = np.where(np.invert(eval_response))[0]
-        focal_individual = np.random.choice(incorrect_responses, size = 1)
-        # Assess behavior of interaction partners of focal individual
-        perceived_incorrect = np.where(state_mat == state_mat[focal_individual])[0] 
-        perceived_incorrect = perceived_incorrect[perceived_incorrect != focal_individual] #don't coutn self
-        perceived_correct = np.where(state_mat == (1 - state_mat[focal_individual]))[0] 
-        # Adjust ties
-        adjacency[focal_individual, perceived_incorrect] = adjacency[focal_individual, perceived_incorrect] - phi
-        adjacency[focal_individual, perceived_correct] = adjacency[focal_individual, perceived_correct] + phi
+    # Choose information samplers
+    samplers = np.random.choice(range(0, n), size = psi_num, replace = False)
+    # Get infromation samplers' type and  select correct stimuli
+    samplers_type = type_mat[samplers]
+    effective_stim = np.dot(samplers_type, np.transpose(stim_sources))
+    # Assess stimuli
+    samplers_react = effective_stim > thresh_mat[samplers]
+    samplers_react = np.ndarray.flatten(samplers_react)
+    # Set state matrix
+    state_mat = np.full((n, 1), -1)
+    samplers_active = samplers[samplers_react]
+    state_mat[samplers_active, 0] = 1
+    state_mat_sum  = copy.copy(state_mat)
+    # simulate cascade 
+    for t in range(1000000):
+        # Weight neighbor info
+        neighbor_state = np.dot(adjacency, state_mat)
+        # Threshold calculation
+        turn_on = neighbor_state > thresh_mat
+        turn_off = neighbor_state < thresh_mat
+        # Update
+        state_mat_last = copy.copy(state_mat)
+        state_mat[turn_on] = 1
+        #state_mat[turn_off] = 0
+        state_mat_sum = state_mat + state_mat_sum
+        # Break if it reaches stable state
+        if np.array_equal(state_mat, state_mat_last) == True:
+            break
+    # Evaluate stable state vs actual threshold for active individuals
+    actives = np.where(state_mat == 1)[0]
+    true_stim = np.dot(type_mat[actives,:], np.transpose(stim_sources))
+    correct_state = true_stim > thresh_mat[actives,:]
+    correct_state = np.ndarray.flatten(correct_state)
+    # Grab incorrect responses and randomly select one
+    incorr_actives = actives[~correct_state]
+    focal_individual = np.random.choice(incorr_actives, size = 1)
+    # Assess behavior of interaction partners of focal individual
+    
+    # FIX STARTING HERE
+    perceived_incorrect = np.where(state_mat == state_mat[focal_individual])[0] 
+    perceived_incorrect = perceived_incorrect[perceived_incorrect != focal_individual] #don't coutn self
+    perceived_correct = np.where(state_mat == (1 - state_mat[focal_individual]))[0] 
+    # Adjust ties
+    adjacency[focal_individual, perceived_incorrect] = adjacency[focal_individual, perceived_incorrect] - phi
+    adjacency[focal_individual, perceived_correct] = adjacency[focal_individual, perceived_correct] + phi
   
 ##########
 # Save files

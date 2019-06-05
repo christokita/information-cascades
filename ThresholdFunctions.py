@@ -14,11 +14,8 @@ import matplotlib.pyplot as plt
 
 
 # Seed thresholds
-def seed_thresholds(n, mean, sd, low, high):
-    # Calculate shape
-    #a, b = (low - mean) / sd, (high - mean) / sd
+def seed_thresholds(n, mean, sd):
     # Generate thresholds and return
-    #thresholds = truncnorm.rvs(a = a, b = b, loc = mean, scale = sd, size = n)
     thresholds = np.random.normal(loc = mean, scale = sd, size = n)
     thresholds = np.array(thresholds)
     thresholds = np.reshape(thresholds, (n, 1))
