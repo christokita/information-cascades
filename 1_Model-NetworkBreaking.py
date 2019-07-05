@@ -90,8 +90,8 @@ for t in range(timesteps):
     correct_state = true_stim > thresh_mat[actives,:]
     correct_state = np.ndarray.flatten(correct_state)
     # Grab incorrect responses and randomly select one
-    incorr_actives = actives[~correct_state]
-    if incorr_actives.size == 0:
+    incorrect_actives = actives[~correct_state]
+    if len(incorrect_actives) == 0:
         continue
     else:
         # Count number of adjustments so far and print update
@@ -99,7 +99,7 @@ for t in range(timesteps):
         if adjust_count % 500 == 0:
             print("Network update " + str(adjust_count), " at t=", t)
         # Choose individual to readjust ties
-        focal_individual = np.random.choice(incorr_actives, size = 1)
+        focal_individual = np.random.choice(incorrect_actives, size = 1)
         # Assess behavior of interaction partners of focal individual
         focal_individual_neighbors = np.squeeze(adjacency[focal_individual,:])
         neighbor_behavior = focal_individual_neighbors * np.ndarray.flatten(state_mat) 
@@ -134,7 +134,7 @@ nodelist = pd.DataFrame({'Id': range(0, n),
                          'Type': type_mat[:,1]})
        
 # Save
-dir_path = 'output/social_networks/'
+dir_path = 'output/network_adjust/social_networks/'
 edge_file_name = dir_path + 'Edge-Gamma_' + str(gamma) + '.csv'
 node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
 edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
