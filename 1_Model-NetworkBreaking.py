@@ -63,6 +63,9 @@ for t in range(timesteps):
     # Assess stimuli
     samplers_react = effective_stim > thresh_mat[samplers]
     samplers_react = np.ndarray.flatten(samplers_react)
+    # If no one reacts, do next time step
+    if sum(samplers_react) == 0:
+        continue
     # Set state matrix
     state_mat = np.zeros((n,1))
     samplers_active = samplers[samplers_react]

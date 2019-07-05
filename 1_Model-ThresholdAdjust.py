@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 ##########
 n = 500 #number of individuals
 k = 5 #mean degree on networks
-gamma = -0.5 #correlation between two information sources
+gamma = 0.95 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
 phi = 0.1 #amount to adjust thresholds by
@@ -63,6 +63,9 @@ for t in range(timesteps):
     # Assess stimuli
     samplers_react = effective_stim > thresh_mat[samplers]
     samplers_react = np.ndarray.flatten(samplers_react)
+    # If no one reacts, do next time step
+    if sum(samplers_react) == 0:
+        continue
     # Set state matrix
     state_mat = np.zeros((n,1))
     samplers_active = samplers[samplers_react]
@@ -100,6 +103,14 @@ for t in range(timesteps):
         focal_correct = np.random.choice(correct_actives, size = 1)
         thresh_mat[focal_incorrect] = thresh_mat[focal_incorrect] + phi
         thresh_mat[focal_correct] = thresh_mat[focal_correct] - phi
+    # Make sure threhsolds do not go outside interval (0, 1)
+    high_vals = thresh_mat >= 1
+    low_vals = thresh_mat <= 0
+    thresh_mat[high_vals] = 0.9999
+    thresh_mat[low_vals] = 0.0001
+    # Time tracker
+    if t % 10000 == 0:
+        print("Time step ", t)
 
     
   
@@ -122,7 +133,7 @@ nodelist = pd.DataFrame({'Id': range(0, n),
                          'Type': type_mat[:,1]})
        
 # Save
-dir_path = 'output/social_networks/'
+dir_path = 'output/thresh_adjust/social_networks/'
 edge_file_name = dir_path + 'Edge-Gamma_' + str(gamma) + '.csv'
 node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
 edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
