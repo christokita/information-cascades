@@ -9,6 +9,7 @@ Stimulus/Information Functions
 """
 
 import numpy as np
+import scipy as sp
 
 # Generate correlated stimuli
 def generate_stimuli(correlation, mean):
@@ -16,5 +17,6 @@ def generate_stimuli(correlation, mean):
     covar = [[1, correlation ], [correlation, 1]]
     # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    #stims = stims[0]
-    return(stims)
+    # Translate stims to percentiles
+    stims_perc = sp.stats.norm.cdf(stims)
+    return(stims_perc)

@@ -14,10 +14,15 @@ import matplotlib.pyplot as plt
 
 
 # Seed thresholds
-def seed_thresholds(n, mean, sd):
-    # Generate thresholds and return
-    thresholds = np.random.normal(loc = mean, scale = sd, size = n)
-    thresholds = np.array(thresholds)
+def seed_thresholds(n, lower, upper):
+    # Generate thresholds 
+    thresholds = np.random.uniform(size = n, low = lower, high = upper)
+    # Python uses a open-close range so make sure no values equal 0
+    while sum(thresholds == 0) > 0:
+        zero_vals = np.where(thresholds == 0)[0]
+        for zero_val in zero_vals:
+            thresholds[zero_val] = np.random.uniform(size = 1, low = lower, high = upper)
+    # Reshape and return
     thresholds = np.reshape(thresholds, (n, 1))
     return thresholds
 
