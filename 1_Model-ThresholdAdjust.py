@@ -9,11 +9,14 @@ Created on Sat Dec  9 12:42:29 2017
  Script to try out information cascaeds on networks
 """
 
+##########
+# Load libraryies and packages
+##########
 import numpy as np
 import pandas as pd
-from SocialNetworkFunctions import *
-from ThresholdFunctions import *
-from StimulusFunctions import *
+from socialnetworkfunctions import *
+from thresholdfunctions import *
+from stimulusfunctions import *
 import copy
 
 import matplotlib.pyplot as plt
