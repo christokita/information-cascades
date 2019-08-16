@@ -25,10 +25,11 @@ import matplotlib.pyplot as plt
 # Set parameters
 ##########
 n = 500 #number of individuals
-k = 4 #mean degree on networks
+k = 5 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
+#adjust_num = 10000
 
 
 ##########
@@ -47,6 +48,8 @@ adjacency_initial = copy.copy(adjacency)
 # Sampler number
 psi_num = int(round(psi*n))
 
+# Adjust counter
+adjust_count = 0
 
 ##########
 # Run simulation
@@ -87,29 +90,36 @@ for t in range(timesteps):
         # Break if it reaches stable state
         if np.array_equal(state_mat, state_mat_last) == True:
             break
-    # Evaluate behavior (technically for all individuals, but functionally for only actives)
+    # Evaluate stable state vs actual threshold for active individuals
     actives = np.where(state_mat == 1)[0]
-    true_stim = np.dot(type_mat, np.transpose(stim_sources))
-    correct_state = true_stim > thresh_mat
+    true_stim = np.dot(type_mat[actives,:], np.transpose(stim_sources))
+    correct_state = true_stim > thresh_mat[actives,:]
     correct_state = np.ndarray.flatten(correct_state)
-    # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-    breaker_active = np.random.choice(actives, size = 1)
-    breaker_correct = correct_state[breaker_active]
-    if not correct_state[breaker_active]:
-         # Assess behavior of interaction partners of focal individual
-        breaker_neighbors = np.squeeze(adjacency[breaker_active,:])
-        neighbor_behavior = breaker_neighbors * np.ndarray.flatten(state_mat) 
+    # Grab incorrect responses and randomly select one
+    incorrect_actives = actives[~correct_state]
+    if len(incorrect_actives) == 0:
+        continue
+    else:
+        # Count number of adjustments so far and print update
+        adjust_count = adjust_count + 1
+        if adjust_count % 500 == 0:
+            print("Network update " + str(adjust_count), " at t=", t)
+        # Choose individual to readjust ties
+        focal_individual = np.random.choice(incorrect_actives, size = 1)
+        # Assess behavior of interaction partners of focal individual
+        focal_individual_neighbors = np.squeeze(adjacency[focal_individual,:])
+        neighbor_behavior = focal_individual_neighbors * np.ndarray.flatten(state_mat) 
         perceived_incorrect = np.where(neighbor_behavior == 1)[0]
-        # Break ties with one randomly-selected "incorrect" neighbor
+        # Adjust ties
         break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
-    # Randomly select one individual to form new tie
-    former_individual = np.random.choice(range(1, n), size = 1)
-    former_neighbors = np.squeeze(adjacency[former_individual,:])
-    potential_ties = np.where(former_neighbors == 0)[0]
-    potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) #prevent self-loop
-    new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-    adjacency[former_individual, new_tie] = 1
+        new_tie = np.where(focal_individual_neighbors == 0)[0]
+        new_tie = np.delete(new_tie, np.where(new_tie == focal_individual)) #prevent self-loop
+        #new_tie = np.random.choice(new_tie, size = len(perceived_incorrect), replace = False)
+        new_tie = np.random.choice(new_tie, size = 1, replace = False)
+        adjacency[focal_individual, perceived_incorrect] = 0
+        adjacency[focal_individual, new_tie] = 1
 
+    
   
 ##########
 # Save files
