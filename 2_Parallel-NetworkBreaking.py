@@ -29,7 +29,7 @@ n = 500 #number of individuals
 k = 5 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 200 #number of rounds simulation will run
+timesteps = 500 #number of rounds simulation will run
 reps = 4 #number of replicate simulations
 
 ##########
@@ -110,7 +110,7 @@ def sim_adjusting_network(n, k, gamma, psi, timesteps) :
         adjacency[former_individual, new_tie] = 1
                     
     ##### Return data #####
-    return(adjacency, type_mat)
+    return(adjacency, adjacency_initial, type_mat, thresh_mat)
 
 ##########
 # Run in parallel
@@ -124,7 +124,9 @@ parallel_results = [pool.apply_async(sim_adjusting_network,
                                      args = (n, k, gamma, psi, timesteps))
                     for rep in range(reps)]
 adj_matrices = [r.get()[0] for r in parallel_results]
-type_matrices = [r.get()[1] for r in parallel_results]
+adj_matrices_initial = [r.get()[1] for r in parallel_results]
+type_matrices = [r.get()[2] for r in parallel_results]
+thresh_matrices = [r.get()[3] for r in parallel_results]
 
 # Close and join
 pool.close()
@@ -133,3 +135,13 @@ pool.join()
 ##########
 # Save files
 ##########
+storage_path = "/scratch/gpfs/ctokita/InfoCascades/network_adjust/"
+run_info = "n" + str(n) + "_gamma" + str(gamma)
+
+
+np.save(storage_path + "social_network_data/" + run_info + ".npy", adj_matrices)
+np.save(storage_path + "social_network_data/" + run_info + "_initial.npy", adj_matrices_initial)
+np.save(storage_path + "type_data/" + run_info + ".npy", type_matrices)
+np.save(storage_path + "thresh_data/" + run_info + ".npy", thresh_matrices)
+
+
