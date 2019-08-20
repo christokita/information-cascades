@@ -4,6 +4,9 @@
 Created on Tue Aug 20 10:02:31 2019
 
 @author: ChrisTokita
+
+DESCRIPTION:
+Script to analyze social network structure produced by simulations
 """
 
 ##########

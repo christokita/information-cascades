@@ -5,6 +5,7 @@ Created on Sat Dec  9 11:31:35 2017
 
 @author: ChrisTokita
 
+DESCRIPTION:
 Social Network Functions
 """
 import numpy as np

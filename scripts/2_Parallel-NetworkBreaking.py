@@ -6,8 +6,9 @@ Created on Sat Dec  9 12:42:29 2017
 
 @author: ChrisTokita
 
- Script to run network-breaking cascade model in parallel 
- (single parameter combo)
+DESCRIPTION:
+Script to run network-breaking cascade model in parallel 
+(single parameter combo)
 """
 
 ##########

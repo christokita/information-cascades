@@ -4,13 +4,17 @@
 Created on Fri Mar 23 17:49:40 2018
 
 @author: ChrisTokita
+
+DESCRIPTION:
+Plot stimulus values under the different methods 
+found in util_scripts/stimulusfunctions.py
 """
 
 import numpy as np
 import scipy as sp
-from socialnetworkfunctions import *
-from thresholdfunctions import *
-from stimulusfunctions import *
+from util_scripts.socialnetworkfunctions import *
+from util_scripts.thresholdfunctions import *
+from util_scripts.stimulusfunctions import *
 import copy
 import matplotlib.pyplot as plt
 

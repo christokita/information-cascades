@@ -6,8 +6,9 @@ Created on Sat Dec  9 12:42:29 2017
 
 @author: ChrisTokita
 
+DESCRIPTION:
 Script to run network-breaking cascade model on local machine
-(single parameter combo) 
+(single parameter combo, single replicate) 
 """
 
 ##########
@@ -15,9 +16,9 @@ Script to run network-breaking cascade model on local machine
 ##########
 import numpy as np
 import pandas as pd
-from socialnetworkfunctions import *
-from thresholdfunctions import *
-from stimulusfunctions import *
+from util_scripts.socialnetworkfunctions import *
+from util_scripts.thresholdfunctions import *
+from util_scripts.stimulusfunctions import *
 import copy
 
 import matplotlib.pyplot as plt
@@ -29,7 +30,7 @@ n = 500 #number of individuals
 k = 4 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 500000 #number of rounds simulation will run
+timesteps = 3000 #number of rounds simulation will run
 
 
 ##########

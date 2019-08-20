@@ -5,6 +5,7 @@ Created on Sat Dec  9 17:59:20 2017
 
 @author: ChrisTokita
 
+DESCRIPTION:
 Stimulus/Information Functions
 """
 

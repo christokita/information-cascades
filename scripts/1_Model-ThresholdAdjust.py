@@ -6,7 +6,9 @@ Created on Sat Dec  9 12:42:29 2017
 
 @author: ChrisTokita
 
- Script to try out information cascaeds on networks
+DESCRIPTION:
+Script to run threshold-adjusting cascade model on local machine
+(single parameter combo, single replicate) 
 """
 
 ##########
