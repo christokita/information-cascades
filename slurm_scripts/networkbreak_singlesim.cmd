@@ -9,4 +9,4 @@
 
 module load anaconda3
 cd InformationCascades/
-srun python3 scripts/2_Parallel-NetworkBreaking.py
+srun python3 scripts/2_parallel-networkbreaking.py
