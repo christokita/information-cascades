@@ -18,7 +18,7 @@ def generate_stimuli(correlation, mean):
     # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
     # Translate stims to 0 to 1 scale
-    stims_sig = np.exp(stims) / (np.exp(stims) + 1)
+    stims_sig = 1 / (1 + np.exp(-stims))
     return(stims_sig)
     
 # Generate correlated stimuli (returned as raw values)
@@ -46,5 +46,5 @@ def generate_stimuli_sig(correlation, mean):
     # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
      # Translate stims to 0 to 1 scale
-    stims_sig = np.exp(stims) / (np.exp(stims) + 1)
+    stims_sig = 1 / (1 + np.exp(-stims))
     return(stims_sig)
