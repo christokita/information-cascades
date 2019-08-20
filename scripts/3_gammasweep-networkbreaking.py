@@ -11,9 +11,9 @@ Script to run network-breaking cascade model in parallel
 (sweep across parameter value) 
 """
 
-##########
+####################
 # Load libraryies and packages
-##########
+####################
 import numpy as np
 import pandas as pd
 from util_scripts.socialnetworkfunctions import *
@@ -23,9 +23,9 @@ import multiprocessing as mp
 import copy
 
 
-##########
+####################
 # Set parameters
-##########
+####################
 n = 500 #number of individuals
 k = 4 #mean degree on networks
 gammas = np.arange(-1, 1.01, 0.25) #correlation between two information sources
@@ -33,12 +33,14 @@ psi = 0.1 #proportion of samplers
 timesteps = 1000000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
 
-##########
+####################
 # Define simulation function
-##########
-def sim_adjusting_network(n, k, gamma, psi, timesteps) :
+####################
+def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     
     ##### Seed initial conditions #####
+    # Set overall seed
+    np.random.seed(replicate*323)
     # Seed individual's thresholds
     thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
@@ -113,9 +115,9 @@ def sim_adjusting_network(n, k, gamma, psi, timesteps) :
     ##### Return data #####
     return(adjacency, adjacency_initial, type_mat, thresh_mat)
 
-##########
+####################
 # Sweep parameter in parallel in parallel
-##########
+####################
 for gamma in gammas:
         
     # Get CPU count and set pool
@@ -124,7 +126,7 @@ for gamma in gammas:
     
     # Run
     parallel_results = [pool.apply_async(sim_adjusting_network, 
-                                         args = (n, k, gamma, psi, timesteps))
+                                         args = (rep, n, k, gamma, psi, timesteps))
                         for rep in range(reps)]
     adj_matrices = [r.get()[0] for r in parallel_results]
     adj_matrices_initial = [r.get()[1] for r in parallel_results]
