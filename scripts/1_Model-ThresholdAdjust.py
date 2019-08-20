@@ -11,9 +11,9 @@ Script to run threshold-adjusting cascade model on local machine
 (single parameter combo, single replicate) 
 """
 
-##########
+####################
 # Load libraryies and packages
-##########
+####################
 import numpy as np
 import pandas as pd
 from socialnetworkfunctions import *
@@ -23,9 +23,9 @@ import copy
 
 import matplotlib.pyplot as plt
 
-##########
+####################
 # Set parameters
-##########
+####################
 n = 500 #number of individuals
 k = 5 #mean degree on networks
 gamma = 0.95 #correlation between two information sources
@@ -34,9 +34,9 @@ timesteps = 500000 #number of rounds simulation will run
 phi = 0.1 #amount to adjust thresholds by
 
 
-##########
+####################
 # Seed initial conditions
-##########
+####################
 # Seed individual's thresholds
 thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
 
@@ -53,9 +53,9 @@ psi_num = int(round(psi*n))
 # Adjust counter
 adjust_count = 0
 
-##########
+####################
 # Run simulation
-##########
+####################
 for t in range(timesteps):
 #while adjust_count <= adjust_num:
     # Generate stimuli for the round
@@ -119,9 +119,9 @@ for t in range(timesteps):
 
     
   
-##########
+####################
 # Save files
-##########
+####################
 # Convert adjacency matrix to edgelist
 edgelist = []
 for i in range(0, n):
@@ -144,9 +144,9 @@ node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
 edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
 nodelist.to_csv(node_file_name, index = False, header = True, sep = ",")
       
-##########
+####################
 # Assess output
-##########       
+####################      
 # Chance in adjacency
 adjacency_delta = adjacency - adjacency_initial
 

@@ -10,6 +10,9 @@ Plot stimulus values under the different methods
 found in util_scripts/stimulusfunctions.py
 """
 
+####################
+# Load libraryies and packages
+####################
 import numpy as np
 import scipy as sp
 from util_scripts.socialnetworkfunctions import *
@@ -19,6 +22,9 @@ import copy
 import matplotlib.pyplot as plt
 
 
+####################
+# Generate different stim values
+####################
 mu = 0 #mean for thresholds
 gamma = -0.4 # correlation between two information sources
 
@@ -35,9 +41,13 @@ for i in range(20000):
         stims_raw = np.vstack([stims_raw, stim_sources_raw])
         stims_sig = np.vstack([stims_sig, stim_sources_sig])
 
-# Compare different stim types
+####################
+# Plot for visualization of difference
+####################
+# Set plot dimensions
 fig = plt.figure(figsize=(15,5))
-        
+   
+# Plot different subplots     
 plt.subplot(1, 3, 1)
 plt.scatter(stims_perc[:,0], stims_perc[:,1], s = 0.25)
 plt.title('Percentile')
