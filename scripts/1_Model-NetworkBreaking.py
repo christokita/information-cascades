@@ -6,7 +6,8 @@ Created on Sat Dec  9 12:42:29 2017
 
 @author: ChrisTokita
 
- Script to try out information cascaeds on networks
+Script to run network-breaking cascade model on local machine
+(single parameter combo) 
 """
 
 ##########

@@ -6,7 +6,8 @@ Created on Sat Dec  9 12:42:29 2017
 
 @author: ChrisTokita
 
- Script to try out information cascaeds on networks
+ Script to run network-breaking cascade model in parallel 
+ (single parameter combo)
 """
 
 ##########
@@ -25,11 +26,11 @@ import copy
 # Set parameters
 ##########
 n = 500 #number of individuals
-k = 5 #mean degree on networks
+k = 4 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 500 #number of rounds simulation will run
-reps = 4 #number of replicate simulations
+timesteps = 1000000 #number of rounds simulation will run
+reps = 100 #number of replicate simulations
 
 ##########
 # Define simulation function
