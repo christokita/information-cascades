@@ -33,6 +33,9 @@ psi = 0.1 #proportion of samplers
 timesteps = 1000000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
 
+# delete gamma = -0.5 (running in separate script)
+gammas = np.delete(gammas, np.where(gammas == -0.5))
+
 ####################
 # Define simulation function
 ####################
@@ -40,7 +43,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     
     ##### Seed initial conditions #####
     # Set overall seed
-    np.random.seed(replicate*323)
+    np.random.seed(replicate * 323)
     # Seed individual's thresholds
     thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
