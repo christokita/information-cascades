@@ -28,7 +28,7 @@ def seed_social_network(n, k):
         break_links = np.random.choice(two_or_more, replace = False, size = number_of_breaks)
         for break_link in break_links:
             # Choose link at random and break/zero out
-            connections = np.where(network[break_link,:] == 1)[0]
+            connections = np.where(network[break_link,] == 1)[0]
             break_this = np.random.choice(connections, size = 1)
             network[break_link, break_this] = 0
         # Add random links to loners
