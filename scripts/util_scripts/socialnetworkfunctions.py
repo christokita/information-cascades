@@ -24,7 +24,7 @@ def seed_social_network(n, k):
         loners = np.where(np.sum(network, axis = 1) == 0)[0]
         number_of_breaks = len(loners) #numver of links that need to broken
         # Find and break links to keep mean degree the same
-        two_or_more = np.where(sum(network) > 1)[0]
+        two_or_more = np.where(np.sum(network, axis = 1) > 1)[0]
         break_links = np.random.choice(two_or_more, replace = False, size = number_of_breaks)
         for break_link in break_links:
             # Choose link at random and break/zero out
