@@ -22,6 +22,7 @@ from util_scripts.socialnetworkfunctions import *
 from util_scripts.thresholdfunctions import *
 import matplotlib.pyplot as plt
 import copy
+import seaborn as sns
 
 ####################
 # Attempt algorithm to create assortativity 
@@ -164,3 +165,9 @@ for assort in assorts:
         # Return values
         to_return = pd.Series([assort, final_assort], index = alg_results.columns)
         alg_results = alg_results.append(to_return, ignore_index=True)
+        
+# Save
+alg_results.to_pickle('../../output/suppl_work/assortativity_algorithm/n500_assortsweep.pkl')
+
+# Plot
+sns.regplot(x = 'AssortValue', y = 'ResultAssort', data = alg_results, fit_reg = False)

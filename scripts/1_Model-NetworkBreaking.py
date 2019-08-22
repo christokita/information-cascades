@@ -30,7 +30,7 @@ n = 500 #number of individuals
 k = 4 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 3000 #number of rounds simulation will run
+timesteps = 100000 #number of rounds simulation will run
 
 
 ####################
@@ -132,7 +132,7 @@ nodelist = pd.DataFrame({'Id': range(0, n),
                          'Type': type_mat[:,1]})
        
 # Save
-dir_path = 'output/network_adjust/social_networks/'
+dir_path = '../output/network_adjust/data/social_network_data/'
 edge_file_name = dir_path + 'Edge-Gamma_' + str(gamma) + '.csv'
 node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
 edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
