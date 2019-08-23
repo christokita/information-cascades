@@ -22,3 +22,11 @@ import matplotlib.pyplot as plt
 list_networks = np.load('../output/network_adjust/data/social_network_data/n500_gamma-0.5.npy')
 list_networks_initial = np.load('../output/network_adjust/data/social_network_data/n500_gamma-0.5_initial.npy')
 
+
+####################
+# Measure assortativity
+####################
+# Calculate assortativity
+g = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency))
+g.vs['Type'] = type_mat[:,0]
+final_assort = g.assortativity(types1 = g.vs['Type'])
