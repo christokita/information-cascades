@@ -104,8 +104,9 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             perceived_incorrect = np.where(neighbor_behavior == 1)[0]
             # Break ties with one randomly-selected "incorrect" neighbor
             break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
+            adjacency[breaker_active, break_tie] = 0
         # Randomly select one individual to form new tie
-        former_individual = np.random.choice(range(1, n), size = 1)
+        former_individual = np.random.choice(range(0, n), size = 1)
         former_neighbors = np.squeeze(adjacency[former_individual,:])
         potential_ties = np.where(former_neighbors == 0)[0]
         potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) #prevent self-loop

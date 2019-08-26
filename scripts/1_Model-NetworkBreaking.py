@@ -54,7 +54,6 @@ psi_num = int(round(psi*n))
 # Run simulation
 ####################
 for t in range(timesteps):
-#while adjust_count <= adjust_num:
     # Generate stimuli for the round
     stim_sources = generate_stimuli(correlation = gamma, mean = 0)
     # Choose information samplers
