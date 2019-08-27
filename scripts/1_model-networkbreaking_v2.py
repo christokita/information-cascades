@@ -28,10 +28,10 @@ import matplotlib.pyplot as plt
 ####################
 n = 200 #number of individuals
 k = 4 #mean degree on networks
-gamma = -0.5 #correlation between two information sources
+gamma = 0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
-p = 0.002 # probability selected individual forms new connection
+p = 0.005 # probability selected individual forms new connection
 
 
 ####################
@@ -49,8 +49,6 @@ adjacency_initial = copy.copy(adjacency)
 
 # Sampler number
 psi_num = int(round(psi*n))
-
-break_count = 0
 
 
 ####################
@@ -78,7 +76,6 @@ for t in range(timesteps):
     state_mat = np.zeros((n,1))
     samplers_active = samplers[samplers_react]
     state_mat[samplers_active, 0] = 1
-    state_mat_sum  = copy.copy(state_mat)
     # simulate cascade 
     for step in range(1000000):
         # Weight neighbor info
@@ -90,7 +87,6 @@ for t in range(timesteps):
         # Update
         state_mat_last = copy.copy(state_mat)
         state_mat[turn_on] = 1
-        #state_mat_sum = state_mat + state_mat_sum
         # Break if it reaches stable state
         if np.array_equal(state_mat, state_mat_last) == True:
             break
@@ -111,7 +107,6 @@ for t in range(timesteps):
         # Break ties with one randomly-selected "incorrect" neighbor
         break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
         adjacency[breaker, break_tie] = 0
-        break_count = break_count + 1
     # Randomly select one individual to form new tie
     former_individual = np.random.choice(range(0, n), size = 1)
     form_connection = np.random.choice((True, False), p = (p, 1-p))

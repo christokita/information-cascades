@@ -28,10 +28,11 @@ import matplotlib.pyplot as plt
 ####################
 n = 200 #number of individuals
 k = 4 #mean degree on networks
-gamma = 0 #correlation between two information sources
+gamma = 0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
-p = 0.002 # probability selected individual forms new connection
+p = 0.00001 # probability any individual forms a tie
+q = 0.9 # probability incorrect individual breaks tie wtih an incorrect neighbor
 
 
 ####################
@@ -95,27 +96,29 @@ for t in range(timesteps):
     true_stim = np.dot(type_mat, np.transpose(stim_sources))
     correct_state = true_stim > thresh_mat
     correct_state = np.ndarray.flatten(correct_state)
-    # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-    breaker_active = np.random.choice(actives, size = 1)
-    breaker_correct = correct_state[breaker_active]
-    if not correct_state[breaker_active]:
+    incorrect_active = actives[correct_state[actives] == False]
+    # Determine which incorrect individuals will break tie 
+    break_connection = np.random.choice((True, False), size = len(incorrect_active), p = (q, 1-q))
+    incorrect_active = incorrect_active[break_connection,]
+    # Loop through incorrect active individuals and break links probabilistically
+    for breaker in incorrect_active:
          # Assess behavior of interaction partners of focal individual
-        breaker_neighbors = np.squeeze(adjacency[breaker_active,:])
+        breaker_neighbors = np.squeeze(adjacency[breaker,:])
         neighbor_behavior = breaker_neighbors * np.ndarray.flatten(state_mat) 
         perceived_incorrect = np.where(neighbor_behavior == 1)[0]
         # Break ties with one randomly-selected "incorrect" neighbor
         break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
-        adjacency[breaker_active, break_tie] = 0
-    # Randomly select one individual to form new tie
-    former_individual = np.random.choice(range(0, n), size = 1)
-    form_connection = np.random.choice((True, False), p = (p, 1-p))
-    if form_connection == True:
+        adjacency[breaker, break_tie] = 0
+    # Individuals probabilistically form ties
+    form_connection = np.random.choice((True, False), size = n, p = (p, 1-p))
+    former_individual = np.arange(n)[form_connection,]
+    for former in former_individual:
         # Form new connection
-        former_neighbors = np.squeeze(adjacency[former_individual,:])
+        former_neighbors = np.squeeze(adjacency[former,:])
         potential_ties = np.where(former_neighbors == 0)[0]
-        potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) #prevent self-loop
+        potential_ties = np.delete(potential_ties, np.where(potential_ties == former)) #prevent self-loop
         new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-        adjacency[former_individual, new_tie] = 1
+        adjacency[former, new_tie] = 1
 
   
 ####################
