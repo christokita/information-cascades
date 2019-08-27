@@ -50,6 +50,8 @@ adjacency_initial = copy.copy(adjacency)
 # Sampler number
 psi_num = int(round(psi*n))
 
+break_count = 0
+
 
 ####################
 # Run simulation
@@ -97,17 +99,19 @@ for t in range(timesteps):
     true_stim = np.dot(type_mat, np.transpose(stim_sources))
     correct_state = true_stim > thresh_mat
     correct_state = np.ndarray.flatten(correct_state)
-    # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-    breaker_active = np.random.choice(actives, size = 1)
-    breaker_correct = correct_state[breaker_active]
-    if not correct_state[breaker_active]:
+    incorrect_active = actives[correct_state[actives] == False]
+    # Randomly select one incorrect individual who will break tie with one incorrect neighbor
+    if len(incorrect_active) > 0:
+        # Select breaker
+        breaker = np.random.choice(incorrect_active, size = 1)
          # Assess behavior of interaction partners of focal individual
-        breaker_neighbors = np.squeeze(adjacency[breaker_active,:])
+        breaker_neighbors = np.squeeze(adjacency[breaker,:])
         neighbor_behavior = breaker_neighbors * np.ndarray.flatten(state_mat) 
         perceived_incorrect = np.where(neighbor_behavior == 1)[0]
         # Break ties with one randomly-selected "incorrect" neighbor
         break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
-        adjacency[breaker_active, break_tie] = 0
+        adjacency[breaker, break_tie] = 0
+        break_count = break_count + 1
     # Randomly select one individual to form new tie
     former_individual = np.random.choice(range(0, n), size = 1)
     form_connection = np.random.choice((True, False), p = (p, 1-p))
