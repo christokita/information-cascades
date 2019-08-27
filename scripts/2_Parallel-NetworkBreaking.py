@@ -50,8 +50,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     adjacency_initial = copy.copy(adjacency)
     # Sampler number
     psi_num = int(round(psi*n))
-    # Adjust counter
-    adjust_count = 0
     
     ##### Run simulation #####
     for t in range(timesteps):
@@ -72,7 +70,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
         state_mat = np.zeros((n,1))
         samplers_active = samplers[samplers_react]
         state_mat[samplers_active, 0] = 1
-        state_mat_sum  = copy.copy(state_mat)
         # simulate cascade 
         for step in range(1000000):
             # Weight neighbor info
@@ -84,7 +81,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             # Update
             state_mat_last = copy.copy(state_mat)
             state_mat[turn_on] = 1
-            #state_mat_sum = state_mat + state_mat_sum
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
                 break
