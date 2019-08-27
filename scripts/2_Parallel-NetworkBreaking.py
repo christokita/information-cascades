@@ -84,8 +84,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             # Update
             state_mat_last = copy.copy(state_mat)
             state_mat[turn_on] = 1
-            #state_mat[turn_off] = 0
-            state_mat_sum = state_mat + state_mat_sum
+            #state_mat_sum = state_mat + state_mat_sum
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
                 break
