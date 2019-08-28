@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 ####################
 n = 200 #number of individuals
 k = 4 #mean degree on networks
-gamma = 0 #correlation between two information sources
+gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 500000 #number of rounds simulation will run
 p = 0.002 # probability selected individual forms new connection
