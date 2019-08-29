@@ -26,15 +26,14 @@ import copy
 ####################
 # Set parameters
 ####################
-n = 500 #number of individuals
+n = 200 #number of individuals
 k = 4 #mean degree on networks
-gammas = np.arange(-1, 1.01, 0.25) #correlation between two information sources
+gammas = np.round(np.arange(-1, 1.01, 0.1), 2) #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 1000000 #number of rounds simulation will run
+timesteps = 100000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
 
-# delete gamma = -0.5 (running in separate script)
-gammas = np.delete(gammas, np.where(gammas == -0.5))
+#gammas = np.delete(gammas, np.where(gammas == -0.5))
 
 ####################
 # Define simulation function
@@ -53,6 +52,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     adjacency_initial = copy.copy(adjacency)
     # Sampler number
     psi_num = int(round(psi*n))
+    # Cascade size data
+    cascade_size = np.empty((0,6), dtype = int)
     
     ##### Run simulation #####
     for t in range(timesteps):
@@ -86,6 +87,17 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             state_mat[turn_on] = 1
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
+                # Get cascade data
+                total_active = np.sum(state_mat)
+                active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
+                active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
+                cascade_stats = np.array([t, len(samplers),
+                                 len(samplers_active), 
+                                 int(total_active),
+                                 int(active_A), 
+                                 int(active_B)])
+                cascade_size = np.vstack([cascade_size, cascade_stats])
+                # Stop cascade
                 break
         # Evaluate behavior (technically for all individuals, but functionally for only actives)
         actives = np.where(state_mat == 1)[0]
@@ -105,14 +117,17 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             adjacency[breaker_active, break_tie] = 0
         # Randomly select one individual to form new tie
         former_individual = np.random.choice(range(0, n), size = 1)
-        former_neighbors = np.squeeze(adjacency[former_individual,:])
-        potential_ties = np.where(former_neighbors == 0)[0]
-        potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) #prevent self-loop
-        new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-        adjacency[former_individual, new_tie] = 1
+        form_connection = np.random.choice((True, False), p = (p, 1-p))
+        if form_connection == True:
+            # Form new connection
+            former_neighbors = np.squeeze(adjacency[former_individual,:])
+            potential_ties = np.where(former_neighbors == 0)[0]
+            potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) #prevent self-loop
+            new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+            adjacency[former_individual, new_tie] = 1
                     
     ##### Return data #####
-    return(adjacency, adjacency_initial, type_mat, thresh_mat)
+    return(adjacency, adjacency_initial, type_mat, thresh_mat, cascade_size)
 
 ####################
 # Sweep parameter in parallel in parallel
@@ -131,6 +146,8 @@ for gamma in gammas:
     adj_matrices_initial = [r.get()[1] for r in parallel_results]
     type_matrices = [r.get()[2] for r in parallel_results]
     thresh_matrices = [r.get()[3] for r in parallel_results]
+    cascade_stats =[r.get()[4] for r in parallel_results]
+    cascade_stats = [np.array(['t', 'samplers', 'samplers_active', 'total_active', 'active_A', 'active_B'])] + cascade_stats
     
     # Close and join
     pool.close()
@@ -143,5 +160,6 @@ for gamma in gammas:
     np.save(storage_path + "social_network_data/" + run_info + "_initial.npy", adj_matrices_initial)
     np.save(storage_path + "type_data/" + run_info + ".npy", type_matrices)
     np.save(storage_path + "thresh_data/" + run_info + ".npy", thresh_matrices)
+    np.save(storage_path + "cascade_data/" + run_info + ".npy", cascade_stats)
 
 
