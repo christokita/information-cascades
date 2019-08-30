@@ -46,7 +46,7 @@ reps = 100 #number of replicate simulations
 ####################
 # Define simulation function
 ####################
-def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
+def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps) :
     
     ##### Seed initial conditions #####
     # Set overall seed
@@ -148,7 +148,7 @@ for gamma in gammas:
     
     # Run
     parallel_results = [pool.apply_async(sim_adjusting_network, 
-                                         args = (rep, n, k, gamma, psi, timesteps))
+                                         args = (rep, n, k, gamma, psi, p, timesteps))
                         for rep in range(reps)]
     adj_matrices = [r.get()[0] for r in parallel_results]
     adj_matrices_initial = [r.get()[1] for r in parallel_results]
