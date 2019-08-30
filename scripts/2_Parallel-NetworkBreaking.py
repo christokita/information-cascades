@@ -31,8 +31,8 @@ k = 4 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.002 # probability selected individual forms new connection
-timesteps = 500 #number of rounds simulation will run
-reps = 2 #number of replicate simulations
+timesteps = 100000 #number of rounds simulation will run
+reps = 100 #number of replicate simulations
 
 ####################
 # Define simulation function

@@ -21,15 +21,23 @@ from util_scripts.thresholdfunctions import *
 from util_scripts.stimulusfunctions import *
 import multiprocessing as mp 
 import copy
+import sys
 
 
 ####################
 # Set parameters
 ####################
+# Import variables from bash script to allow cleaner parameter sweeps
+gamma_low = float(sys.argv[1]) #sys.argv[0] is name of script
+gamma_high  = float(sys.argv[2])
+gamma_step  = float(sys.argv[3])
+
+# Normal variables
 n = 200 #number of individuals
 k = 4 #mean degree on networks
-gammas = np.round(np.arange(-1, 1.01, 0.1), 2) #correlation between two information sources
+gammas = np.round(np.arange(gamma_low, gamma_high + gamma_step/10, gamma_step), 3) #correlation between two information sources
 psi = 0.1 #proportion of samplers
+p = 0.002 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
 
