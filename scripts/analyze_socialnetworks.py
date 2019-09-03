@@ -68,4 +68,4 @@ for file in pars_of_interest:
 # Save
 assort_data= pd.DataFrame(data = assort_values, columns = ['Gamma', 'Assortativity'])
 outfile_name = 'n200_gammasweep_assortativity'
-np.savetxt('../output/network_adjust/data_derived/social_networks/' + outfile_name + '.csv', assort_values)
+assort_data.to_csv('../output/network_adjust/data_derived/social_networks/' + outfile_name + '.csv', index = False)
