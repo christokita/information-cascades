@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1
-#SBATCH -n 1
-#SBATCH -c 20
+#SBATCH -n 20
 #SBATCH -t 23:00:00
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
