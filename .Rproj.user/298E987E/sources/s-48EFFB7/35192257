@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567542487085.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "35192257",
+    "lastKnownWriteTime" : 1567542544,
+    "last_content_update" : 1567542544563,
+    "path" : "~/Documents/Research/Tarnita Lab/Information Cascades/InformationCascades/scripts/plot_socialnetstructure.R",
+    "project_path" : "scripts/plot_socialnetstructure.R",
+    "properties" : {
+        "cursorPosition" : "2,40",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
