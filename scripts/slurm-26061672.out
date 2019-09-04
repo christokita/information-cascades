@@ -1,0 +1,446 @@
+/var/spool/slurmd/job26061672/slurm_script: line 10: cd: InformationCascades/: No such file or directory
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "scripts/3_gammasweep-networkbreaking.py", line 114, in sim_adjusting_network
+    cascade_size = np.vstack([cascade_size, cascade_stats])
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/site-packages/numpy/core/shape_base.py", line 283, in vstack
+    return _nx.concatenate([atleast_2d(_m) for _m in tup], 0)
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <module>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "scripts/3_gammasweep-networkbreaking.py", line 158, in <listcomp>
+    adj_matrices = [r.get()[0] for r in parallel_results]
+  File "/usr/licensed/anaconda3/2019.3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: all the input array dimensions except for the concatenation axis must match exactly
+srun: error: della-r2c3n11: tasks 9,16-19: Exited with exit code 1
+srun: Terminating job step 26061672.0
+slurmstepd: error: *** STEP 26061672.0 ON della-r2c3n11 CANCELLED AT 2019-09-04T13:13:32 ***
+srun: error: della-r2c3n11: tasks 0-8,10-15: Terminated
+srun: Force Terminated job step 26061672.0

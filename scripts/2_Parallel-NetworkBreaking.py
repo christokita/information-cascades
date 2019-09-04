@@ -52,7 +52,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     # Sampler number
     psi_num = int(round(psi*n))
     # Cascade size data
-    cascade_size = np.empty((0,6), dtype = int)
+    cascade_size = np.empty((0,8), dtype = int)
     
     ##### Run simulation #####
     for t in range(timesteps):
@@ -94,13 +94,14 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
         samplers_B = np.sum(type_mat[samplers_active][:,1])
         active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
         active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
-        cascade_stats = np.array([t, len(samplers),
-                         len(samplers_active), 
-                         int(samplers_A),
-                         int(samplers_B),
-                         int(total_active),
-                         int(active_A), 
-                         int(active_B)])
+        cascade_stats = np.array([t, 
+                                  len(samplers),
+                                  len(samplers_active), 
+                                  int(samplers_A),
+                                  int(samplers_B),
+                                  int(total_active),
+                                  int(active_A), 
+                                  int(active_B)])
         cascade_size = np.vstack([cascade_size, cascade_stats])        
         # Evaluate behavior (technically for all individuals, but functionally for only actives)
         actives = np.where(state_mat == 1)[0]
