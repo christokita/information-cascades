@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Sep  4 09:49:32 2019
+
+@author: ChrisTokita
+
+DESCRIPTION:
+Script to analyze cascade patterns produced by simulations
+"""
+
+####################
+# Load libraryies and packages
+####################
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import re
+
+
+####################
+# List files to be read
+####################
+# Set group size runs of intereset
+n_of_interest = 200
+
+# Find files
+all_files = os.listdir('../output/network_adjust/data/cascade_data/')
+pars_of_interest = [file for file in all_files if re.findall(str(n_of_interest) + '_gamma[-.0-9]+.npy', file)]
+pars_of_interest = [re.sub('.npy', '', file) for file in pars_of_interest]
+
+
+####################
+# Measure cascade dynamics over time
+####################
+# Loop through files of different gamma values
+for file in pars_of_interest:
+    
+    # Get gamma value
+    gamma = float(re.search('.*_gamma([-\.0-9]+)', file).group(1))
+    
+    # Load list of cascade data for that parameter setting
+    list_cascades = np.load('../output/network_adjust/data/cascade_data/' + file + '.npy')
+    headers = list_cascades[0] # item 0 is the headers of the matrices
+    list_cascades = list_cascades[1:len(list_cascades)] # the rest are the actual data arrays
+
+    # Loop thorugh individual cascade array
+    avg_cascade = np.zeros((100000, 6))
+    avg_cascade = pd.DataFrame(avg_cascade, columns = headers)
+    for i in np.arange(len(list_cascades)): 
+        # Grab array
+        cascade_array = list_cascades[i]
+        cascade_array = pd.DataFrame(cascade_array, columns = headers)
+        time_array = pd.DataFrame(np.arange(100000), columns = ['t'])
+        full_array = time_array.merge(cascade_array, how = 'left', on = 't')
+        full_array = full_array.fillna(value = 0)
+        # Add to average array (this solution requires all arrays to be the same size)
+        avg_cascade = avg_cascade + full_array
+        
+        
+    # Average (and reset first column to time)
+    avg_cascade = avg_cascade / (len(list_cascades))
+    avg_cascade[:, 0] = np.arange(100000) #set up time index
