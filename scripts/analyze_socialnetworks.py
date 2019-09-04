@@ -14,18 +14,18 @@ Script to analyze social network structure produced by simulations
 ####################
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import os
 import re
 import igraph
 
+'''
 ####################
 # Load individual data
 ####################
 list_networks = np.load('../output/network_adjust/data/social_network_data/n200_gamma-0.5.npy')
 list_networks_initial = np.load('../output/network_adjust/data/social_network_data/n200_gamma-0.5_initial.npy')
 list_types = np.load('../output/network_adjust/data/type_data/n200_gamma-0.5.npy')
-
+'''
 
 ####################
 # List files to be read
