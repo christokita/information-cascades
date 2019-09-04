@@ -1,2 +1,5 @@
 output/network_adjust/data/cascade_data/
 output/thresh_adjust/data/cascade_data/
+output/network_adjust/data_derived/cascades/
+output/thresh_adjust/data_derived/cascades/
+

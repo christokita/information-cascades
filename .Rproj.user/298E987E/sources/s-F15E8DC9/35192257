@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567542487085.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "35192257",
+    "lastKnownWriteTime" : 1567632224,
+    "last_content_update" : 1567632229059,
+    "path" : "~/Documents/Research/Tarnita Lab/Information Cascades/InformationCascades/scripts/plot_cascades.R",
+    "project_path" : "scripts/plot_cascades.R",
+    "properties" : {
+        "cursorPosition" : "39,40",
+        "scrollLine" : "22",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

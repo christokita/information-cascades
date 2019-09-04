@@ -17,6 +17,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import re
+import math
 
 
 ####################
@@ -30,12 +31,17 @@ all_files = os.listdir('../output/network_adjust/data/cascade_data/')
 pars_of_interest = [file for file in all_files if re.findall(str(n_of_interest) + '_gamma[-.0-9]+.npy', file)]
 pars_of_interest = [re.sub('.npy', '', file) for file in pars_of_interest]
 
+'''
+####################
+# Measure cascade dynamics over time (simple average across replicates)
+####################
+# Dataframe to collect results
+all_cascade = pd.DataFrame(avg_cascade, columns = headers)
 
-####################
-# Measure cascade dynamics over time
-####################
 # Loop through files of different gamma values
 for file in pars_of_interest:
+    
+    print(file)
     
     # Get gamma value
     gamma = float(re.search('.*_gamma([-\.0-9]+)', file).group(1))
@@ -61,4 +67,57 @@ for file in pars_of_interest:
         
     # Average (and reset first column to time)
     avg_cascade = avg_cascade / (len(list_cascades))
-    avg_cascade[:, 0] = np.arange(100000) #set up time index
+    avg_cascade['t'] = np.arange(100000) #set up time index
+    avg_cascade['Gamma'] = gamma
+'''
+    
+####################
+# Measure cascade dynamics over time (simple average across replicates)
+####################
+# Dataframe to collect results
+all_cascade = pd.DataFrame(columns = ['t', 'gamma', 'mean', 'count', 'std', 'error'], dtype = float)
+
+# Loop through files of different gamma values
+for file in pars_of_interest:
+    
+    print(file)
+    
+    # Get gamma value
+    gamma = float(re.search('.*_gamma([-\.0-9]+)', file).group(1))
+    
+    # Load list of cascade data for that parameter setting
+    list_cascades = np.load('../output/network_adjust/data/cascade_data/' + file + '.npy')
+    headers = list_cascades[0] # item 0 is the headers of the matrices
+    list_cascades = list_cascades[1:len(list_cascades)] # the rest are the actual data arrays
+
+    # Loop thorugh individual cascade array and append
+    cascade_data = pd.DataFrame(columns = headers, dtype = float)
+    for i in np.arange(len(list_cascades)): 
+        # Grab array
+        cascade_array = list_cascades[i]
+        cascade_array = pd.DataFrame(cascade_array, columns = headers)
+        # Add to average array (this solution requires all arrays to be the same size)
+        cascade_data = cascade_data.append(cascade_array, ignore_index = True)
+        
+        
+    # Calculate additional statistics
+    cascade_data['active_diff'] = abs(cascade_data['active_A'] - cascade_data['active_B'])
+    cascade_data['active_diff_prop'] = cascade_data['active_diff'] / cascade_data['total_active']
+    
+    # Create summary statistics
+    cascade_diff = cascade_data.groupby(['t'])['active_diff_prop'].agg(['mean', 'count', 'std'])
+    ci95_error = []
+    for j in np.arange(cascade_diff.shape[0]):
+        # Calculate 95% CI
+        mean, count, sd = cascade_diff.loc[j]
+        error = (1.96 * sd) / math.sqrt(count)
+        ci95_error.append(error)
+    cascade_diff['error'] = ci95_error
+    # Bind to larger dataframe for saving
+    cascade_diff['gamma'] = gamma
+    cascade_diff['t'] = cascade_diff.index
+    all_cascade = all_cascade.append(cascade_diff)
+    
+# Save to csv
+all_cascade.to_csv('../output/network_adjust/data_derived/cascades/n' + str(n_of_interest) + '_gammasweep.csv',
+                   index = False)
