@@ -30,7 +30,7 @@ n = 200 #number of individuals
 k = 4 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-p = 0.002 # probability selected individual forms new connection
+p = 0.004 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 
 
@@ -93,19 +93,18 @@ for t in range(timesteps):
         state_mat[turn_on] = 1
         # Break if it reaches stable state
         if np.array_equal(state_mat, state_mat_last) == True:
-            # Get cascade data
-            total_active = np.sum(state_mat)
-            active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
-            active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
-            cascade_stats = {'t': t, 
-                              'samplers': len(samplers), 
-                              'samplers_active': len(samplers_active), 
-                              'total_active': int(total_active),
-                              'active_A': int(active_A),
-                              'active_B': int(active_B)}
-            cascade_size = cascade_size.append(cascade_stats, ignore_index = True)
             # Stop cascade
             break
+    # Get cascade data
+    total_active = np.sum(state_mat)
+    active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
+    active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
+    cascade_stats = np.array([t, len(samplers),
+                     len(samplers_active), 
+                     int(total_active),
+                     int(active_A), 
+                     int(active_B)])
+    cascade_size = np.vstack([cascade_size, cascade_stats])
     # Evaluate behavior (technically for all individuals, but functionally for only actives)
     actives = np.where(state_mat == 1)[0]
     true_stim = np.dot(type_mat, np.transpose(stim_sources))

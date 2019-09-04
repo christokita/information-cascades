@@ -86,18 +86,18 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
             state_mat[turn_on] = 1
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
-                # Get cascade data
-                total_active = np.sum(state_mat)
-                active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
-                active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
-                cascade_stats = np.array([t, len(samplers),
-                                 len(samplers_active), 
-                                 int(total_active),
-                                 int(active_A), 
-                                 int(active_B)])
-                cascade_size = np.vstack([cascade_size, cascade_stats])
                 # Stop cascade
                 break
+        # Get cascade data
+        total_active = np.sum(state_mat)
+        active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
+        active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
+        cascade_stats = np.array([t, len(samplers),
+                         len(samplers_active), 
+                         int(total_active),
+                         int(active_A), 
+                         int(active_B)])
+        cascade_size = np.vstack([cascade_size, cascade_stats])        
         # Evaluate behavior (technically for all individuals, but functionally for only actives)
         actives = np.where(state_mat == 1)[0]
         true_stim = np.dot(type_mat, np.transpose(stim_sources))
