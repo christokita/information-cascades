@@ -27,10 +27,10 @@ import copy
 # Set parameters
 ####################
 n = 200 #number of individuals
-k = 4 #mean degree on networks
+k = 5 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-p = 0.002 # probability selected individual forms new connection
+p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
 
@@ -90,10 +90,14 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
                 break
         # Get cascade data
         total_active = np.sum(state_mat)
+        samplers_A = np.sum(type_mat[samplers_active][:,0])
+        samplers_B = np.sum(type_mat[samplers_active][:,1])
         active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
         active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
         cascade_stats = np.array([t, len(samplers),
                          len(samplers_active), 
+                         int(samplers_A),
+                         int(samplers_B),
                          int(total_active),
                          int(active_A), 
                          int(active_B)])
@@ -144,7 +148,8 @@ adj_matrices_initial = [r.get()[1] for r in parallel_results]
 type_matrices = [r.get()[2] for r in parallel_results]
 thresh_matrices = [r.get()[3] for r in parallel_results]
 cascade_stats =[r.get()[4] for r in parallel_results]
-cascade_stats = [np.array(['t', 'samplers', 'samplers_active', 'total_active', 'active_A', 'active_B'])] + cascade_stats
+cascade_headers = [np.array(['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])]
+cascade_stats = cascade_headers + cascade_stats
 
 # Close and join
 pool.close()
