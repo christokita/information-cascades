@@ -32,18 +32,19 @@ theme_ctokita <- function() {
 ##########
 cascade_data <- read.csv('output/network_adjust/data_derived/cascades/n200_gammasweep.csv', header = TRUE)
 cascade_look <- cascade_data %>% 
-  filter(gamma %in% c(-1, -0.5, 0, 0.5, 1))
+  filter(gamma %in% c(0.9, 0.5, 0, -0.5, 0.9))
 
 ##########
 # Plot
 ##########
-gg_cascade <- ggplot(data = cascade_data, aes(group = gamma, x = t, y = mean, color = gamma, fill = gamma)) +
-  geom_ribbon(aes(ymin = mean - error, ymax = mean + error), alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+gg_cascade <- ggplot(data = cascade_look, aes(group = gamma, x = t, y = mean, color = gamma, fill = gamma)) +
+  # geom_ribbon(aes(ymin = mean - error, ymax = mean + error), alpha = 0.4) +
+  # geom_line(size = 0.3) +
+  geom_point(size = 0.3, shape = '.', alpha = 0.5) +
   ylab("Cascade difference") +
   xlab(expression(paste("Time step (", t, ")"))) +
   theme_ctokita() 
 
 gg_cascade
+
 ggsave("output/network_adjust/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
