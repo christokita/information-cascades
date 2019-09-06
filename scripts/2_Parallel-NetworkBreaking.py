@@ -41,7 +41,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     
     ##### Seed initial conditions #####
     # Set overall seed
-    np.random.seed(replicate * 323)
+    np.random.seed(replicate * gamma * 323)
     # Seed individual's thresholds
     thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
@@ -140,15 +140,26 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
 cpus = mp.cpu_count()
 pool = mp.Pool(cpus)
 
+# Set up iterable parameters for passing to starmap_asyn
+reps_array = np.arange(reps)
+n_array = [n] * len(reps_array)
+k_array = [k] * len(reps_array)
+gamma_array = [gamma] * len(reps_array)
+psi_array = [psi] * len(reps_array)
+p_array = [p] * len(reps_array)
+timesteps_array = [timesteps] * len(reps_array)
+
 # Run
-parallel_results = [pool.apply_async(sim_adjusting_network, 
-                                     args = (rep, n, k, gamma, psi, timesteps))
-                    for rep in range(reps)]
-adj_matrices = [r.get()[0] for r in parallel_results]
-adj_matrices_initial = [r.get()[1] for r in parallel_results]
-type_matrices = [r.get()[2] for r in parallel_results]
-thresh_matrices = [r.get()[3] for r in parallel_results]
-cascade_stats =[r.get()[4] for r in parallel_results]
+parallel_results = pool.starmap_async(sim_adjusting_network, 
+                                     zip(reps_array, n_array, k_array, gamma_array, psi_array, timesteps_array))
+
+# Get data
+parallel_results = parallel_results.get()
+adj_matrices = [r[0] for r in parallel_results]
+adj_matrices_initial = [r[1] for r in parallel_results]
+type_matrices = [r[2] for r in parallel_results]
+thresh_matrices = [r[3] for r in parallel_results]
+cascade_stats =[r[4] for r in parallel_results]
 cascade_headers = [np.array(['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])]
 cascade_stats = cascade_headers + cascade_stats
 
