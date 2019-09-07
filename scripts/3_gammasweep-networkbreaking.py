@@ -50,7 +50,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps) :
     
     ##### Seed initial conditions #####
     # Set overall seed
-    np.random.seed((replicate + 1) * gamma * 323)
+    np.random.seed( int( (replicate + 1 + gamma) * 323 ) )
     # Seed individual's thresholds
     thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
@@ -164,7 +164,7 @@ if __name__=='__main__':
         
         # Run
         parallel_results = pool.starmap_async(sim_adjusting_network, 
-                                             zip(reps_array, n_array, k_array, gamma_array, psi_array, timesteps_array))
+                                             zip(reps_array, n_array, k_array, gamma_array, psi_array, p_array, timesteps_array))
         
         # Get data
         parallel_results = parallel_results.get()

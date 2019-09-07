@@ -37,11 +37,11 @@ reps = 100 #number of replicate simulations
 ####################
 # Define simulation function
 ####################
-def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
+def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps) :
     
     ##### Seed initial conditions #####
     # Set overall seed
-    np.random.seed(replicate * gamma * 323)
+    np.random.seed( int( (replicate + 1 + gamma) * 323 ) )
     # Seed individual's thresholds
     thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
@@ -102,7 +102,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
                                   int(total_active),
                                   int(active_A), 
                                   int(active_B)])
-        cascade_size = np.vstack([cascade_size, cascade_stats])        
+        cascade_size = np.vstack([cascade_size, cascade_stats])
         # Evaluate behavior (technically for all individuals, but functionally for only actives)
         actives = np.where(state_mat == 1)[0]
         true_stim = np.dot(type_mat, np.transpose(stim_sources))
@@ -133,6 +133,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps) :
     ##### Return data #####
     return(adjacency, adjacency_initial, type_mat, thresh_mat, cascade_size)
 
+
 ####################
 # Run in parallel
 ####################
@@ -151,7 +152,7 @@ timesteps_array = [timesteps] * len(reps_array)
 
 # Run
 parallel_results = pool.starmap_async(sim_adjusting_network, 
-                                     zip(reps_array, n_array, k_array, gamma_array, psi_array, timesteps_array))
+                                     zip(reps_array, n_array, k_array, gamma_array, psi_array, p_array, timesteps_array))
 
 # Get data
 parallel_results = parallel_results.get()
