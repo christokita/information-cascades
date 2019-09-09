@@ -21,6 +21,7 @@ from util_scripts.thresholdfunctions import *
 from util_scripts.stimulusfunctions import *
 import multiprocessing as mp 
 import copy
+import sys
 
 
 ####################
@@ -28,7 +29,7 @@ import copy
 ####################
 n = 200 #number of individuals
 k = 5 #mean degree on networks
-gamma = -0.5 #correlation between two information sources
+gamma = float(sys.argv[1]) #correlation between two information sources (imported from SLURM script)
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
@@ -171,8 +172,8 @@ pool.join()
 ####################
 # Save files
 ####################
-#storage_path = "/scratch/gpfs/ctokita/InformationCascades/network_adjust/data/"
-storage_path = "../output/network_adjust/data/"
+storage_path = "/scratch/gpfs/ctokita/InformationCascades/network_adjust/data/"
+#storage_path = "../output/network_adjust/data/"
 run_info = "n" + str(n) + "_gamma" + str(gamma)
 
 

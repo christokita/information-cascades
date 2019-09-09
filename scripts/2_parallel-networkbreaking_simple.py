@@ -7,8 +7,8 @@ Created on Sat Dec  9 12:42:29 2017
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to run network-breaking cascade model in parallel
-(sweep across parameter value) 
+Script to run network-breaking cascade model in parallel 
+(single parameter combo)
 """
 
 ####################
@@ -21,27 +21,18 @@ from util_scripts.thresholdfunctions import *
 from util_scripts.stimulusfunctions import *
 import multiprocessing as mp 
 import copy
-import sys
 
 
 ####################
 # Set parameters
 ####################
-# Import variables from bash script to allow cleaner parameter sweeps
-gamma_low = float(sys.argv[1]) #sys.argv[0] is name of script
-gamma_high  = float(sys.argv[2])
-gamma_step  = float(sys.argv[3])
-
-# Normal variables
 n = 200 #number of individuals
 k = 5 #mean degree on networks
-gammas = np.round(np.arange(gamma_low, gamma_high + gamma_step/10, gamma_step), 3) #correlation between two information sources
+gamma = 0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 reps = 100 #number of replicate simulations
-
-#gammas = np.delete(gammas, np.where(gammas == -0.5))
 
 ####################
 # Define simulation function
@@ -142,49 +133,53 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps) :
     ##### Return data #####
     return(adjacency, adjacency_initial, type_mat, thresh_mat, cascade_size)
 
-####################
-# Sweep parameter in parallel in parallel
-####################
-if __name__=='__main__':
-    # Get CPU count and set pool
-    cpus = mp.cpu_count()
-    pool = mp.Pool(cpus)
-    
-    # Sweep gamma values
-    for gamma in gammas:
-        
-        # Set up iterable parameters for passing to starmap_asyn
-        reps_array = np.arange(reps)
-        n_array = [n] * len(reps_array)
-        k_array = [k] * len(reps_array)
-        gamma_array = [gamma] * len(reps_array)
-        psi_array = [psi] * len(reps_array)
-        p_array = [p] * len(reps_array)
-        timesteps_array = [timesteps] * len(reps_array)
-        
-        # Run
-        parallel_results = pool.starmap_async(sim_adjusting_network, 
-                                             zip(reps_array, n_array, k_array, gamma_array, psi_array, p_array, timesteps_array))
-        
-        # Get data
-        parallel_results = parallel_results.get()
-        adj_matrices = [r[0] for r in parallel_results]
-        adj_matrices_initial = [r[1] for r in parallel_results]
-        type_matrices = [r[2] for r in parallel_results]
-        thresh_matrices = [r[3] for r in parallel_results]
-        cascade_stats =[r[4] for r in parallel_results]
-        cascade_headers = [np.array(['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])]
-        cascade_stats = cascade_headers + cascade_stats
-          
-        # Save files
-        storage_path = "/scratch/gpfs/ctokita/InformationCascades/network_adjust/data/"
-        run_info = "n" + str(n) + "_gamma" + str(gamma)
-        np.save(storage_path + "social_network_data/" + run_info + ".npy", adj_matrices)
-        np.save(storage_path + "social_network_data/" + run_info + "_initial.npy", adj_matrices_initial)
-        np.save(storage_path + "type_data/" + run_info + ".npy", type_matrices)
-        np.save(storage_path + "thresh_data/" + run_info + ".npy", thresh_matrices)
-        np.save(storage_path + "cascade_data/" + run_info + ".npy", cascade_stats)
 
-    # Close and join
-    pool.close()
-    pool.join()
+####################
+# Run in parallel
+####################
+# Get CPU count and set pool
+cpus = mp.cpu_count()
+pool = mp.Pool(cpus)
+
+# Set up iterable parameters for passing to starmap_asyn
+reps_array = np.arange(reps)
+n_array = [n] * len(reps_array)
+k_array = [k] * len(reps_array)
+gamma_array = [gamma] * len(reps_array)
+psi_array = [psi] * len(reps_array)
+p_array = [p] * len(reps_array)
+timesteps_array = [timesteps] * len(reps_array)
+
+# Run
+parallel_results = pool.starmap_async(sim_adjusting_network, 
+                                     zip(reps_array, n_array, k_array, gamma_array, psi_array, p_array, timesteps_array))
+
+# Close and join
+pool.close()
+pool.join()
+
+# Get data
+parallel_results = parallel_results.get()
+adj_matrices = [r[0] for r in parallel_results]
+adj_matrices_initial = [r[1] for r in parallel_results]
+type_matrices = [r[2] for r in parallel_results]
+thresh_matrices = [r[3] for r in parallel_results]
+cascade_stats =[r[4] for r in parallel_results]
+cascade_headers = [np.array(['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])]
+cascade_stats = cascade_headers + cascade_stats
+  
+####################
+# Save files
+####################
+storage_path = "/scratch/gpfs/ctokita/InformationCascades/network_adjust/data/"
+#storage_path = "../output/network_adjust/data/"
+run_info = "n" + str(n) + "_gamma" + str(gamma)
+
+
+np.save(storage_path + "social_network_data/" + run_info + ".npy", adj_matrices)
+np.save(storage_path + "social_network_data/" + run_info + "_initial.npy", adj_matrices_initial)
+np.save(storage_path + "type_data/" + run_info + ".npy", type_matrices)
+np.save(storage_path + "thresh_data/" + run_info + ".npy", thresh_matrices)
+np.save(storage_path + "cascade_data/" + run_info + ".npy", cascade_stats)
+
+

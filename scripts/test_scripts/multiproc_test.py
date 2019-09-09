@@ -41,16 +41,16 @@ def test_function(x, rep):
 ####################
 if __name__=='__main__':
     
+    # Get CPU count and set pool
+    cpus = mp.cpu_count()
+    pool = mp.Pool(cpus)
+    
     # Set parameters
-    parameters = np.arange(2)
-    replicates = 8
+    parameters = np.arange(3)
+    replicates = 40
     
     # Loop through parameters
     for para in parameters:
-        
-        # Get CPU count and set pool
-        cpus = mp.cpu_count()
-        pool = mp.Pool(cpus)
         
         # Run
         reps = np.arange(replicates)
@@ -68,10 +68,6 @@ if __name__=='__main__':
             dataframe_results = pd.concat([dataframe_results, df])
         dataframe_results = dataframe_results.sort_values(by = ['Process', 'Time'])
         
-        # close pool
-        pool.close()
-        pool.join()
-        
         # Mock-'save'
         print("---------- NEW Parameter run ----------")
         print("\n \n Printing dataframe: \n")
@@ -79,3 +75,6 @@ if __name__=='__main__':
         print("\n \n Printing parameters used: \n")
         print(para_results)
         
+    # close pool
+    pool.close()
+    pool.join()
