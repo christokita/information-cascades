@@ -11,7 +11,7 @@ Script to run network-breaking cascade model on local machine in parallel
 """
 
 ####################
-# Load libraryies and packages
+# Load libraries and packages
 ####################
 from model_networkbreaking import *
 import multiprocessing as mp
