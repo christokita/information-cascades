@@ -34,7 +34,7 @@ list_types = np.load('../output/network_adjust/data/type_data/n200_gamma-0.5.npy
 n_of_interest = 200
 
 # Find files
-all_files = os.listdir('../output/network_adjust/data/social_network_data/')
+all_files = os.listdir('../output/network_break/data/social_network_data/')
 pars_of_interest = [file for file in all_files if re.findall(str(n_of_interest) + '_gamma[-.0-9]+.npy', file)]
 pars_of_interest = [re.sub('.npy', '', file) for file in pars_of_interest]
 

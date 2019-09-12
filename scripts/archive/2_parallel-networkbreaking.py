@@ -7,8 +7,12 @@ Created on Sat Dec  9 12:42:29 2017
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to run network-breaking cascade model on local machine
-(single parameter combo, single replicate) 
+Script to run network-breaking cascade model in parallel on HPC cluster
+(single parameter combo, multiple replicate) 
+
+The number of replicates should be specified in the slurm script that calls this script.
+This is achieved by running 
+Specifically, the replicate number is called from the slurm script and used as a parameter here.
 """
 
 ####################
@@ -20,8 +24,8 @@ from util_scripts.socialnetworkfunctions import *
 from util_scripts.thresholdfunctions import *
 from util_scripts.stimulusfunctions import *
 import copy
+import sys
 
-import matplotlib.pyplot as plt
 
 ####################
 # Set parameters
@@ -32,13 +36,15 @@ gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
 timesteps = 10000 #number of rounds simulation will run
-reps = 20 #number of replicate simulations
-
+replicate = int(sys.argv[1]) #replicate ID number
 
 
 ####################
 # Seed initial conditions
 ####################
+# Set overall seed
+np.random.seed( int( (replicate + 1 + gamma) * 323 ) )
+
 # Seed individual's thresholds
 thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
 
@@ -138,38 +144,8 @@ for t in range(timesteps):
         new_tie = np.random.choice(potential_ties, size = 1, replace = False)
         adjacency[former_individual, new_tie] = 1
 
-'''
+
 ####################
 # Save files
 ####################
-# Convert adjacency matrix to edgelist
-edgelist = []
-for i in range(0, n):
-    for j in range(0, n):
-        row = [i, j, adjacency[i, j]]
-        edgelist.append(row)
-        
-edgelist = pd.DataFrame(edgelist, columns = ['Source', 'Target', 'Weight'])
-edgelist = edgelist[edgelist.Weight > 0] #keep only positive edges
-
-# make node list
-nodelist = pd.DataFrame({'Id': range(0, n),
-                         'Threshold': thresh_mat[:,0],
-                         'Type': type_mat[:,1]})
-       
-# Save
-dir_path = '../output/network_adjust/data/social_network_data/'
-edge_file_name = dir_path + 'Edge-Gamma_' + str(gamma) + '.csv'
-node_file_name = dir_path + 'Node-Gamma_' + str(gamma) + '.csv'
-edgelist.to_csv(edge_file_name, index = False, header = True, sep = ",")
-nodelist.to_csv(node_file_name, index = False, header = True, sep = ",")
-      
-####################
-# Assess output
-####################       
-# Chance in adjacency
-adjacency_delta = adjacency - adjacency_initial
-'''
-
-
 

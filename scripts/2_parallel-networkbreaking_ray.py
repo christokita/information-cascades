@@ -12,6 +12,7 @@ Script to run network-breaking cascade model on HPC cluster
 This script depends on a slurm script to call this script and provide certain parameter values,
 namely the replicate number (taken from a slurm array) and possibly the gamma value.
 """
+import ray
 from model_networkbreaking import *
 import sys
 
@@ -23,23 +24,30 @@ import sys
 n = 200 #number of individuals
 k = 5 #mean degree on networks
 gamma = float(sys.argv[1]) #correlation between two information sources
+#gamma = 0 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
-timesteps = 100000 #number of rounds simulation will run
-rep = int(sys.argv[2]) #replicate ID number
+timesteps = 1000 #number of rounds simulation will run
+reps = 40 #number of replicates
 
 outpath = '/scratch/gpfs/ctokita/InformationCascades/network_break/'
+#outpath = '../data_sim/network_break/'
 
 
 ##########
 # Run model
 ##########
-sim_adjusting_network(replicate = rep, 
-                      n = n, 
-                      k = k, 
-                      gamma = gamma, 
-                      psi = psi, 
-                      p = p, 
-                      timesteps = timesteps,
-                      outpath = outpath)
+ray.init()
+
+for rep in np.arange(reps):
+    sim_adjusting_network.remote(replicate = rep, 
+                                  n = n, 
+                                  k = k, 
+                                  gamma = gamma, 
+                                  psi = psi, 
+                                  p = p, 
+                                  timesteps = timesteps,
+                                  outpath = outpath)
+
+#ray.shutdown()
 
