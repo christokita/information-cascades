@@ -12,7 +12,7 @@ Function to run network-breaking cascade model
 """
 
 ####################
-# Load libraryies and packages
+# Load libraries and packages
 ####################
 import numpy as np
 import pandas as pd

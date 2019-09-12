@@ -9,6 +9,10 @@ DESCRIPTION:
 Script to run network-breaking cascade model on local machine in parallel
 (single parameter combo, numerous replicates) 
 """
+
+####################
+# Load libraryies and packages
+####################
 from model_networkbreaking import *
 import multiprocessing as mp
 import sys

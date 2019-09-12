@@ -10,7 +10,7 @@ Script to analyze cascade patterns produced by simulations
 """
 
 ####################
-# Load libraryies and packages
+# Load libraries and packages
 ####################
 import numpy as np
 import pandas as pd

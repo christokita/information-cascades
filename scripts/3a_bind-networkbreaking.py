@@ -16,9 +16,12 @@ namely the replicate number (taken from a slurm array) and possibly the gamma va
 ####################
 # Load libraries and packages
 ####################
-from model_networkbreaking import *
-import sys
-
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import re
+import math
 #NOTE: sys.argv[0] is name of script
 
 ##########
