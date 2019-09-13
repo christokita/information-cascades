@@ -151,11 +151,13 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
         if not os.path.exists(output_dirs[x]):
             os.makedirs(output_dirs[x])
     # Save files
-    cascade_df.to_pickle(output_dirs[0] + "cascade_rep" + str(replicate)  + ".pkl")
-    np.save(output_dirs[1] + "sn_rep" + str(replicate)  + ".npy", adjacency)
-    np.save(output_dirs[1] + "sn_initial_rep" + str(replicate)  + ".npy", adjacency_initial)
-    np.save(output_dirs[2] + "thresh_rep" + str(replicate)  + ".npy", adjacency)
-    np.save(output_dirs[3] + "type_rep" + str(replicate)  + ".npy", adjacency)
+    rep_label = str(replicate)
+    rep_label = rep_label.zfill(2)
+    cascade_df.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
+    np.save(output_dirs[1] + "sn_rep" + rep_label + ".npy", adjacency)
+    np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
+    np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", adjacency)
+    np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", adjacency)
     
     
 ####################
