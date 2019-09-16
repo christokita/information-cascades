@@ -6,6 +6,9 @@
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH --mail-user=ctokita@princeton.edu
+#SBATCH --output=slurm_outfiles/slurm-%A_%a.out
 
-module load anaconda3
+##Load anaconda python packages
+module load anaconda3 
+##Run script with (1) gamma variable, and (2) replicate number
 srun python3 scripts/2_parallel-networkbreaking.py 0 $SLURM_ARRAY_TASK_ID

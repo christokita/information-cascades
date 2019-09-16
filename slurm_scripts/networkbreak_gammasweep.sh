@@ -8,7 +8,7 @@ sbatch networkbreak_gammas/networkbreak_gamma-0.4.cmd
 sbatch networkbreak_gammas/networkbreak_gamma-0.3.cmd
 sbatch networkbreak_gammas/networkbreak_gamma-0.2.cmd
 sbatch networkbreak_gammas/networkbreak_gamma-0.1.cmd
-#sbatch networkbreak_gammas/networkbreak_gamma0.0.cmd
+sbatch networkbreak_gammas/networkbreak_gamma0.0.cmd
 sbatch networkbreak_gammas/networkbreak_gamma0.1.cmd
 sbatch networkbreak_gammas/networkbreak_gamma0.2.cmd
 sbatch networkbreak_gammas/networkbreak_gamma0.3.cmd
