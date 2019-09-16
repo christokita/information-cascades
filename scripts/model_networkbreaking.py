@@ -156,8 +156,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     cascade_df.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
     np.save(output_dirs[1] + "sn_rep" + rep_label + ".npy", adjacency)
     np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
-    np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", adjacency)
-    np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", adjacency)
+    np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
+    np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
     
     
 ####################
