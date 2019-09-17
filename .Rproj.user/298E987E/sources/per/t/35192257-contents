@@ -30,21 +30,34 @@ theme_ctokita <- function() {
 ##########
 # Load data 
 ##########
-cascade_data <- read.csv('output/network_adjust/data_derived/cascades/n200_gammasweep.csv', header = TRUE)
+cascade_data <- read.csv('output/network_break/data_derived/cascades/n200_rollingavg.csv', header = TRUE)
 cascade_look <- cascade_data %>% 
   filter(gamma %in% c(0.9, 0.5, 0, -0.5, 0.9))
 
 ##########
-# Plot
+# Plot: Rolling averages
 ##########
-gg_cascade <- ggplot(data = cascade_look, aes(group = gamma, x = t, y = mean, color = gamma, fill = gamma)) +
+# Cascade size
+gg_size <- ggplot(data = cascade_look, aes(group = gamma, x = start, y = active_mean, color = gamma, fill = gamma)) +
   # geom_ribbon(aes(ymin = mean - error, ymax = mean + error), alpha = 0.4) +
-  # geom_line(size = 0.3) +
-  geom_point(size = 0.3, shape = '.', alpha = 0.5) +
-  ylab("Cascade difference") +
+  geom_line(size = 0.6) +
+  #geom_point(size = 0.3, shape = '.', alpha = 0.5) +
+  ylab("Cascade size") +
   xlab(expression(paste("Time step (", t, ")"))) +
   theme_ctokita() 
 
-gg_cascade
+gg_size
 
-ggsave("output/network_adjust/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+#ggsave("output/network_adjust/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+
+# Cascade bias
+gg_diff <- ggplot(data = cascade_look, aes(group = gamma, x = start, y = actdiff_mean, color = gamma, fill = gamma)) +
+  # geom_ribbon(aes(ymin = mean - error, ymax = mean + error), alpha = 0.4) +
+  geom_line(size = 0.6) +
+  #geom_point(size = 0.3, shape = '.', alpha = 0.5) +
+  ylab("Cascade bias") +
+  xlab(expression(paste("Time step (", t, ")"))) +
+  theme_ctokita() 
+
+gg_diff
+
