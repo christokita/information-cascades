@@ -51,7 +51,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     type_mat = assign_type(n = n)
     # Set up social network
     adjacency = seed_social_network(n, k)
-    adjacency_initial = copy.copy(adjacency)
+    adjacency_initial = copy.deepcopy(adjacency)
     # Sampler number
     psi_num = int(round(psi*n))
     # Cascade size data
@@ -85,7 +85,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
             # Threshold calculation
             turn_on = social_stim > thresh_mat
             # Update
-            state_mat_last = copy.copy(state_mat)
+            state_mat_last = copy.deepcopy(state_mat)
             state_mat[turn_on] = 1
             # Break if it reaches stable state
             if np.array_equal(state_mat, state_mat_last) == True:
