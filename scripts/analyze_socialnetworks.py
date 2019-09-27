@@ -17,6 +17,7 @@ import pandas as pd
 import os
 import re
 import igraph
+import copy
 
 '''
 ####################
@@ -91,3 +92,4 @@ for run in runs:
 assort_data= pd.DataFrame(data = assort_values, columns = ['Gamma', 'Assortativity'])
 outfile_name = 'n200_gammasweep_assortativity'
 assort_data.to_csv('../output/network_break/data_derived/social_networks/' + outfile_name + '.csv', index = False)
+
