@@ -46,8 +46,8 @@ gg_assort <- ggplot(data = assort_sum, aes(x = Gamma, y = Assort_mean)) +
   geom_ribbon(aes(ymin = Assort_mean - Assort_95error, ymax = Assort_mean + Assort_95error), alpha = 0.4,  fill = "#525252") +
   geom_line(color = "#000000", size = 0.3) +
   geom_point(color = "#000000", size = 0.8) +
-  ylab("Assortativity") +
-  xlab(expression(paste("Information correlation (", gamma, ")"))) +
+  ylab(expression( paste("Assortativity, ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_assort

@@ -77,12 +77,19 @@ gg_size <- ggplot() +
              size = 0.6) +
   # General plotting controls
   scale_color_gradientn(colors = pal, 
-                        name = expression(paste("Information\ncorrelation (", italic(gamma), ")"))) +
+                        name = expression(paste(bold("Information\ncorrelation, "), italic(gamma))),
+                        breaks = seq(-1, 1, 0.5),
+                        labels = c("-1.0   (Opposing coverage)", 
+                                   "-0.5", 
+                                   "0.0   (Disjointed coverage)", 
+                                   "0.5", 
+                                   "1.0   (Mirrored coverage)")) +
   scale_x_continuous(labels = comma) +
-  ylab(expression( paste("Cascade size, ", italic(X[A] + X[B])))) +
+  ylab(expression( paste("Cascade size, ", italic(X[t]) ))) +
   xlab(expression(paste("Time step, ", italic(t) ))) +
   theme_ctokita() + 
-  theme(legend.key.height = unit(5, "mm"))
+  theme(legend.key.height = unit(5, "mm"),
+        legend.title = element_text(face = "bold"))
 
 gg_size + theme(legend.position = "none")
 ggsave("output/network_break/plots/CascadeSize_gamma.png", width = 90, height = 45, units = "mm", dpi = 400)
@@ -90,7 +97,7 @@ ggsave("output/network_break/plots/CascadeSize_gamma.png", width = 90, height = 
 # Plot just legend
 gg_legend <- get_legend(gg_size)
 as_ggplot(gg_legend)
-ggsave("output/network_break/plots/Cascade_legend.png", width = 20, height = 45, units = "mm", dpi = 400)
+ggsave("output/network_break/plots/Cascade_legend.png", width = 35, height = 45, units = "mm", dpi = 400)
 
 # Cascade bias
 gg_diff <- ggplot() +
@@ -114,7 +121,7 @@ gg_diff <- ggplot() +
                         name = expression(paste("Information\ncorrelation (", gamma, ")"))) +
   scale_y_continuous(breaks = seq(0, 0.4, 0.05)) +
   scale_x_continuous(labels = comma) +
-  ylab(expression( paste("Cascade bias, |", italic(X[A] - X[B]), "|"))) +
+  ylab(expression( paste("Cascade bias, |", italic(X[paste(A, ",", t)] - X[paste(B, ",", t)]), "| / ", italic(X[t])) )) +
   xlab(expression(paste("Time step, ", italic(t) ))) +
   theme_ctokita() +
   theme(legend.position = "none")
