@@ -14,32 +14,47 @@ from scipy.stats import truncnorm
 import matplotlib.pyplot as plt
 
 
-# Seed thresholds
 def seed_thresholds(n, lower, upper):
-    # Generate thresholds 
+    # Generates thresholds for each individual.
+    #
+    # INPUTS:
+    # - n:       the number of individuals in the social system (int).
+    # - lower:   lower bound for threshold values (float).
+    # - upper:   upper bound for threshold values (float).
+    
     thresholds = np.random.uniform(size = n, low = lower, high = upper)
-    # Python uses a open-close range so make sure no values equal 0
-    while sum(thresholds == 0) > 0:
+    while sum(thresholds == 0) > 0:  # Python uses a open-close range so make sure no values equal 0
         zero_vals = np.where(thresholds == 0)[0]
         for zero_val in zero_vals:
             thresholds[zero_val] = np.random.uniform(size = 1, low = lower, high = upper)
-    # Reshape and return
-    thresholds = np.reshape(thresholds, (n, 1))
+    thresholds = np.reshape(thresholds, (n, 1)) # Make into desired shape for use in simulations
     return thresholds
 
-# Assign type
+
 def assign_type(n):
-    # Assign type randomly, equal probability
+    # Assigns a type randomly to each individual.
+    # Each individual has an equal change of getting a given type.
+    #
+    # INPUTS:
+    # - n:       the number of individuals in the social system (int).
+
     types = []
     for i in range(n):
         ind_type = np.random.choice([1, 0], size = 2, replace = False)
         types.append(ind_type)
     types = np.array(types)
-    return(types)
+    return types
 
-# Response threshold function
+
 def response_threshold(stimulus, threshold):
+    # Response threshold function dictating the behavioral state of individuals.
+    # ** Not currently in use **
+    #
+    # INPUTS:
+    # - stimulus:    stimulus value that the threshold is compared against (float).
+    # - threshold:   threshold value of individual (float).
+    
     if stimulus > threshold:
-        return(1)
+        return 1
     else:
-        return(-1)
+        return 0

@@ -12,40 +12,59 @@ Stimulus/Information Functions
 import numpy as np
 import scipy as sp
 
-# Generate correlated stimuli (method used in simulations)
+
 def generate_stimuli(correlation, mean):
-    # Create covariation matrix
-    covar = [[1, correlation ], [correlation, 1]]
-    # Generate stimuli
-    stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    # Translate stims to 0 to 1 scale
-    stims_sig = 1 / (1 + np.exp(-stims))
-    return(stims_sig)
+    # Generates a single pair of stimuli/infromation values for the two news sources.
+    # Values are rescaled to the range [0, 1] using a logistic function.
+    # ** This is currently the method used in the model. **
+    #
+    # INPUTS:
+    # - correlation:   the correlation between the two information sources during random samples (float).
+    # - mean:          average out-degree desired in social network (float or int).
     
-# Generate correlated stimuli (returned as raw values)
+    covar = [[1, correlation ], [correlation, 1]] 
+    stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1) 
+    stims_sig = 1 / (1 + np.exp(-stims+mean)) # Translate stims to 0 to 1 scale
+    return stims_sig
+    
+
 def generate_stimuli_raw(correlation, mean):
-    # Create covariation matrix
+    # Generates a single pair of stimuli/infromation values for the two news sources.
+    # Values generated are raw and have NOT been scaled to the range [0, 1].
+    #
+    # INPUTS:
+    # - correlation:   the correlation between the two information sources during random samples (float).
+    # - mean:          average out-degree desired in social network (float or int).
+
     covar = [[1, correlation ], [correlation, 1]]
-    # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    return(stims)
+    return stims
     
-# Generate correlated stimuli (returned as percentile)
+    
 def generate_stimuli_perc(correlation, mean):
-    # Create covariation matrix
-    covar = [[1, correlation ], [correlation, 1]]
-    # Generate stimuli
-    stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    # Translate stims to percentiles
-    stims_perc = sp.stats.norm.cdf(stims, loc = 0, scale = 1)
-    return(stims_perc)
+    # Generates a single pair of stimuli/infromation values for the two news sources.
+    # Values are rescaled to the range [0, 1] according to the percentile value of each stim.
+    #
+    # INPUTS:
+    # - correlation:   the correlation between the two information sources during random samples (float).
+    # - mean:          average out-degree desired in social network (foat or int).
     
-# Generate correlated stimuli (returned using sigmoid function)
-def generate_stimuli_sig(correlation, mean):
-    # Create covariation matrix
     covar = [[1, correlation ], [correlation, 1]]
-    # Generate stimuli
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-     # Translate stims to 0 to 1 scale
-    stims_sig = 1 / (1 + np.exp(-stims))
-    return(stims_sig)
+    stims_perc = sp.stats.norm.cdf(stims, loc = 0, scale = 1) # Translate stims to percentiles
+    return stims_perc
+    
+    
+def generate_stimuli_sig(correlation, mean):
+    # Generates a single pair of stimuli/infromation values for the two news sources.
+    # Values are rescaled to the range [0, 1] using a logistic function.
+    # ** This is currently the method used in the model. Equivalent to generate_stimuli function. **
+    #
+    # INPUTS:
+    # - correlation:   the correlation between the two information sources during random samples (float).
+    # - mean:          average out-degree desired in social network (float or int).
+
+    covar = [[1, correlation ], [correlation, 1]]
+    stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
+    stims_sig = 1 / (1 + np.exp(-stims))      # Translate stims to 0 to 1 scale
+    return stims_sig
