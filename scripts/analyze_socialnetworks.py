@@ -76,7 +76,7 @@ for run in runs:
     for i in np.arange(len(social_networks)):
         
         # Load network and threshold matrices
-        adjacency = np.load(sim_dir + run + '/' + social_networks[i])
+        adjacency = np.load(sn_dir + run + '/' + social_networks[i])
         type_mat = np.load(type_dir +  run + '/' + type_files[i])
         
         # Calculate assortativity
