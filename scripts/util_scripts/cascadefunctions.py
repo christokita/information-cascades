@@ -11,6 +11,7 @@ Cascade Functions
 
 import numpy as np
 import scipy as sp    
+import copy
     
 
 def simulate_cascade(network, states, thresholds):
@@ -54,5 +55,5 @@ def evaluate_behavior(states, thresholds, stimuli, types):
     actives = np.where(states == 1)[0]
     true_stim = np.dot(types, np.transpose(stimuli))
     correct = true_stim > thresholds
-    correct = np.ndarray.flatten(correct_state)
+    correct = np.ndarray.flatten(correct)
     return correct

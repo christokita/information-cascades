@@ -19,10 +19,10 @@ k = 5 #mean degree on networks
 gamma = -0.5 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
-timesteps = 10000 #number of rounds simulation will run
+timesteps = 100000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
 
-outpath = '../output/network_break/data/'
+outpath = '../data_sim/test/'
 
 
 ##########

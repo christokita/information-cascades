@@ -99,9 +99,9 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
         cascade_size = np.vstack([cascade_size, cascade_stats])
         # Evaluate whether those who were active during casacde were correct to do so
         correct_state = evaluate_behavior(states = state_mat, 
-                                                  thresholds = thresh_mat, 
-                                                  stimuli = stim_sources, 
-                                                  types = type_mat)
+                                          thresholds = thresh_mat, 
+                                          stimuli = stim_sources, 
+                                          types = type_mat)
         # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
         adjacency = break_tie(network = adjacency,
                               states = state_mat,
@@ -169,7 +169,7 @@ def make_tie(network, connect_prob):
     # - stims:         matrix of thresholds for each individual (numpy array).
     # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
     
-    n = network.shape()[0] # Get number of individuals in system
+    n = network.shape[0] # Get number of individuals in system
     former_individual = np.random.choice(range(0, n), size = 1)
     form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob))
     if form_connection == True:
