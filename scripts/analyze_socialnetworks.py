@@ -82,7 +82,7 @@ for run in runs:
         # Calculate assortativity
         g = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency))
         g.vs['Type'] = type_mat[:,0]
-        final_assort = g.assortativity(types1 = g.vs['Type'])
+        final_assort = g.assortativity(types1 = g.vs['Type'], directed = True)
         
         # Return
         to_return = np.array([[gamma, final_assort]])
