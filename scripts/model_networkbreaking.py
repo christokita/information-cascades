@@ -16,10 +16,10 @@ Function to run network-breaking cascade model
 ####################
 import numpy as np
 import pandas as pd
-from util_scripts.socialnetworkfunctions import *
-from util_scripts.thresholdfunctions import *
-from util_scripts.stimulusfunctions import *
-from util_scripts.cascadefunctions import *
+import util_scripts.socialnetworkfunctions as sn
+import util_scripts.thresholdfunctions as th
+import util_scripts.stimulusfunctions as st
+import util_scripts.cascadefunctions as cs
 import copy
 import os
 
@@ -48,21 +48,25 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     seed = int( (replicate + 1 + gamma) * 323 )
     np.random.seed(seed)
     # Seed individual's thresholds
-    thresh_mat = seed_thresholds(n = n, lower = 0, upper = 1)
+    thresh_mat = th.seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
-    type_mat = assign_type(n = n)
+    type_mat = th.assign_type(n = n)
     # Set up social network
-    adjacency = seed_social_network(n, k)
+    adjacency = sn.seed_social_network(n, k)
     adjacency_initial = copy.deepcopy(adjacency)
     # Sampler number
     psi_num = int(round(psi*n))
     # Cascade size data
     cascade_size = pd.DataFrame(columns = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])
+    # Cascade behavior data (correct/incorrect behavior)
+    behavior_data = pd.DataFrame(np.zeros(shape = (n, 5)),
+                                          columns = ['individual', 'true_positive', 'false_negative', 'true_negative', 'false_positive'])
+    behavior_data['individual'] = np.arange(n)
     
     ########## Run simulation ##########
     for t in range(timesteps):
         # Generate stimuli for the round
-        stim_sources = generate_stimuli(correlation = gamma, mean = 0)
+        stim_sources = st.generate_stimuli(correlation = gamma, mean = 0)
         # Choose information samplers
         samplers = np.random.choice(range(0, n), size = psi_num, replace = False)
         # Get infromation samplers' type and  select correct stimuli
@@ -71,37 +75,28 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
         # Assess stimuli
         samplers_react = effective_stim > thresh_mat[samplers]
         samplers_react = np.ndarray.flatten(samplers_react)
-        # If no one reacts, do next time step
-        if sum(samplers_react) == 0:
-            continue
         # Set state matrix
         state_mat = np.zeros((n,1))
         samplers_active = samplers[samplers_react]
-        state_mat[samplers_active, 0] = 1
+        state_mat[samplers_active] = 1
         # simulate cascade 
-        state_mat = simulate_cascade(network = adjacency, 
-                                     states = state_mat, 
-                                     thresholds = thresh_mat)
-        # Get cascade data
-        total_active = np.sum(state_mat)
-        samplers_A = np.sum(type_mat[samplers_active][:,0])
-        samplers_B = np.sum(type_mat[samplers_active][:,1])
-        active_A = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,0])
-        active_B = np.sum(np.ndarray.flatten(state_mat) * type_mat[:,1])
-        cascade_stats = np.array([t,
-                                  len(samplers),
-                                  len(samplers_active), 
-                                  int(samplers_A),
-                                  int(samplers_B),
-                                  int(total_active),
-                                  int(active_A), 
-                                  int(active_B)])
-        cascade_size = np.vstack([cascade_size, cascade_stats])
-        # Evaluate whether those who were active during casacde were correct to do so
-        correct_state = evaluate_behavior(states = state_mat, 
-                                          thresholds = thresh_mat, 
-                                          stimuli = stim_sources, 
-                                          types = type_mat)
+        state_mat = cs.simulate_cascade(network = adjacency, 
+                                        states = state_mat, 
+                                        thresholds = thresh_mat)
+        # Get cascade data for beginning and end of simulation
+        if (t < 5000 or t >= timesteps - 5000):
+            cascade_size = cs.get_cascade_stats(t = t,
+                                                samplers = samplers,
+                                                active_samplers = samplers_active,
+                                                states = state_mat, 
+                                                types = type_mat, 
+                                                stats_df = cascade_size)
+        # Evaluate behavior of individuals relative to threshold and stimuli
+        correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
+                                                            thresholds = thresh_mat, 
+                                                            stimuli = stim_sources, 
+                                                            types = type_mat,
+                                                            behavior_df = behavior_data)
         # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
         adjacency = break_tie(network = adjacency,
                               states = state_mat,
@@ -148,16 +143,17 @@ def break_tie(network, states, correct_behavior):
     # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
     
     actives = np.where(states == 1)[0]
-    breaker_active = np.random.choice(actives, size = 1)
-    breaker_correct = correct_behavior[breaker_active]
-    if not breaker_correct:
-         # Assess behavior of interaction partners of focal individual
-        breaker_neighbors = np.squeeze(network[breaker_active,:])
-        neighbor_behavior = breaker_neighbors * np.ndarray.flatten(states) 
-        perceived_incorrect = np.where(neighbor_behavior == 1)[0]
-        # Break ties with one randomly-selected "incorrect" neighbor
-        break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
-        network[breaker_active, break_tie] = 0
+    if sum(actives) > 0: #error catch when no individual are active
+        breaker_active = np.random.choice(actives, size = 1)
+        breaker_correct = correct_behavior[breaker_active]
+        if not breaker_correct:
+             # Assess behavior of interaction partners of focal individual
+            breaker_neighbors = np.squeeze(network[breaker_active,:])
+            neighbor_behavior = breaker_neighbors * np.ndarray.flatten(states) 
+            perceived_incorrect = np.where(neighbor_behavior == 1)[0]
+            # Break ties with one randomly-selected "incorrect" neighbor
+            break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
+            network[breaker_active, break_tie] = 0
     return network
     
 def make_tie(network, connect_prob):

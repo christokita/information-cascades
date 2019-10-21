@@ -22,7 +22,7 @@ p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
 
-outpath = '../data_sim/test/'
+outpath = '../data_sim/network_break/'
 
 
 ##########
