@@ -16,7 +16,7 @@ namely the replicate number (taken from a slurm array) and possibly the gamma va
 ####################
 # Load libraries and packages
 ####################
-from model_networkbreaking import *
+import model_networkbreaking as model
 import sys
 
 #NOTE: sys.argv[0] is name of script
@@ -38,12 +38,12 @@ outpath = '/scratch/gpfs/ctokita/InformationCascades/network_break/'
 ##########
 # Run model
 ##########
-sim_adjusting_network(replicate = rep, 
-                      n = n, 
-                      k = k, 
-                      gamma = gamma, 
-                      psi = psi, 
-                      p = p, 
-                      timesteps = timesteps,
-                      outpath = outpath)
+model.sim_adjusting_network(replicate = rep, 
+                            n = n, 
+                            k = k, 
+                            gamma = gamma, 
+                            psi = psi, 
+                            p = p, 
+                            timesteps = timesteps,
+                            outpath = outpath)
 

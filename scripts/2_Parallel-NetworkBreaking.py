@@ -13,8 +13,9 @@ Script to run network-breaking cascade model on local machine in parallel
 ####################
 # Load libraries and packages
 ####################
-from model_networkbreaking import *
+import model_networkbreaking as model
 import multiprocessing as mp
+import numpy as np
 import sys
 
 #NOTE: sys.argv[0] is name of script
@@ -53,7 +54,7 @@ for rep in np.arange(reps):
     outpath_array = [outpath] * len(reps_array)
     
     # Run
-    out = pool.starmap_async(sim_adjusting_network, 
+    out = pool.starmap_async(model.sim_adjusting_network, 
                             zip(reps_array, 
                                 n_array, 
                                 k_array, 

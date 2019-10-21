@@ -9,7 +9,7 @@ DESCRIPTION:
 Script to run network-breaking cascade model on local machine
 (single parameter combo, numerous replicates) 
 """
-from model_networkbreaking import *
+import model_networkbreaking as model
 
 ##########
 # Set parameters
@@ -29,12 +29,13 @@ outpath = '../data_sim/network_break/'
 # Run model
 ##########
 for rep in np.arange(reps):
-    sim_adjusting_network(replicate = rep, 
-                          n = n, 
-                          k = k, 
-                          gamma = gamma, 
-                          psi = psi, 
-                          p = p, 
-                          timesteps = timesteps,
-                          outpath = outpath)
+    model.sim_adjusting_network(replicate = rep, 
+                                n = n, 
+                                k = k, 
+                                gamma = gamma, 
+                                psi = psi, 
+                                p = p, 
+                                timesteps = timesteps,
+                                outpath = outpath)
+
 
