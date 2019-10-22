@@ -130,7 +130,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
-    behavior_data.to_pick(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
+    behavior_data.to_pickle(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
