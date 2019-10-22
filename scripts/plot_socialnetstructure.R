@@ -32,23 +32,55 @@ theme_ctokita <- function() {
 ##########
 assort_data <- read.csv('output/network_break/data_derived/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
 assort_sum <- assort_data %>% 
-  group_by(Gamma) %>% 
-  summarise(Assort_mean = mean(Assortativity),
-            Assort_sd = sd(Assortativity),
-            Assort_95error = qnorm(0.975)*sd(Assortativity)/sqrt(length(Assortativity)))
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  group_by(gamma) %>% 
+  summarise(assort_mean = mean(assort_final),
+            assort_sd = sd(assort_final),
+            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
+            assortchange_mean = mean(delta_assort),
+            assortchange_sd = sd(delta_assort),
+            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort)))
 
 ##########
 # Plot
 ##########
-gg_assort <- ggplot(data = assort_sum, aes(x = Gamma, y = Assort_mean)) +
-  geom_hline(aes(yintercept = 0), size = 0.3, linetype = "dotted") +
-  # geom_vline(aes(xintercept = 0), size = 0.3, linetype = "dotted") +
-  geom_ribbon(aes(ymin = Assort_mean - Assort_95error, ymax = Assort_mean + Assort_95error), alpha = 0.4,  fill = "#525252") +
-  geom_line(color = "#000000", size = 0.3) +
-  geom_point(color = "#000000", size = 0.8) +
+# Raw final assortativity values
+gg_assort <- ggplot(data = assort_sum, aes(x = gamma, y = assort_mean)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+              alpha = 0.4,  
+              fill = "#525252") +
+  geom_line(color = "#000000", 
+            size = 0.3) +
+  geom_point(color = "#000000", 
+             size = 0.8) +
   ylab(expression( paste("Assortativity, ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_assort
-ggsave("output/network_break/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = "output/network_break/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+
+# Change in assortativity
+gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mean)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  # geom_errorbar(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error),
+  #               size = 0.3,
+  #               width = 0) +
+  geom_ribbon(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error), 
+              alpha = 0.4,  
+              fill = "#525252") +
+  geom_line(color = "#000000", 
+            size = 0.3) +
+  geom_point(color = "#000000", 
+             size = 0.8) +
+  ylab(expression( paste("Change in assortativity, ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  theme_ctokita() 
+
+gg_assortchange
+ggsave(plot = gg_assortchange, filename = "output/network_break/plots/SocialNet_assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
