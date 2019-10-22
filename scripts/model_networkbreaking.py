@@ -112,7 +112,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     cascade_df['replicate'] = replicate
     # Create output folder
     output_name = "n" + str(n) + "_gamma" + str(gamma)
-    data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data']
+    data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
     for x in np.arange(len(data_dirs)):
@@ -130,6 +130,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
+    behavior_data.to_pick(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
