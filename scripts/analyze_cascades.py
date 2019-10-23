@@ -35,11 +35,25 @@ runs = os.listdir(cas_dir)
 runs = [run for run in runs if re.findall(str(n_of_interest) + '_gamma[-.0-9]+', run)]
 
 ####################
-# Measure cascade dynamics over time (simple average across replicates)
+# Measure change in cascade dynamics (avg. in first 5000 timesteps vs. avg. in last 5000 timesteps)
 ####################
-all_cascade = pd.DataFrame()
+# Function to summarise data for beginning and end of cascade
+def summarise_cascade(cascade_df):
+    
+    # Get window size
+    t_window = int(cascade_df.shape[0] / 2)
+    
+    # Summarise by beginning (t<5000) and end of sim (t>=95000)
+    begin = cascade_df.iloc[0:t_window, :]
+    end = cascade_df.iloc[t_window:2*t_window, :]
+    begin = begin.mean()
+    end = end.mean()
+    return begin, end
+
 
 # Loop through runs
+all_cascade = pd.DataFrame()
+
 for run in runs:
     
     # Load statement
@@ -53,41 +67,42 @@ for run in runs:
     run_files.sort()
     
     # Create dataframe for parameter setting summary 
-    headers = pd.read_pickle(cas_dir + run +'/' + run_files[0]).columns
+    headers = ['gamma', 'replicate', 
+               'size_begin', 'size_end', 'size_diff',
+               'bias_begin', 'bias_end', 'bias_diff']
     cascade_data = pd.DataFrame(columns = headers, dtype = float)
     
-    # Loop through files of different gamma values, load, and append
+    # Loop through files of different gamma values
     for file in run_files:
+        
+        # Read
         cascade = pd.read_pickle(cas_dir + run +'/' + file)
-        cascade_data = cascade_data.append(cascade, ignore_index = True)
-            
-    # Calculate additional statistics
-    cascade_data = cascade_data.astype(float)
-    cascade_data['active_diff'] = abs(cascade_data['active_A'] - cascade_data['active_B'])
-    cascade_data['active_diff_prop'] = cascade_data['active_diff'] / cascade_data['total_active']
-    
-    # Create summary statistics
-    cascade_sum = cascade_data.groupby(['t'])['total_active','active_diff_prop'].agg(['mean', 'count', 'std'])
-    cascade_sum.columns = cascade_sum.columns.map('_'.join)
-    ci95_total = []
-    ci95_diff = []
-    for j in np.arange(cascade_sum.shape[0]):
-        # Calculate 95% CI
-        mean_tot, count_tot, sd_tot, mean_diff, count_diff, sd_diff = cascade_sum.loc[j]
-        error_tot = (1.96 * sd_tot) / math.sqrt(count_tot)
-        error_diff = (1.96 * sd_diff) / math.sqrt(count_diff)
-        ci95_total.append(error_tot)
-        ci95_diff.append(error_diff)
-    cascade_sum['total_active_error'] = ci95_total
-    cascade_sum['active_diff_prop_error'] = ci95_diff
+        cascade = cascade.astype(float)
+        rep = int(re.search('([0-9]+)', file).group(1))
+        
+        # Calculate additional statistics
+        cascade['active_diff'] = abs(cascade['active_A'] - cascade['active_B'])
+        cascade['active_diff_prop'] = cascade['active_diff'] / cascade['total_active']
+        
+        # Summarise data for beginngin and end of simulations
+        cascade_begin, cascade_end = summarise_cascade(cascade)
+        cascade_sum = pd.DataFrame({'gamma': [gamma],
+                                    'replicate': [rep], 
+                                    'size_begin': [cascade_begin.total_active],
+                                    'size_end': [cascade_end.total_active],
+                                    'size_diff': [cascade_end.total_active - cascade_begin.total_active], 
+                                    'bias_begin': [cascade_begin.active_diff_prop], 
+                                    'bias_end': [cascade_end.active_diff_prop], 
+                                    'bias_diff': [cascade_end.active_diff_prop - cascade_begin.active_diff_prop]})
+        
+        # Append
+        cascade_data = cascade_data.append(cascade_sum, ignore_index = True, sort = False)
     
     # Bind to larger dataframe for saving
-    cascade_sum['gamma'] = gamma
-    cascade_sum['t'] = cascade_sum.index
     if all_cascade.empty:
-        all_cascade = cascade_sum.copy(deep = True)
+        all_cascade = cascade_data.copy(deep = True)
     else:
-        all_cascade = all_cascade.append(cascade_sum)
+        all_cascade = all_cascade.append(cascade_data)
     
 # Save to csv
 all_cascade.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_gammasweep.csv',
