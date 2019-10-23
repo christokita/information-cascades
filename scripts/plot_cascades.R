@@ -8,6 +8,7 @@
 # Load packages
 ##########
 library(ggplot2)
+library(tidyr)
 library(dplyr)
 library(RColorBrewer)
 library(scales)
@@ -28,103 +29,101 @@ theme_ctokita <- function() {
           legend.key.size = unit(3, "mm"))
 }
 
-############## Cascade difference among types ##############
 
 ##########
 # Load data 
 ##########
 # Read in data
-cascade_data <- read.csv('output/network_break/data_derived/cascades/n200_rollingavg.csv', header = TRUE)
-
-# Set aside group for plots with less data
-cascade_look <- cascade_data %>% 
-  filter(gamma %in% c(0.9, 0.5, 0, -0.5, -0.9))
-
-# Data set for end points on graph
-end_time <- max(cascade_data$start)
-cascade_ends <- cascade_data %>% 
-  filter(start == end_time)
-
-# Data set for emphasis lines
-cascade_emph <- cascade_data %>% 
-  filter(gamma %in% c(1, -1))
-cascade_emph_ends <- cascade_emph %>% 
-  filter(start == end_time)
-
-
-# Set color palette
-pal <- brewer.pal(length(unique(cascade_look$gamma)), "PuOr")
+cascade_data <- read.csv('output/network_break/data_derived/cascades/n200_gammasweep.csv', header = TRUE)
 
 ##########
-# Plot: Rolling averages
+# Plot: Change in cascade size
 ##########
-# Cascade size
-gg_size <- ggplot() +
+########## Overall change ##########
+# Summarise by gamma
+cascade_size <- cascade_data %>% 
+  mutate(size_diff_norm = (size_end - size_begin) / size_begin) %>% 
+  group_by(gamma) %>% 
+  summarise(size_diff_mean = mean(size_diff),
+            size_diff_sd = sd(size_diff),
+            size_diff_95error = qnorm(0.975)*sd(size_diff)/sqrt(length(size_diff)),
+            size_diff_norm_mean = mean(size_diff_norm),
+            size_diff_norm_sd = sd(size_diff_norm),
+            size_diff_norm_95error = qnorm(0.975)*sd(size_diff_norm)/sqrt(length(size_diff_norm)))
+
+# Plot
+gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_diff_norm_mean)) +
   # Plot all data
-  geom_line(data = cascade_data, 
-            aes(group = gamma, x = start, y = active_mean, color = gamma), 
-            size = 0.2, 
-            alpha = 0.5) +
-  geom_point(data = cascade_ends,
-             aes(group = gamma, x = start, y = active_mean, color = gamma),
-             size = 0.1) +
-  # Plot emphasis lines
-  geom_line(data = cascade_emph, 
-            aes(group = gamma, x = start, y = active_mean, color = gamma), 
-            size = 0.3) +
-  geom_point(data = cascade_emph_ends,
-             aes(group = gamma, x = start, y = active_mean, color = gamma),
-             size = 0.6) +
+  geom_errorbar(aes(ymin = size_diff_norm_mean - size_diff_norm_95error, 
+                    ymax = size_diff_norm_mean + size_diff_norm_95error), 
+                size = 0.2, 
+                width = 0) +
+  geom_point(size = 0.8) +
   # General plotting controls
-  scale_color_gradientn(colors = pal, 
-                        name = expression(paste(bold("Information\ncorrelation, "), italic(gamma))),
-                        breaks = seq(-1, 1, 0.5),
-                        labels = c("-1.0   (Opposing coverage)", 
-                                   "-0.5", 
-                                   "0.0   (Disjointed coverage)", 
-                                   "0.5", 
-                                   "1.0   (Mirrored coverage)")) +
-  scale_x_continuous(labels = comma) +
-  ylab(expression( paste("Cascade size, ", italic(X[t]) ))) +
-  xlab(expression(paste("Time step, ", italic(t) ))) +
-  theme_ctokita() + 
-  theme(legend.key.height = unit(5, "mm"),
-        legend.title = element_text(face = "bold"))
+  scale_y_continuous(limits = c(-0.5, 0)) +
+  ylab(expression( paste(Delta, " cascade size" ))) +
+  xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
+  theme_ctokita() 
 
-gg_size + theme(legend.position = "none")
-ggsave("output/network_break/plots/CascadeSize_gamma.png", width = 90, height = 45, units = "mm", dpi = 400)
+gg_size 
+ggsave("output/network_break/plots/CascadeSize_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
 
-# Plot just legend
-gg_legend <- get_legend(gg_size)
-as_ggplot(gg_legend)
-ggsave("output/network_break/plots/Cascade_legend.png", width = 35, height = 45, units = "mm", dpi = 400)
 
-# Cascade bias
-gg_diff <- ggplot() +
+##########
+# Plot: Change in cascade bias
+##########
+# Summarise by gamma
+cascade_diff <- cascade_data %>% 
+  mutate(bias_diff_norm = (bias_end - bias_begin) / bias_begin) %>% 
+  group_by(gamma) %>% 
+  summarise(bias_diff_mean = mean(bias_diff),
+            bias_diff_sd = sd(bias_diff),
+            bias_diff_95error = qnorm(0.975)*sd(bias_diff)/sqrt(length(bias_diff)))
+
+# Summarizing plot
+gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_diff_mean)) +
   # Plot all data
-  geom_line(data = cascade_data,
-            aes(group = gamma, x = start, y = actdiff_mean, color = gamma),
-            size = 0.2, 
-            alpha = 0.5) +
-  geom_point(data = cascade_ends,
-             aes(group = gamma, x = start, y = actdiff_mean, color = gamma),
-             size = 0.1) +
-  # Plot emphasis lines
-  geom_line(data = cascade_emph, 
-            aes(group = gamma, x = start, y = actdiff_mean, color = gamma), 
-            size = 0.3) +
-  geom_point(data = cascade_emph_ends,
-             aes(group = gamma, x = start, y = actdiff_mean, color = gamma),
-             size = 0.6) +
+  geom_errorbar(aes(ymin = bias_diff_mean - bias_diff_95error, ymax = bias_diff_mean + bias_diff_95error),
+                size = 0.2,
+                width = 0) +
+  geom_point(size = 0.8) +
   # General plotting controls
-  scale_color_gradientn(colors = pal, 
-                        name = expression(paste("Information\ncorrelation (", gamma, ")"))) +
-  scale_y_continuous(breaks = seq(0, 0.4, 0.05)) +
-  scale_x_continuous(labels = comma) +
-  ylab(expression( paste("Cascade bias, |", italic(X[paste(A, ",", t)] - X[paste(B, ",", t)]), "| / ", italic(X[t])) )) +
-  xlab(expression(paste("Time step, ", italic(t) ))) +
-  theme_ctokita() +
-  theme(legend.position = "none")
+  scale_y_continuous(limits = c(0, 0.16)) +
+  ylab(expression( paste(Delta, " cascade bias" ))) +
+  xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
+  theme_ctokita() 
 
 gg_diff
-ggsave("output/network_break/plots/CascadeDiff_gamma.png", width = 90, height = 45, units = "mm", dpi = 400)
+ggsave("output/network_break/plots/CascadeDiff_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+
+
+########## Bias, beginning and emnd ##########
+# Summarise by gamma, time point
+cascade_diff_time <- cascade_data %>% 
+  select(gamma, bias_begin, bias_end) %>% 
+  gather(time, bias, -gamma) %>% 
+  group_by(gamma, time) %>% 
+  summarise(diff_mean = mean(bias),
+            diff_sd = sd(bias),
+            diff_95error = qnorm(0.975)*sd(bias)/sqrt(length(bias)))
+
+# Raw plot
+gg_diff_time <- ggplot(cascade_diff_time, aes(x = gamma, y = diff_mean, color = time)) +
+  geom_errorbar(aes(ymin = diff_mean - diff_95error, ymax = diff_mean + diff_95error),
+                position = position_dodge(width = 0.05),
+                size = 0.2,
+                width = 0) +
+  geom_point(position = position_dodge(width = 0.05),
+             size = 0.8) +
+  scale_color_manual(name = "",
+                     labels = c(expression( paste(italic(t), " < 5,000") ),
+                                expression( paste(italic(t), " < 5,000") )),
+                     values = c("#969696", "#6e016b")) +
+  ylab(expression( paste("Cascade bias" ))) +
+  xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
+  theme_ctokita() +
+  theme(legend.position = c(0.7, 0.9),
+        legend.background = element_blank())
+
+gg_diff_time
+ggsave("output/network_break/plots/CascadeDiff_GammaAndTime.png", width = 45, height = 45, units = "mm", dpi = 400)
