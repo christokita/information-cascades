@@ -99,7 +99,7 @@ for run in runs:
     
     # Bind to larger dataframe for saving
     if all_cascade.empty:
-        all_cascade = cascade_data.copy(deep = True)
+        all_cascade = copy.deepcopy(cascade_data)
     else:
         all_cascade = all_cascade.append(cascade_data)
     
