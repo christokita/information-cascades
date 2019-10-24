@@ -14,11 +14,10 @@ Script to analyze cascade patterns produced by simulations
 ####################
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt #occasionally use for on the spot plotting
 import os
 import re
 import math
-import copy
 
 
 ####################
