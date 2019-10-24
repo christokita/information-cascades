@@ -70,12 +70,12 @@ for run in runs:
     type_files.sort()
     
     # Warning and error catch
-    if len(social_networks) != len(type_files):
+    if len(sn_final) != len(type_files):
         print("The number of replicates do not match in the social network and type data directories.")
         break
     
      # Loop through individual replicates and calculate assortativity
-    for i in np.arange(len(social_networks)):
+    for i in np.arange(len(sn_final)):
         
         # Load network and threshold matrices
         adjacency = np.load(sn_dir + run + '/' + sn_final[i])
