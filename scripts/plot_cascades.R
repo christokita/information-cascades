@@ -115,14 +115,16 @@ gg_diff_time <- ggplot(cascade_diff_time, aes(x = gamma, y = diff_mean, color = 
                 width = 0) +
   geom_point(position = position_dodge(width = 0.05),
              size = 0.8) +
+  # scale_y_continuous(limits = c(0, 0.4)) +
   scale_color_manual(name = "",
-                     labels = c(expression( paste(italic(t), " < 5,000") ),
-                                expression( paste(italic(t), " < 5,000") )),
+                     labels = c("Simulation start",
+                                "Simulation end"),
                      values = c("#969696", "#6e016b")) +
   ylab(expression( paste("Cascade bias" ))) +
   xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
   theme_ctokita() +
-  theme(legend.position = c(0.7, 0.9),
+  theme(legend.position = c(0.75, 0.98),
+        legend.key.height = unit(2, "mm"),
         legend.background = element_blank())
 
 gg_diff_time
