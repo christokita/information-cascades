@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import util_scripts.socialnetworkfunctions as sn
 import util_scripts.thresholdfunctions as th
+import util_scripts.stimulusfunctions as st
 import util_scripts.cascadefunctions as cs
 import copy
 import os
@@ -53,6 +54,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     # Set up social network
     adjacency = sn.seed_social_network(n, k)
     adjacency_initial = copy.deepcopy(adjacency)
+    # Sampler number
+    psi_num = int(round(psi*n))
     # Cascade size data
     cascade_size = pd.DataFrame(columns = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])
     # Cascade behavior data (correct/incorrect behavior)
@@ -62,13 +65,21 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     
     ########## Run simulation ##########
     for t in range(timesteps):
-        # Initial information sampling
-        stim_sources, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
-                                                                                       gamma = gamma,
-                                                                                       psi = psi,
-                                                                                       types = type_mat,
-                                                                                       thresholds = thresh_mat)
-        # Simulate information cascade 
+        # Generate stimuli for the round
+        stim_sources = st.generate_stimuli(correlation = gamma, mean = 0)
+        # Choose information samplers
+        samplers = np.random.choice(range(0, n), size = psi_num, replace = False)
+        # Get infromation samplers' type and  select correct stimuli
+        samplers_type = type_mat[samplers]
+        effective_stim = np.dot(samplers_type, np.transpose(stim_sources))
+        # Assess stimuli
+        samplers_react = effective_stim > thresh_mat[samplers]
+        samplers_react = np.ndarray.flatten(samplers_react)
+        # Set state matrix
+        state_mat = np.zeros((n,1))
+        samplers_active = samplers[samplers_react]
+        state_mat[samplers_active] = 1
+        # simulate cascade 
         state_mat = cs.simulate_cascade(network = adjacency, 
                                         states = state_mat, 
                                         thresholds = thresh_mat)
@@ -94,20 +105,14 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
         adjacency = make_tie(network = adjacency, 
                              connect_prob = p)
     
-    ########## Assess fitness ##########
-    # Get fitness of individuals (based on behavior) and size of cascades
-    fitness_behavior, fitness_size = cs.assess_fitness(n = n, 
-                                                      gamma = gamma, 
-                                                      psi = psi, 
-                                                      trial_count = 10000, 
-                                                      network = adjacency, 
-                                                      thresholds = thresh_mat, 
-                                                      types = type_mat)
-    
     ########## Save files ##########
+    # Turn cascade data into df for easy use
+    headers = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B']
+    cascade_df = pd.DataFrame(cascade_size, columns = headers)
+    cascade_df['replicate'] = replicate
     # Create output folder
     output_name = "n" + str(n) + "_gamma" + str(gamma)
-    data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data', 'fitness_data']
+    data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
     for x in np.arange(len(data_dirs)):
@@ -120,14 +125,12 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     # Save files
     rep_label = str(replicate)
     rep_label = rep_label.zfill(2)
-    cascade_size.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
+    cascade_df.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
     np.save(output_dirs[1] + "sn_rep" + rep_label + ".npy", adjacency)
     np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
     behavior_data.to_pickle(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
-    fitness_size.to_pickle(output_dirs[5] + "fit_size_rep" + rep_label + ".pkl")
-    fitness_behavior.to_pickle(output_dirs[5] + "fit_behav_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
