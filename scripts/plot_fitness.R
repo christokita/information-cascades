@@ -31,8 +31,8 @@ theme_ctokita <- function() {
 behav_data <- read.csv('output/network_break/data_derived/cascades/n200allbehavior_gammasweep.csv', header = TRUE)
 behav_sum <- behav_data %>% 
   select(-replicate) %>% 
-  mutate(fitness = incorrect_message / correct_message) %>% 
-  mutate(fitness = ifelse(fitness == Inf, NA, fitness)) %>% #need to figure out how to deal with Inf values
+  mutate(fitness = correct_message - incorrect_message ) %>% 
+  # mutate(fitness = ifelse(fitness == Inf, 10, fitness)) %>% #need to figure out how to deal with Inf values
   group_by(gamma) %>% 
   summarise_each(funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE))) %>% 
   mutate(correct_message_95ci = qnorm(0.975) * correct_message_sd/sqrt(100 * 200),
