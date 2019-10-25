@@ -10,6 +10,7 @@ Script to run network-breaking cascade model on local machine
 (single parameter combo, numerous replicates) 
 """
 import model_networkbreaking as model
+import numpy as np
 
 ##########
 # Set parameters
