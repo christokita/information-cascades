@@ -38,6 +38,10 @@ behav_sum <- behav_data %>%
   mutate(correct_message_95ci = qnorm(0.975) * correct_message_sd/sqrt(100 * 200),
          incorrect_message_95ci = qnorm(0.975) * incorrect_message_sd/sqrt(100 * 200),
          fitness_95ci = qnorm(0.975) * fitness_sd/sqrt(100 * 200))
+
+gamma_zero_fitness <- behav_sum$fitness_mean[behav_sum$gamma == 0]
+behav_sum <- behav_sum %>% 
+  mutate(fitness_mean_norm = (fitness_mean - gamma_zero_fitness) / gamma_zero_fitness)
       
 ##########
 # Plot
@@ -84,12 +88,13 @@ ggsave(plot = gg_incorrect,
        dpi = 400)
 
 # Individual fitness (i.e., ratio of correct/incorrect messages received)
-gg_fitness <- ggplot(data = behav_sum, aes(x = gamma, y = fitness_mean)) +
-  geom_errorbar(aes(ymin = fitness_mean - fitness_95ci,
-                    ymax = fitness_mean + fitness_95ci),
-                size = 0.2,
-                width = 0) +
+gg_fitness <- ggplot(data = behav_sum, aes(x = gamma, y = fitness_mean_norm)) +
+  # geom_errorbar(aes(ymin = fitness_mean - fitness_95ci,
+  #                   ymax = fitness_mean + fitness_95ci),
+  #               size = 0.2,
+  #               width = 0) +
   geom_point(size = 0.8) +
+  geom_hline(yintercept = 0) +
   ylab("Individual fitness") +
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   theme_ctokita() 
