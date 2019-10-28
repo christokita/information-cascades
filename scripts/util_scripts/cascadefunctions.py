@@ -176,4 +176,4 @@ def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
                                                           behavior_df = behavior_stats)
     
     # Return
-    return cascade_stats, behavior_stats
+    return behavior_stats, cascade_stats
