@@ -16,9 +16,9 @@ Function to run network-breaking cascade model
 ####################
 import numpy as np
 import pandas as pd
-import util_scripts.socialnetworkfunctions as sn
-import util_scripts.thresholdfunctions as th
-import util_scripts.cascadefunctions as cs
+import cascade_models.socialnetworkfunctions as sn
+import cascade_models.thresholdfunctions as th
+import cascade_models.cascadefunctions as cs
 import copy
 import os
 
