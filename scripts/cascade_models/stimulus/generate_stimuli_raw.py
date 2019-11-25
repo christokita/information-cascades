@@ -6,6 +6,8 @@ Created on Mon Nov 25 11:00:54 2019
 @author: ChrisTokita
 """
 
+import numpy as np
+
 def generate_stimuli_raw(correlation, mean):
     # Generates a single pair of stimuli/infromation values for the two news sources.
     # Values generated are raw and have NOT been scaled to the range [0, 1].

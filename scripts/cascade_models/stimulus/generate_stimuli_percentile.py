@@ -6,6 +6,9 @@ Created on Mon Nov 25 11:01:16 2019
 @author: ChrisTokita
 """
 
+import numpy as np
+import scipy as sp
+
 def generate_stimuli_percentile(correlation, mean):
     # Generates a single pair of stimuli/infromation values for the two news sources.
     # Values are rescaled to the range [0, 1] according to the percentile value of each stim.

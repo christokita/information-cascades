@@ -6,6 +6,8 @@ Created on Mon Nov 25 11:01:30 2019
 @author: ChrisTokita
 """
 
+import numpy as np
+
 def generate_stimuli_sigmoid(correlation, mean):
     # Generates a single pair of stimuli/infromation values for the two news sources.
     # Values are rescaled to the range [0, 1] using a logistic function.
