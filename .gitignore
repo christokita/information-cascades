@@ -1,2 +1,3 @@
 data_sim/
 .Rproj.user
+**/__pycache__/
