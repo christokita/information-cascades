@@ -11,7 +11,7 @@ Cascade Functions
 
 import numpy as np
 import pandas as pd 
-import util_scripts.stimulusfunctions as st
+import cascade_models.stimulus as st
 import copy
 
 def simulate_stim_sampling(n, gamma, psi, types, thresholds):
