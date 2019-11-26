@@ -10,18 +10,18 @@ import numpy as np
 import igraph
 
  
-def seed_social_network(n, k, type = "random"):
+def seed_social_network(n, k, network_type):
     # This function generates a social network.
     #
     # INPUTS:
     # - n:   number of individuals in the social system (int).
     # - k:   average degree desired in social network (int).
-    # - type:    
+    # - type:   type of network to generate: random, scale-free (str).    
     
     # Generate graph using Erdo-Renyi algorithm
-    if type == "random":
+    if network_type == "random":
         g = igraph.Graph.Erdos_Renyi(n = n, m = n*k, directed = True, loops = False)
-    elif type == "scalefree":
+    elif network_type == "scalefree":
         g = igraph.Graph.Barabasi(n = n, m = k, directed = True, power = 1)
     # Make into adjacency matrix
     network = g.get_adjacency()
