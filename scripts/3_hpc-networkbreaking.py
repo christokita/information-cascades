@@ -32,7 +32,7 @@ p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 rep = int(sys.argv[2]) #replicate ID number
 
-outpath = '/scratch/gpfs/ctokita/InformationCascades/network_break/'
+outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/'
 
 
 ##########
