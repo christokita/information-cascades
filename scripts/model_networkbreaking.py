@@ -29,18 +29,19 @@ np.seterr(divide='ignore', invalid='ignore')
 # Define simulation function
 ####################
 
-def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
+def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, network_type = "random") :
     # Simulates a single replicate simulation of the network-breaking information cascade model. 
     #
     # INPUTS:
-    # - replicate:   id number of replicate (int or float).
-    # - n:           number of individuals in social system (int). n > 0.
-    # - k:           mean out-degree of initial social network (int). k > 0.
-    # - gamma:       correlation between information sources (float). gamma = [-1, 1].
-    # - psi:         prop. of individuals sampling info source every time step (float). psi = (0, 1].
-    # - p:           probability that randomly selected individual forms a new connection (float). p = [0, 1].
-    # - timesteps:   length of simulation (int).
-    # - outpath:     path to directory where output folders and files will be created (str). 
+    # - replicate:      id number of replicate (int or float).
+    # - n:              number of individuals in social system (int). n > 0.
+    # - k:              mean out-degree of initial social network (int). k > 0.
+    # - gamma:          correlation between information sources (float). gamma = [-1, 1].
+    # - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
+    # - p:              probability that randomly selected individual forms a new connection (float). p = [0, 1].
+    # - timesteps:      length of simulation (int).
+    # - outpath:        path to directory where output folders and files will be created (str). 
+    # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
         
     ########## Seed initial conditions ##########
     # Set overall seed
@@ -51,7 +52,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath) :
     # Assign type
     type_mat = th.assign_type(n = n)
     # Set up social network
-    adjacency = sn.seed_social_network(n, k)
+    adjacency = sn.seed_social_network(n, k, network_type = network_type)
     adjacency_initial = copy.deepcopy(adjacency)
     # Cascade size data
     cascade_size = pd.DataFrame(columns = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])
