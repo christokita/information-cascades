@@ -33,13 +33,13 @@ p = 0.005 # probability selected individual forms new connection
 timesteps = 100000 #number of rounds simulation will run
 rep = int(sys.argv[2]) #replicate ID number
 
-outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/__scale-free/'
+outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/__regular/'
 
 
 ##########
 # Run model
 ##########
-model. sim_adjusting_network(replicate = rep, 
+model.sim_adjusting_network(replicate = rep, 
                             n = n, 
                             k = k, 
                             gamma = gamma, 
@@ -47,5 +47,5 @@ model. sim_adjusting_network(replicate = rep,
                             p = p, 
                             timesteps = timesteps,
                             outpath = outpath,
-                            network_type = "scalefree")
+                            network_type = "regular")
     

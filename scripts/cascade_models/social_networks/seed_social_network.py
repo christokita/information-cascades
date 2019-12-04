@@ -23,6 +23,8 @@ def seed_social_network(n, k, network_type):
         g = igraph.Graph.Erdos_Renyi(n = n, m = n*k, directed = True, loops = False)
     elif network_type == "scalefree":
         g = igraph.Graph.Barabasi(n = n, m = k, directed = True, power = 1)
+    elif network_type == "regular":
+        g = igraph.Graph.K_Regular(n = n, k = k, directed = True, multiple = False)
     # Make into adjacency matrix
     network = g.get_adjacency()
     network = np.array(network.data)
