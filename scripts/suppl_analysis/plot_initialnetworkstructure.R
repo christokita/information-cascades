@@ -41,9 +41,9 @@ rand_sum <- rand_data %>%
             assortchange_mean = mean(delta_assort),
             assortchange_sd = sd(delta_assort),
             assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
-  mutate(network_type = "Random")
+  mutate(network_type = "Random (default)")
 
-# Scale-network
+# Scale-free network
 sf_data <- read.csv('output/network_break/data_derived/social_networks/n200_scalefree_assortativity.csv', header = TRUE)
 sf_sum <- sf_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
@@ -56,14 +56,28 @@ sf_sum <- sf_data %>%
             assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
   mutate(network_type = "Scale-free")
 
+# Regular network
+reg_data <- read.csv('output/network_break/data_derived/social_networks/n200_regular_assortativity.csv', header = TRUE)
+reg_sum <- reg_data %>% 
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  group_by(gamma) %>% 
+  summarise(assort_mean = mean(assort_final),
+            assort_sd = sd(assort_final),
+            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
+            assortchange_mean = mean(delta_assort),
+            assortchange_sd = sd(delta_assort),
+            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+  mutate(network_type = "Regular")
+
 # Bind
-assort_sum <- rbind(rand_sum, sf_sum)
-rm(rand_data, rand_sum, sf_data, sf_sum)
+assort_sum <- rbind(rand_sum, sf_sum, reg_sum)
+rm(rand_data, rand_sum, sf_data, sf_sum, reg_data, reg_sum)
 
 ##########
 # Plot
 ##########
 # Raw final assortativity values
+pal <- c("#e41a1c", "#377eb8", "#4daf4a")
 gg_assort_networktype <- ggplot(data = assort_sum, 
                                 aes(x = gamma, 
                                     y = assort_mean, 
@@ -78,31 +92,12 @@ gg_assort_networktype <- ggplot(data = assort_sum,
               color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
+  scale_color_manual(name = "Network type", values = pal) +
+  scale_fill_manual(name = "Network type", values = pal) +
   ylab(expression( paste("Assortativity, ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
-  theme_ctokita() 
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
 
 gg_assort_networktype
-ggsave(plot = gg_assort, filename = "output/network_break/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
-
-# Change in assortativity
-gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mean)) +
-  geom_hline(aes(yintercept = 0), 
-             size = 0.3, 
-             linetype = "dotted") +
-  # geom_errorbar(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error),
-  #               size = 0.3,
-  #               width = 0) +
-  geom_ribbon(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error), 
-              alpha = 0.4,  
-              fill = "#525252") +
-  geom_line(color = "#000000", 
-            size = 0.3) +
-  geom_point(color = "#000000", 
-             size = 0.8) +
-  ylab(expression( paste("Change in assortativity, ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
-  theme_ctokita() 
-
-gg_assortchange
-ggsave(plot = gg_assortchange, filename = "output/network_break/plots/SocialNet_assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort_networktype, filename = "output/network_break/plots/suppl_plots/Assortativity_by_networktype.png", height = 45, width = 90, units = "mm", dpi = 400)
