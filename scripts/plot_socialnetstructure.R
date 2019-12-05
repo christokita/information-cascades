@@ -1,6 +1,6 @@
 ##############################
 #
-# PLOT: Social network structure figures
+# PLOT: Effect of initial social network structure on ending network structure
 #
 ##############################
 

@@ -27,8 +27,13 @@ import copy
 n_of_interest = 200
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/fitness_data/' 
-thresh_dir = '../data_sim/network_break/thresh_data/'
+fit_dir = '../data_sim/network_break/__regular/fitness_data/' 
+thresh_dir = '../data_sim/network_break/__regular/thresh_data/'
+
+# For output
+outpath = '../data_derived/network_break/other_network_types/'
+filetags = 'regular' #added info after 'n<number>_fitness_<datatype>_
+
 
 # List runs
 runs = os.listdir(fit_dir)
@@ -91,7 +96,7 @@ for run in runs:
     del(cascade_data, cascade_sum)
         
 # Write to CSV
-all_cascade.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_cascadesize_gammasweep.csv',
+all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_cascadesize_' + filetags + '.csv',
                    index = False)
     
 
@@ -112,8 +117,8 @@ for run in runs:
     gamma = float(re.search('.*_gamma([-\.0-9]+)', run).group(1))
     
      # Get replicates in beahvior directory
-    files = os.listdir(fit_dir + run +'/')
-    files = [file for file in run_files if re.findall('behav', file)] #grab only cascade size files
+    run_files = os.listdir(fit_dir + run +'/')
+    run_files = [file for file in run_files if re.findall('behav', file)] #grab only cascade size files
     reps = [re.search(".*(rep[0-9]{2}).*", file).group(1) for file in files]
     reps.sort()
     
@@ -149,7 +154,7 @@ for run in runs:
 
             
 # Write to CSV
-all_behavior.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_allbehavior_gammasweep.csv',
+all_behavior.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_allbehavior_' + filetags + '.csv',
                    index = False)
-summarized_behav.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_behaviorsum_gammasweep.csv',
+summarized_behav.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_behaviorsum_scalefree' + filetags + '.csv',
                    index = False)
