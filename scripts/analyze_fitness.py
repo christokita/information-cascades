@@ -34,7 +34,6 @@ thresh_dir = '../data_sim/network_break/__regular/thresh_data/'
 outpath = '../data_derived/network_break/other_network_types/'
 filetags = 'regular' #added info after 'n<number>_fitness_<datatype>_
 
-
 # List runs
 runs = os.listdir(fit_dir)
 runs = [run for run in runs if re.findall(str(n_of_interest) + '_gamma[-.0-9]+', run)]

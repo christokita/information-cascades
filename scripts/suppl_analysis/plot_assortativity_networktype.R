@@ -31,7 +31,7 @@ theme_ctokita <- function() {
 # Load data and summarise
 ##########
 # Normal sim (random network)
-rand_data <- read.csv('data_derived/network_break/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
+rand_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
 rand_sum <- rand_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 

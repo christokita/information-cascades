@@ -30,7 +30,7 @@ theme_ctokita <- function() {
 ##########
 # Load data and summarise
 ##########
-assort_data <- read.csv('data_derived/network_break/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
+assort_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
 assort_sum <- assort_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 

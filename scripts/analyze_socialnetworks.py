@@ -38,6 +38,10 @@ n_of_interest = 200
 sn_dir = '../data_sim/network_break/social_network_data/' #social network data
 type_dir = '../data_sim/network_break/type_data/' #type data
 
+# For output
+outpath = '../data_derived/network_break/social_networks/'
+filetags = 'gammasweep' #added info after 'n<number>_assortativity
+
 # List runs
 runs = os.listdir(sn_dir)
 runs = [run for run in runs if re.findall(str(n_of_interest) + '_gamma[-.0-9]+', run)]
@@ -96,6 +100,5 @@ for run in runs:
             
 # Save
 assort_data= pd.DataFrame(data = assort_values, columns = ['gamma', 'assort_final', 'assort_initial'])
-outfile_name = 'n' + str(n_of_interest) + '_gammasweep_assortativity'
-assort_data.to_csv('../data_derived/network_break/social_networks/' + outfile_name + '.csv', index = False)
+assort_data.to_csv(outpath + 'n' + str(n_of_interest) + '_assortativity' + filetags + '.csv', index = False)
 
