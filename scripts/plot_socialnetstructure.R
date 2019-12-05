@@ -30,7 +30,7 @@ theme_ctokita <- function() {
 ##########
 # Load data and summarise
 ##########
-assort_data <- read.csv('output/network_break/data_derived/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
+assort_data <- read.csv('data_derived/network_break/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
 assort_sum <- assort_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 
@@ -61,7 +61,7 @@ gg_assort <- ggplot(data = assort_sum, aes(x = gamma, y = assort_mean)) +
   theme_ctokita() 
 
 gg_assort
-ggsave(plot = gg_assort, filename = "output/network_break/plots/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = "output/network_break/social_networks/SocialNet_assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
 
 # Change in assortativity
 gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mean)) +
@@ -83,4 +83,4 @@ gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mea
   theme_ctokita() 
 
 gg_assortchange
-ggsave(plot = gg_assortchange, filename = "output/network_break/plots/SocialNet_assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assortchange, filename = "output/network_break/networks/SocialNet_assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)

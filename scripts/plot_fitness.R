@@ -31,7 +31,7 @@ theme_ctokita <- function() {
 ##########
 # Load data and summarise
 ##########
-behav_data <- read.csv('output/network_break/data_derived/cascades/n200_fitness_allbehavior_gammasweep.csv', header = TRUE)
+behav_data <- read.csv('data_derived/network_break/data_derived/cascades/n200_fitness_allbehavior_gammasweep.csv', header = TRUE)
 behav_sum <- behav_data %>% 
   select(-replicate) %>% 
   mutate(fitness = correct_message - incorrect_message ) %>% 
@@ -63,7 +63,7 @@ gg_correct <- ggplot(data = behav_sum, aes(x = gamma, y = correct_message_mean))
 gg_correct
 
 ggsave(plot = gg_correct, 
-       filename = "output/network_break/plots/MessageCorrect_gamma.png", 
+       filename = "output/network_break/cascades/MessageCorrect_gamma.png", 
        width = 45, 
        height = 45, 
        units = "mm", 
@@ -84,7 +84,7 @@ gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma, y = incorrect_message_me
 gg_incorrect
 
 ggsave(plot = gg_incorrect, 
-       filename = "output/network_break/plots/MessageInorrect_gamma.png", 
+       filename = "output/network_break/cascades/MessageInorrect_gamma.png", 
        width = 45, 
        height = 45, 
        units = "mm", 

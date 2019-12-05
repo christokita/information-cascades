@@ -91,7 +91,7 @@ for run in runs:
     del(cascade_data, cascade_sum)
         
 # Write to CSV
-all_cascade.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_fitness_cascadesize_gammasweep.csv',
+all_cascade.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_cascadesize_gammasweep.csv',
                    index = False)
     
 
@@ -149,7 +149,7 @@ for run in runs:
 
             
 # Write to CSV
-all_behavior.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_fitness_allbehavior_gammasweep.csv',
+all_behavior.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_allbehavior_gammasweep.csv',
                    index = False)
-summarized_behav.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_fitness_behaviorsum_gammasweep.csv',
+summarized_behav.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_fitness_behaviorsum_gammasweep.csv',
                    index = False)

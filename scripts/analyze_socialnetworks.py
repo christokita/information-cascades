@@ -97,5 +97,5 @@ for run in runs:
 # Save
 assort_data= pd.DataFrame(data = assort_values, columns = ['gamma', 'assort_final', 'assort_initial'])
 outfile_name = 'n' + str(n_of_interest) + '_gammasweep_assortativity'
-assort_data.to_csv('../output/network_break/data_derived/social_networks/' + outfile_name + '.csv', index = False)
+assort_data.to_csv('../data_derived/network_break/social_networks/' + outfile_name + '.csv', index = False)
 

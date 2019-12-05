@@ -36,7 +36,7 @@ thresh_dir = '../data_sim/network_break/thresh_data/' #threshold data
 ####################
 # Read in data
 outfile_name = 'n' + str(n_of_interest) + '_gammasweep_assortativity'
-assort_data = pd.read_csv('../output/network_break/data_derived/social_networks/' + outfile_name + '.csv')
+assort_data = pd.read_csv('../data_derived/network_break/social_networks/' + outfile_name + '.csv')
 
 # Find high assortatiity graph
 high_assort = assort_data[assort_data.Assortativity > 0.26] #grab high assort values
@@ -69,5 +69,5 @@ high_assort_nodes = pd.DataFrame({"Id": np.arange(0, n_of_interest),
                                   "Type": high_assort_types[:,0],
                                   "Threshold": high_assort_thresh[:,0]})
 filename = "examplenet_highassort"
-high_assort_graph.to_csv('../output/network_break/data_derived/social_networks/' + filename + ".csv")
-high_assort_nodes.to_csv('../output/network_break/data_derived/social_networks/' + filename + "_nodes.csv", index = False)
+high_assort_graph.to_csv('../data_derived/network_break/social_networks/' + filename + ".csv")
+high_assort_nodes.to_csv('../data_derived/network_break/social_networks/' + filename + "_nodes.csv", index = False)

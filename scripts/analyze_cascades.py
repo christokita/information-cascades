@@ -104,7 +104,7 @@ for run in runs:
         all_cascade = all_cascade.append(cascade_data)
     
 # Save to csv
-all_cascade.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_gammasweep.csv',
+all_cascade.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_gammasweep.csv',
                    index = False)
 
 
@@ -112,7 +112,7 @@ all_cascade.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_
 # Rolling average of cascade dynamics
 ####################
 # Load in data summary data from above
-all_cascade = pd.read_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_gammasweep.csv')
+all_cascade = pd.read_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_gammasweep.csv')
 
 # Rolling average function
 def weight_rolling_average(data, window, weight, metric_name):
@@ -173,5 +173,5 @@ for gamma in gammas:
         cascade_rollingavg = cascade_rollingavg.append(gamma_avg)
     
 # Save rolling average to csv
-cascade_rollingavg.to_csv('../output/network_break/data_derived/cascades/n' + str(n_of_interest) + '_rollingavg.csv',
+cascade_rollingavg.to_csv('../data_derived/network_break/cascades/n' + str(n_of_interest) + '_rollingavg.csv',
                    index = False)

@@ -31,7 +31,7 @@ theme_ctokita <- function() {
 # Load data and summarise
 ##########
 # Normal sim (random network)
-rand_data <- read.csv('output/network_break/data_derived/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
+rand_data <- read.csv('data_derived/network_break/data_derived/social_networks/n200_gammasweep_assortativity.csv', header = TRUE)
 rand_sum <- rand_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 
@@ -44,7 +44,7 @@ rand_sum <- rand_data %>%
   mutate(network_type = "Random (default)")
 
 # Scale-free network
-sf_data <- read.csv('output/network_break/data_derived/social_networks/n200_scalefree_assortativity.csv', header = TRUE)
+sf_data <- read.csv('data_derived/network_break/data_derived/social_networks/n200_scalefree_assortativity.csv', header = TRUE)
 sf_sum <- sf_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 
@@ -57,7 +57,7 @@ sf_sum <- sf_data %>%
   mutate(network_type = "Scale-free")
 
 # Regular network
-reg_data <- read.csv('output/network_break/data_derived/social_networks/n200_regular_assortativity.csv', header = TRUE)
+reg_data <- read.csv('data_derived/network_break/data_derived/social_networks/n200_regular_assortativity.csv', header = TRUE)
 reg_sum <- reg_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   group_by(gamma) %>% 
@@ -100,4 +100,4 @@ gg_assort_networktype <- ggplot(data = assort_sum,
   theme(aspect.ratio = 1)
 
 gg_assort_networktype
-ggsave(plot = gg_assort_networktype, filename = "output/network_break/plots/suppl_plots/Assortativity_by_networktype.png", height = 45, width = 90, units = "mm", dpi = 400)
+ggsave(plot = gg_assort_networktype, filename = "output/network_break/suppl_analysis/Assortativity_by_networktype.png", height = 45, width = 90, units = "mm", dpi = 400)
