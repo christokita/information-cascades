@@ -8,6 +8,7 @@ Most of this project is written in Python. Python scripts are used to construct 
 
 ## Necessary packages for this model
 **Python**: numpy, pandas, dplython, igraph, scipy, re, copy, os
+
 **R**: dplyr, ggplot2
 
 ## Components of this repository
