@@ -9,9 +9,8 @@ Most of this project is written in Python. Python scripts are used to construct 
 ## Necessary packages for this model
 All packages for this model can be installed by running script [*forthecoming feature*]. The packages that will be necessary to simulate this model and generate model outputs are:
 
-**Python**: numpy, pandas, dplython, igraph, scipy, re, copy, os
-
-**R**: dplyr, ggplot2
+* **Python**: numpy, pandas, dplython, igraph, scipy, re, copy, os
+* **R**: dplyr, ggplot2
 
 ## Components of this repository
 forthecoming
