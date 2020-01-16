@@ -13,9 +13,9 @@ library(dplyr)
 ####################
 # Paramters for analysis
 ####################
-data_path <- "data_derived/thresh_adjust/cascades/n200_fitness_allbehavior_gammasweep.csv" #path to data
-out_path <- "output/thresh_adjust/cascades/" #directory you wish to save plots
-plot_tag <- "equal" #extra info to add onto end of plot name
+data_path <- "data_derived/thresh_adjust/fitness/n200_fitness_allbehavior_largerphi.csv" #path to data
+out_path <- "output/thresh_adjust/fitness/" #directory you wish to save plots
+plot_tag <- "largerphi" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }

@@ -28,11 +28,11 @@ n_of_interest = 200
 # Directory where simulation data is found
 fit_dir = '../data_sim/thresh_adjust/fitness_data/' 
 thresh_dir = '../data_sim/thresh_adjust/thresh_data/'
-tags = 'equal' #file tags that designate runs from a particular simulation
+tags = 'largerphi' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/thresh_adjust/fitness/'
-filetags = 'equal' #added info after 'n<number>_fitness_<filetag>_
+filetags = 'largerphi' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
@@ -95,5 +95,5 @@ for run in runs:
 # Write to CSV
 all_behavior.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_allbehavior_' + filetags + '.csv',
                    index = False)
-summarized_behav.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_behaviorsum_scalefree' + filetags + '.csv',
+summarized_behav.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_behaviorsum_' + filetags + '.csv',
                    index = False)
