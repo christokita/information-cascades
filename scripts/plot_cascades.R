@@ -17,9 +17,9 @@ library(ggpubr)
 ####################
 # Paramters for analysis
 ####################
-data_path <- 'data_derived/thresh_adjust/cascades/n200_fitness_cascadesize_gammasweep.csv' #path to data
-out_path <- "output/thresh_adjust/cascades/" #directory you wish to save plots
-plot_tag <- "equal" #extra info to add onto end of plot name
+data_path <- 'data_derived/network_break/cascades/n200_cascadestats_gammasweep.csv' #path to data
+out_path <- "output/network_break/cascades/" #directory you wish to save plots
+plot_tag <- "gamma" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }

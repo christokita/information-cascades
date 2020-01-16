@@ -28,11 +28,11 @@ n_of_interest = 200
 # Directory where simulation data is found
 fit_dir = '../data_sim/thresh_adjust/fitness_data/' 
 thresh_dir = '../data_sim/thresh_adjust/thresh_data/'
-tags = 'equal' #file tags that designate runs from a particular simulation
+tags = 'largerphi' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/thresh_adjust/cascades/'
-filetags = 'gammasweep' #added info after 'n<number>_fitness_<filetag>_
+filetags = 'largerphi' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
@@ -95,6 +95,6 @@ for run in runs:
     del(cascade_data, cascade_sum)
         
 # Write to CSV
-all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_cascadesize_' + filetags + '.csv',
+all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadestats_' + filetags + '.csv',
                    index = False)
     
