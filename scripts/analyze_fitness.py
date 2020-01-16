@@ -29,6 +29,7 @@ n_of_interest = 200
 # Directory where simulation data is found
 fit_dir = '../data_sim/thresh_adjust/fitness_data/' 
 thresh_dir = '../data_sim/thresh_adjust/thresh_data/'
+tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/thresh_adjust/cascades/'
@@ -36,7 +37,7 @@ filetags = 'gammasweep' #added info after 'n<number>_fitness_<datatype>_
 
 # List runs
 runs = os.listdir(fit_dir)
-runs = [run for run in runs if re.findall(str(n_of_interest) + '_gamma[-.0-9]+', run)]
+runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.0-9]+', run)]
 
 
 ####################

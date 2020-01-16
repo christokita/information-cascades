@@ -47,6 +47,7 @@ model.sim_adjusting_thresholds(replicate = rep,
                                     phi = phi,
                                     omega = omega,
                                     timesteps = timesteps,
-                                    outpath = outpath)
+                                    outpath = outpath,
+                                    sim_tag = "equal")
 
 

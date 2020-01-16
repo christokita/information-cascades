@@ -29,7 +29,7 @@ np.seterr(divide='ignore', invalid='ignore')
 # Define simulation function
 ####################
 
-def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps, outpath, network_type = "random") :
+def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps, outpath, sim_tag, network_type = "random") :
     # Simulates a single replicate simulation of the network-breaking information cascade model. 
     #
     # INPUTS:
@@ -42,6 +42,7 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
     # - omega:          amount threhsold changes if individual is incorrect in behavior (float).
     # - timesteps:      length of simulation (int).
     # - outpath:        path to directory where output folders and files will be created (str). 
+    # - sim_tag:        added infomation to add to file names when saving model output (str).
     # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
         
     ########## Seed initial conditions ##########
@@ -107,7 +108,7 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
     
     ########## Save files ##########
     # Create output folder
-    output_name = "n" + str(n) + "_gamma" + str(gamma)
+    output_name = "n" + str(n) + "_" + sim_tag + str(gamma)
     data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data', 'fitness_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
@@ -143,11 +144,19 @@ def adjust_thresh(thresholds, states, correct_behavior, phi, omega):
     
     actives = np.where(states == 1)[0]
     if sum(actives) > 0: #error catch when no individual are active
+        
+        # Select avtive individual and adjust threshold accordingly
         adjuster_active = np.random.choice(actives, size = 1)
         adjuster_correct = correct_behavior[adjuster_active]
         if adjuster_correct:
             thresholds[adjuster_active] += phi 
         elif not adjuster_correct:
             thresholds[adjuster_active] -= omega 
+            
+        # Enforce  threshold boundary [0, 1]
+        if thresholds[adjuster_active] > 1:
+            thresholds[adjuster_active] = 1
+        elif thresholds[adjuster_active] < 0:
+            thresholds[adjuster_active] = 0
+            
     return thresholds
-
