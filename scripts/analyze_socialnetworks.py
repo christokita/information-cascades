@@ -17,16 +17,7 @@ import pandas as pd
 import os
 import re
 import igraph
-import copy
 
-'''
-####################
-# Load individual data
-####################
-list_networks = np.load('../output/network_adjust/data/social_network_data/n200_gamma-0.5.npy')
-list_networks_initial = np.load('../output/network_adjust/data/social_network_data/n200_gamma-0.5_initial.npy')
-list_types = np.load('../output/network_adjust/data/type_data/n200_gamma-0.5.npy')
-'''
 
 ####################
 # List files to be read
@@ -37,14 +28,18 @@ n_of_interest = 200
 # Directory where simulation data is found
 sn_dir = '../data_sim/network_break/social_network_data/' #social network data
 type_dir = '../data_sim/network_break/type_data/' #type data
+tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/social_networks/'
 filetags = 'gammasweep' #added info after 'n<number>_assortativity
+if len(filetags) > 0:
+    filetags = '_' + filetags
 
 # List runs
 runs = os.listdir(sn_dir)
-runs = [run for run in runs if re.findall(str(n_of_interest) + '_gamma[-.0-9]+', run)]
+runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.0-9]+', run)]
+runs.sort()
 
 
 ####################
@@ -99,6 +94,76 @@ for run in runs:
         assort_values = np.vstack([assort_values, to_return])
             
 # Save
-assort_data= pd.DataFrame(data = assort_values, columns = ['gamma', 'assort_final', 'assort_initial'])
+assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'assort_final', 'assort_initial'])
 assort_data.to_csv(outpath + 'n' + str(n_of_interest) + '_assortativity' + filetags + '.csv', index = False)
 
+
+####################
+# Measure network structural change (breaks from start to finish)
+####################
+
+# Loop through runs
+for run in runs:
+    
+    # Load statement
+    print("Starting on \'" + run + "\'...")
+    
+    # Get gamma value
+    gamma = float(re.search('.*_gamma([-\.0-9]+)', run).group(1))
+    
+     # List social network files in that run's data folder
+    sn_files = os.listdir(sn_dir + run +'/')
+    sn_final = [file for file in sn_files if re.findall('sn_rep[0-9]+.npy', file)] 
+    sn_initial = [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] 
+    sn_final.sort()
+    sn_initial.sort()
+    
+    # List type data files in that run's data folder
+    type_files = os.listdir(type_dir + run +'/')
+    type_files.sort()
+    
+    # Dataframe to hold data
+    network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
+                                                  'same_type_adds', 'same_type_breaks', 
+                                                  'diff_type_adds', 'diff_type_breaks'])
+
+    
+    # Warning and error catch
+    if len(sn_final) != len(type_files):
+        print("The number of replicates do not match in the social network and type data directories.")
+        break
+    
+     # Loop through individual replicates and calculate changes in network
+    for replicate in np.arange(len(sn_final)):
+        
+        # Load network and threshold matrices
+        adjacency = np.load(sn_dir + run + '/' + sn_final[replicate])
+        adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[replicate])
+        type_mat = np.load(type_dir +  run + '/' + type_files[replicate])
+        
+        # Determine changes in network connections
+        adjacency_diff = adjacency_initial - adjacency
+        
+        # Determine frequency of new social ties and social tie breaks by individual type
+        individual_type = type_mat[:, 1] #second column is equivalent to saying type 0 or type 1
+        for i in np.arange(len(individual_type)):
+            # Classify neighbors by type (in relation to selected individual's type)
+            same_type_individuals = np.where(individual_type == individual_type[i])[0]
+            diff_type_individuals = np.where(individual_type != individual_type[i])[0]
+            # Classify new ties and breaks by the type of individual
+            all_adds, all_breaks = np.where(adjacency_diff[i, :] == 1)[0], np.where(adjacency_diff[i, :] == -1)[0]
+            same_type_adds = [x for x in all_adds if x in same_type_individuals]
+            same_type_breaks = [x for x in all_breaks if x in same_type_individuals]
+            diff_type_adds = [x for x in all_adds if x in diff_type_individuals]
+            diff_type_breaks = [x for x in all_breaks if x in diff_type_individuals]
+            # Count
+            same_type_adds, same_type_breaks = len(same_type_adds), len(same_type_breaks)
+            diff_type_adds, diff_type_breaks = len(diff_type_adds), len(diff_type_breaks)
+            # Summarize
+            data_row = pd.DataFrame(data = [[gamma, replicate, i, same_type_adds, same_type_breaks, diff_type_adds, diff_type_breaks]],
+                                    columns = network_change_data.columns)
+            network_change_data = network_change_data.append(data_row, ignore_index = True)
+            
+    # Save
+    network_change_data.to_csv(outpath + 'network_change/' + 'n' + str(n_of_interest) + '_networkchange' + '_gamma' + str(gamma) + '.csv', index = False)
+    del(network_change_data)
