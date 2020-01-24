@@ -149,9 +149,9 @@ def adjust_thresh(thresholds, states, correct_behavior, phi, omega):
         adjuster_active = np.random.choice(actives, size = 1)
         adjuster_correct = correct_behavior[adjuster_active]
         if adjuster_correct:
-            thresholds[adjuster_active] += phi 
+            thresholds[adjuster_active] -= phi #decrease threshold if correct (positive reinforcement)
         elif not adjuster_correct:
-            thresholds[adjuster_active] -= omega 
+            thresholds[adjuster_active] += omega#decrease threshold if incorrect (negative reinforcement)
             
         # Enforce  threshold boundary [0, 1]
         if thresholds[adjuster_active] > 1:
