@@ -9,6 +9,7 @@
 ##########
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 ####################
 # My preferred theme
@@ -83,4 +84,100 @@ gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mea
   theme_ctokita() 
 
 gg_assortchange
-ggsave(plot = gg_assortchange, filename = "output/network_break/networks/SocialNet_assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assortchange, 
+       filename = "output/network_break/social_networks/assortchange_gamma.png", 
+       width = 45, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+
+############## Changes in network structure ##############
+
+##########
+# Load data and summarise
+##########
+network_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
+network_change_data <- lapply(network_files, function(x) {
+  # Read in file 
+  run_file <- read.csv(x)
+  #Summarize
+  run_data <- run_file %>% 
+    mutate(net_same = same_type_adds - same_type_breaks,
+           net_diff = diff_type_adds - diff_type_breaks,
+           net_degree = out_degree - out_degree_initial) %>% 
+    select(-replicate, -individual) %>% 
+    gather(metric, value, -gamma) %>% 
+    group_by(gamma, metric) %>% 
+    summarise(mean = mean(value), 
+             sd = sd(value),
+             error = sd(value)/sqrt(length(value)))
+  return(run_data)
+})
+network_change_data <- do.call("rbind", network_change_data)
+
+
+##########
+# Plot
+##########
+# Change in connections by type
+net_type_data <- network_change_data %>% 
+  filter(metric %in% c("net_same", "net_diff"))
+gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean)) +
+  geom_hline(yintercept = 0, 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
+                size = 0.3,
+                width = 0) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 0.8) +
+  ylab(expression( paste(Delta, " social ties")) ) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_shape_manual(values = c(21, 19),
+                     labels = c("Diff. ideology",
+                                "Same ideology"),
+                     name = "Connetion type") +
+  scale_fill_manual(values = c("white", "black"),
+                    labels = c("Diff. ideology",
+                               "Same ideology"),
+                    name = "Connetion type") +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_type_change
+
+ggsave(plot = gg_type_change, 
+       filename = "output/network_break/social_networks/tiechange_gamma.png", 
+       width = 75, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+
+# Change in degree
+net_degree_data <- network_change_data %>% 
+  filter(metric == "net_degree")
+gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
+  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
+                size = 0.3,
+                width = 0) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 0.8) +
+  ylab(expression( paste(Delta, " degree"))) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_y_continuous(limits = c(0, 1.5), 
+                     expand = c(0, 0)) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1,
+        legend.position = "none")
+
+gg_degree_change
+
+ggsave(plot = gg_degree_change, 
+       filename = "output/network_break/social_networks/degreechange_gamma.png", 
+       width = 45, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
