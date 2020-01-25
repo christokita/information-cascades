@@ -123,7 +123,9 @@ for run in runs:
     type_files.sort()
     
     # Dataframe to hold data
-    network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
+    network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual',
+                                                  'out_degree', 'out_degree_initial',
+                                                  'in_degree', 'in_degree_initial',
                                                   'same_type_adds', 'same_type_breaks', 
                                                   'diff_type_adds', 'diff_type_breaks'])
 
@@ -142,7 +144,11 @@ for run in runs:
         type_mat = np.load(type_dir +  run + '/' + type_files[replicate])
         
         # Determine changes in network connections
-        adjacency_diff = adjacency_initial - adjacency
+        out_degree_initial = np.sum(adjacency_initial, axis = 1)
+        in_degree_initial = np.sum(adjacency_initial, axis = 0)
+        out_degree = np.sum(adjacency, axis = 1)
+        in_degree = np.sum(adjacency, axis = 0)
+        adjacency_diff = adjacency - adjacency_initial
         
         # Determine frequency of new social ties and social tie breaks by individual type
         individual_type = type_mat[:, 1] #second column is equivalent to saying type 0 or type 1
@@ -160,7 +166,11 @@ for run in runs:
             same_type_adds, same_type_breaks = len(same_type_adds), len(same_type_breaks)
             diff_type_adds, diff_type_breaks = len(diff_type_adds), len(diff_type_breaks)
             # Summarize
-            data_row = pd.DataFrame(data = [[gamma, replicate, i, same_type_adds, same_type_breaks, diff_type_adds, diff_type_breaks]],
+            data_row = pd.DataFrame(data = [[gamma, replicate, i, 
+                                             out_degree[i], out_degree_initial[i],
+                                             in_degree[i], in_degree_initial[i],
+                                             same_type_adds, same_type_breaks, 
+                                             diff_type_adds, diff_type_breaks]],
                                     columns = network_change_data.columns)
             network_change_data = network_change_data.append(data_row, ignore_index = True)
             
