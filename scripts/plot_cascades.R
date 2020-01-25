@@ -17,9 +17,9 @@ library(ggpubr)
 ####################
 # Paramters for analysis
 ####################
-data_path <- 'data_derived/thresh_adjust/cascades/n200_cascadestats_equal.csv' #path to data
+data_path <- 'data_derived/thresh_adjust/cascades/n200_cascadestats_muchlargerphi.csv' #path to data
 out_path <- "output/thresh_adjust/cascades/" #directory you wish to save plots
-plot_tag <- "equal" #extra info to add onto end of plot name
+plot_tag <- "muchlargerphi" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
@@ -70,8 +70,8 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean)) +
   geom_point(size = 0.8) +
   # General plotting controls
   # scale_y_continuous(limits = c(0.0, 28), breaks = seq(16, 28, 2)) +
-  ylab(expression( paste("Cascade size, ", italic(X[t]) ))) +
-  xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
+  ylab(expression( paste("Cascade size ", italic(X) ))) +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
 
 gg_size 
@@ -100,7 +100,7 @@ gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean)) +
   # General plotting controls
   # scale_y_continuous(limits = c(0, 0.16)) +
   ylab(expression( paste("Cascade bias" ))) +
-  xlab(expression(paste("Information correlation, ", italic(gamma) ))) +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
 
 gg_diff

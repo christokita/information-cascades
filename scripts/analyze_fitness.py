@@ -28,11 +28,11 @@ n_of_interest = 200
 # Directory where simulation data is found
 fit_dir = '../data_sim/thresh_adjust/fitness_data/' 
 thresh_dir = '../data_sim/thresh_adjust/thresh_data/'
-tags = 'largeromega' #file tags that designate runs from a particular simulation
+tags = 'muchlargerphi' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/thresh_adjust/fitness/'
-filetags = 'largeromega' #added info after 'n<number>_fitness_<filetag>_
+filetags = 'muchlargerphi' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)

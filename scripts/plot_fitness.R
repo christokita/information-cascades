@@ -13,9 +13,9 @@ library(dplyr)
 ####################
 # Paramters for analysis
 ####################
-data_path <- "data_derived/thresh_adjust/fitness/n200_fitness_allbehavior_largeromega.csv" #path to data
+data_path <- "data_derived/thresh_adjust/fitness/n200_fitness_allbehavior_muchlargerphi.csv" #path to data
 out_path <- "output/thresh_adjust/fitness/" #directory you wish to save plots
-plot_tag <- "largeromega" #extra info to add onto end of plot name
+plot_tag <- "muchlargerphi" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
