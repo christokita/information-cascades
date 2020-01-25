@@ -1,0 +1,232 @@
+##############################
+#
+# PLOT: Compare threshold-adjusting model outputs for fitness anc cascades
+#
+##############################
+
+##########
+# Load packages
+##########
+library(ggplot2)
+library(dplyr)
+
+##########
+# Plot parameters
+##########
+# Plot out
+out_path <- "output/thresh_adjust/"
+
+# Plot variables
+dodge_width = 0.05
+pal <- c("#e66101", "#bababa", "#5e3c99")
+labs <- c(expression(paste(phi, " >> ", omega)), 
+          expression(paste(phi, "  =  ", omega)), 
+          expression(paste(phi, " << ", omega)))
+key_name <- "Threshold\ndynamics"
+
+####################
+# Load and process data
+####################
+# Cascade data
+cascade_files <- list.files("data_derived/thresh_adjust/cascades/", full.names = TRUE)
+cascade_data <- lapply(cascade_files, function(file) {
+  run_data <-  read.csv(file, header = TRUE)
+  parameters <- gsub(".*_([a-z]+)\\.csv", "\\1", file, perl = TRUE)
+  run_sum <- run_data %>% 
+    select(gamma, total_active) %>% 
+    group_by(gamma) %>% 
+    summarise_each(list(size_mean = mean, 
+                        size_sd = sd, 
+                        rep_count = length)) %>% 
+    mutate(size_95ci = qnorm(0.975) * size_sd / sqrt(rep_count),
+           run = parameters)
+  cascade_diff <- run_data %>% 
+    select(gamma, active_diff_prop) %>% 
+    group_by(gamma) %>% 
+    summarise_each(list(bias_mean = mean, 
+                        bias_sd = sd, 
+                        rep_count = length)) %>% 
+    mutate(bias_95ci = qnorm(0.975) * bias_sd / sqrt(rep_count))
+  run_sum <- merge(run_sum, cascade_diff)
+  return(run_sum)
+})
+cascade_data <- do.call('rbind', cascade_data)
+cascade_data$run <- factor(cascade_data$run, levels = c("muchlargerphi", "equal", "muchlargeromega"))
+
+# Fitness data
+fitness_files <- list.files("data_derived/thresh_adjust/fitness/", pattern = ".*allbehavior.*",  full.names = TRUE)
+fitness_data <- lapply(fitness_files, function(file) {
+  run_data <-  read.csv(file, header = TRUE)
+  parameters <- gsub(".*_([a-z]+)\\.csv", "\\1", file, perl = TRUE)
+  run_sum <- run_data %>% 
+    select(-replicate) %>% 
+    mutate(fitness = correct_message - incorrect_message ) %>% 
+    # mutate(fitness = ifelse(fitness == Inf, 10, fitness)) %>% #need to figure out how to deal with Inf values
+    group_by(gamma) %>% 
+    summarise_each(funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE))) %>% 
+    mutate(correct_message_95ci = qnorm(0.975) * correct_message_sd/sqrt(100 * 200),
+           incorrect_message_95ci = qnorm(0.975) * incorrect_message_sd/sqrt(100 * 200),
+           fitness_95ci = qnorm(0.975) * fitness_sd/sqrt(100 * 200),
+           run = parameters)
+  
+  gamma_zero_fitness <- run_sum$fitness_mean[run_sum$gamma == 0]
+  run_sum <- run_sum %>%
+    mutate(fitness_mean_norm = (fitness_mean - gamma_zero_fitness) / gamma_zero_fitness)
+  return(run_sum)
+})
+fitness_data <- do.call('rbind', fitness_data)
+fitness_data$run <- factor(fitness_data$run, levels = c("muchlargerphi", "equal", "muchlargeromega"))
+
+####################
+# My preferred theme
+####################
+theme_ctokita <- function() {
+  theme_classic() +
+    theme(axis.text       = element_text(size = 6, color = "black"),
+          axis.title      = element_text(size = 7, color = "black"),
+          axis.ticks = element_line(size = 0.3, color = "black"),
+          axis.line = element_line(size = 0.3),
+          legend.title    = element_text(size = 7, face = "bold", vjust = -1),
+          legend.text     = element_text(size = 6, color = "black"),
+          strip.text      = element_text(size = 7, color = "black"),
+          legend.key.size = unit(3, "mm"))
+}
+
+
+########## Cascades #########
+
+##########
+# Plot: Cascade size
+##########
+gg_size <- ggplot(cascade_data, aes(x = gamma, y = size_mean, color = run)) +
+  geom_errorbar(aes(ymin = size_mean - size_95ci, 
+                    ymax = size_mean + size_95ci), 
+                size = 0.2, 
+                width = 0,
+                position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab(expression( paste("Cascade size ", italic(X) ))) +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_size
+
+ggsave(plot = gg_size,
+       filename = paste0(out_path, "cascades/Comparison_CascadeSize.png"),
+       width = 70,
+       height = 45,
+       units = "mm",
+       dpi = 400)
+
+##########
+# Plot: Cascade bias
+##########
+gg_bias <- ggplot(cascade_data, aes(x = gamma, y = bias_mean, color = run)) +
+  geom_errorbar(aes(ymin = bias_mean - bias_95ci, 
+                    ymax = bias_mean + bias_95ci), 
+                size = 0.2, 
+                width = 0,
+                position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab(expression( "Cascade bias" )) +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_bias
+
+ggsave(plot = gg_bias,
+       filename = paste0(out_path, "cascades/Comparison_CascadeBias.png"),
+       width = 70,
+       height = 45,
+       units = "mm",
+       dpi = 400)
+
+
+########## Fitness #########
+
+##########
+# Plot: Proportion of messages received that an individual would want (i.e., greater than threshold)
+##########
+gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mean, color = run)) +
+  geom_errorbar(aes(ymin = correct_message_mean - correct_message_95ci,
+                    ymax = correct_message_mean + correct_message_95ci),
+                size = 0.2,
+                width = 0,
+                position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab("Freq. correct message received") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_correct
+
+ggsave(plot = gg_correct,
+       filename = paste0(out_path, "fitness/Comparison_MessageCorrect.png"),
+       width = 70,
+       height = 45,
+       units = "mm",
+       dpi = 400)
+
+##########
+# Plot: Proportion of incorrect messages received
+##########
+gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message_mean, color = run)) +
+  geom_errorbar(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
+                    ymax = incorrect_message_mean + incorrect_message_95ci),
+                size = 0.2,
+                width = 0,
+                position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab("Freq. incorrect message received") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_incorrect
+
+ggsave(plot = gg_incorrect,
+       filename = paste0(out_path, "fitness/Comparison_MessageIncorrect.png"),
+       width = 70,
+       height = 45,
+       units = "mm",
+       dpi = 400)
+
+##########
+# Plot: Individual fitness (i.e., difference in correct/incorrect messages received)
+##########
+gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = fitness_mean, color = run)) +
+  geom_errorbar(aes(ymin = fitness_mean - fitness_95ci,
+                    ymax = fitness_mean + fitness_95ci),
+                size = 0.2,
+                width = 0,
+                position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab("Individual fitness (True Correct - False Positive)") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  theme_ctokita() 
+
+gg_fitness
+
