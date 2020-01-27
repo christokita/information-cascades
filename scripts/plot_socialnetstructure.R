@@ -57,8 +57,8 @@ gg_assort <- ggplot(data = assort_sum, aes(x = gamma, y = assort_mean)) +
             size = 0.3) +
   geom_point(color = "#000000", 
              size = 0.8) +
-  ylab(expression( paste("Assortativity, ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_assort
@@ -79,8 +79,8 @@ gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mea
             size = 0.3) +
   geom_point(color = "#000000", 
              size = 0.8) +
-  ylab(expression( paste("Change in assortativity, ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_assortchange
