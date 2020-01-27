@@ -13,9 +13,9 @@ library(dplyr)
 ####################
 # Paramters for analysis
 ####################
-data_path <- "data_derived/thresh_adjust/fitness/n200_fitness_allbehavior_muchlargerphi.csv" #path to data
-out_path <- "output/thresh_adjust/fitness/" #directory you wish to save plots
-plot_tag <- "muchlargerphi" #extra info to add onto end of plot name
+data_path <- "data_derived/network_break/fitness/n200_fitness_allbehavior_gammasweep.csv" #path to data
+out_path <- "output/network_break/fitness/" #directory you wish to save plots
+plot_tag <- "gamma" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
@@ -67,7 +67,7 @@ gg_correct <- ggplot(data = behav_sum, aes(x = gamma, y = correct_message_mean))
                 width = 0) +
   geom_point(size = 0.8) +
   ylab("Freq. correct message received") +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_correct
@@ -88,7 +88,7 @@ gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma, y = incorrect_message_me
                 width = 0) +
   geom_point(size = 0.8) +
   ylab("Freq. incorrect message received") +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_incorrect
@@ -107,7 +107,9 @@ gg_fitness <- ggplot(data = behav_sum, aes(x = gamma, y = fitness_mean)) +
   #               size = 0.2,
   #               width = 0) +
   geom_point(size = 0.8) +
-  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = 0,
+             size = 0.3,
+             linetype = "dotted") +
   ylab("Individual fitness") +
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   theme_ctokita() 
