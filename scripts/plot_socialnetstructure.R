@@ -105,7 +105,8 @@ network_change_data <- lapply(network_files, function(x) {
   run_data <- run_file %>% 
     mutate(net_same = same_type_adds - same_type_breaks,
            net_diff = diff_type_adds - diff_type_breaks,
-           net_degree = out_degree - out_degree_initial) %>% 
+           net_out_degree = out_degree - out_degree_initial,
+           net_in_degree = in_degree - in_degree_initial) %>% 
     select(-replicate, -individual) %>% 
     gather(metric, value, -gamma) %>% 
     group_by(gamma, metric) %>% 
@@ -157,14 +158,14 @@ ggsave(plot = gg_type_change,
 
 # Change in degree
 net_degree_data <- network_change_data %>% 
-  filter(metric == "net_degree")
+  filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
                 size = 0.3,
                 width = 0) +
   geom_point(aes(shape = metric, fill = metric),
              size = 0.8) +
-  ylab(expression( paste(Delta, " degree"))) +
+  ylab(expression( paste(Delta, " out-degree"))) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_y_continuous(limits = c(0, 1.5), 
                      expand = c(0, 0)) +
@@ -175,7 +176,7 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
 gg_degree_change
 
 ggsave(plot = gg_degree_change, 
-       filename = "output/network_break/social_networks/degreechange_gamma.png", 
+       filename = "output/network_break/social_networks/outdegreechange_gamma.png", 
        width = 45, 
        height = 45, 
        units = "mm", 
