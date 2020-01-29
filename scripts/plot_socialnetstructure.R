@@ -69,6 +69,13 @@ ggsave(plot = gg_assort,
        units = "mm", 
        dpi = 400)
 
+ggsave(plot = gg_assort, 
+       filename = "output/network_break/social_networks/assortativity_gamma.svg", 
+       width = 45, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
 # Change in assortativity
 gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mean)) +
   geom_hline(aes(yintercept = 0), 
