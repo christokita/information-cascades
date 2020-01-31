@@ -63,13 +63,13 @@ cascade_size <- cascade_data %>%
 # Plot
 gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean)) +
   # Plot all data
-  geom_errorbar(aes(ymin = size_mean - size_95ci, 
+  geom_ribbon(aes(ymin = size_mean - size_95ci, 
                     ymax = size_mean + size_95ci), 
-                size = 0.2, 
-                width = 0) +
+                alpha = 0.4,
+              fill = "#525252") +
+  geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   # General plotting controls
-  # scale_y_continuous(limits = c(0.0, 28), breaks = seq(16, 28, 2)) +
   ylab("Cascade size") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
@@ -93,9 +93,11 @@ cascade_diff <- cascade_data %>%
 # Summarizing plot
 gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean)) +
   # Plot all data
-  geom_errorbar(aes(ymin = bias_mean - bias_95ci, ymax = bias_mean + bias_95ci),
-                size = 0.2,
-                width = 0) +
+  geom_ribbon(aes(ymin = bias_mean - bias_95ci, 
+                    ymax = bias_mean + bias_95ci),
+                alpha = 0.4,
+                fill = "#525252") +
+  geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   # General plotting controls
   # scale_y_continuous(limits = c(0, 0.16)) +
