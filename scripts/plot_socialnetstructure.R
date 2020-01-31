@@ -51,12 +51,9 @@ gg_assort <- ggplot(data = assort_sum, aes(x = gamma, y = assort_mean)) +
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
-              alpha = 0.4,  
-              fill = "#525252") +
-  geom_line(color = "#000000", 
-            size = 0.3) +
-  geom_point(color = "#000000", 
-             size = 0.8) +
+              alpha = 0.4) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
@@ -85,10 +82,8 @@ gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mea
   #               size = 0.3,
   #               width = 0) +
   geom_ribbon(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error), 
-              alpha = 0.4,  
-              fill = "#525252") +
-  geom_line(color = "#000000", 
-            size = 0.3) +
+              alpha = 0.4) +
+  geom_line(size = 0.3) +
   geom_point(color = "#000000", 
              size = 0.8) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
@@ -142,8 +137,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.4,  
-              fill = "#525252") +
+              alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1) +
@@ -177,8 +171,7 @@ ties_data <- network_change_data %>%
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   geom_line(size = 0.3) +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error),
-              alpha = 0.4,  
-              fill = "#525252") +
+              alpha = 0.4) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1) +
   ylab("Count") +
@@ -214,8 +207,7 @@ net_degree_data <- network_change_data %>%
   filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.4,  
-              fill = "#525252") +
+              alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(aes(fill = metric),
              size = 0.8) +

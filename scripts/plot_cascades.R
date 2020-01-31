@@ -65,8 +65,7 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean)) +
   # Plot all data
   geom_ribbon(aes(ymin = size_mean - size_95ci, 
                     ymax = size_mean + size_95ci), 
-                alpha = 0.4,
-              fill = "#525252") +
+                alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   # General plotting controls
@@ -95,8 +94,7 @@ gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean)) +
   # Plot all data
   geom_ribbon(aes(ymin = bias_mean - bias_95ci, 
                     ymax = bias_mean + bias_95ci),
-                alpha = 0.4,
-                fill = "#525252") +
+                alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   # General plotting controls
