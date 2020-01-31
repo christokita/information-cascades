@@ -166,11 +166,11 @@ def make_tie(network, connect_prob):
     
     n = network.shape[0] # Get number of individuals in system
     former_individual = np.random.choice(range(0, n), size = 1)
-    form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob))
-    if form_connection == True:
-        former_neighbors = np.squeeze(network[former_individual,:])
-        potential_ties = np.where(former_neighbors == 0)[0]
-        potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
+    form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob)) #determine if individual will form new tie
+    former_neighbors = np.squeeze(network[former_individual,:]) #get individual's neighbors
+    potential_ties = np.where(former_neighbors == 0)[0]
+    potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
+    if form_connection == True and len(potential_ties) > 0: #form connection only if selected to form connection and isn't already connected to everyone
         new_tie = np.random.choice(potential_ties, size = 1, replace = False)
         network[former_individual, new_tie] = 1
     return network
