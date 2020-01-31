@@ -30,7 +30,7 @@ theme_ctokita <- function() {
 ##########
 # Load data and summarise
 ##########
-# Normal sim (10^5 steps)
+# Normal sim (uniform threshold distribution)
 norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
 norm_data <- norm_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
@@ -43,7 +43,7 @@ norm_data <- norm_data %>%
             assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
   mutate(threshold_dist = "Uniform dist.")
 
-# Long sim (10^6)
+# Identical thresholds
 iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical-thresholds/n200_assortativity_identicalthresholds.csv', header = TRUE)
 iden_data <- iden_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
@@ -171,16 +171,20 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, color = thresho
                                 "Diff. ideology"),
                      name = "Connetion type") +
   scale_fill_manual(values = c("black", "white"),
-                    labels = c("Same ideology",
-                               "Diff. ideology"),
-                    name = "Connetion type") +
+                     labels = c("Same ideology",
+                                "Diff. ideology"),
+                     name = "Connetion type") +
+  scale_color_manual(values = pal,
+                    labels = c("Uniform dist.",
+                               "Identical"),
+                    name = "Thresholds") +
   theme_ctokita() +
   theme(aspect.ratio = 1)
 
 gg_type_change
 
 ggsave(plot = gg_type_change, 
-       filename = "output/network_break/social_networks/tiechange_gamma.png", 
+       filename = "output/network_break/suppl_analysis/tiechange_thresholddistributions.png", 
        width = 75, 
        height = 45, 
        units = "mm", 
@@ -192,7 +196,7 @@ ties_data <- network_change_data %>%
   filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
   mutate(set = paste0(threshold_dist, "-", metric),
          metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
-gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, color = threshold_dist)) +
+gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, col = threshold_dist)) +
   geom_line(aes(group = set),
             size = 0.3) +
   geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
@@ -208,32 +212,27 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, color = th
                                 "New tie, diff. ideology",
                                 "Broken tie, diff. ideology"),
                      name = "") +
-  scale_fill_manual(values = c("black", "black", "white", "white"),
-                    labels = c("New tie, same ideology",
-                               "Broken tie, same ideology",
-                               "New tie, diff. ideology",
-                               "Broken tie, diff. ideology"),
-                    name = "") +
+  scale_color_manual(values = pal,
+                      labels = c("Uniform dist.",
+                                 "Identical"),
+                      name = "Thresholds") +
+  scale_fill_manual(values = c(pal[1], pal[1], "white", "white"),
+                     labels = c("New tie, same ideology",
+                                "Broken tie, same ideology",
+                                "New tie, diff. ideology",
+                                "Broken tie, diff. ideology"),
+                     name = "") +
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_ties
 
 ggsave(plot = gg_ties, 
-       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength.png", 
+       filename = "output/network_break/suppl_analysis/Breaksandadds_thresholddistributions.png", 
        width = 90, 
        height = 45, 
        units = "mm", 
        dpi = 400)
 
-gg_ties <- gg_ties +
-  scale_y_continuous(limits = c(0, 1.5))
-
-ggsave(plot = gg_ties, 
-       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength_zoom.png", 
-       width = 90, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
 
 # Change in degree
 net_degree_data <- network_change_data %>% 
@@ -243,7 +242,8 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim
   geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
                 size = 0.3,
                 width = 0) +
-  geom_point(aes(shape = metric, fill = metric),
+  geom_point(aes(shape = metric, 
+                 fill = metric),
              size = 0.8) +
   ylab(expression( paste(Delta, " out-degree"))) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
