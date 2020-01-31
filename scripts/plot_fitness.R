@@ -61,12 +61,12 @@ behav_sum <- behav_sum %>%
 ##########
 # Proportion of messages received that an individual would want (i.e., greater than threshold)
 gg_correct <- ggplot(data = behav_sum, aes(x = gamma, y = correct_message_mean)) +
-  geom_errorbar(aes(ymin = correct_message_mean - correct_message_95ci,
+  geom_ribbon(aes(ymin = correct_message_mean - correct_message_95ci,
                     ymax = correct_message_mean + correct_message_95ci),
-                size = 0.2,
-                width = 0) +
+                alpha = 0.4) +
+  geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("Freq. correct message received") +
+  ylab("Reacted to true positive story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
@@ -82,12 +82,12 @@ ggsave(plot = gg_correct,
 
 # Proportion of incorrect messages received
 gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma, y = incorrect_message_mean)) +
-  geom_errorbar(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
+  geom_ribbon(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
                     ymax = incorrect_message_mean + incorrect_message_95ci),
-                size = 0.2,
-                width = 0) +
+                alpha = 0.4) +
+  geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("Freq. incorrect message received") +
+  ylab("Reacted to false positive story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
