@@ -19,9 +19,9 @@ out_path <- "output/thresh_adjust/"
 # Plot variables
 dodge_width = 0.05
 pal <- c("#e66101", "#bababa", "#5e3c99")
-labs <- c(expression(paste(phi, " >> ", omega)), 
-          expression(paste(phi, "  =  ", omega)), 
-          expression(paste(phi, " << ", omega)))
+labs <- c(expression(paste("Care more about being right")), 
+          expression(paste("Care equally")), 
+          expression(paste("Care more about being wrong")))
 key_name <- "Threshold\ndynamics"
 
 ####################
@@ -99,26 +99,33 @@ theme_ctokita <- function() {
 # Plot: Cascade size
 ##########
 gg_size <- ggplot(cascade_data, aes(x = gamma, y = size_mean, color = run)) +
-  geom_errorbar(aes(ymin = size_mean - size_95ci, 
-                    ymax = size_mean + size_95ci), 
-                size = 0.2, 
-                width = 0,
+  geom_ribbon(aes(ymin = size_mean - size_95ci, 
+                    ymax = size_mean + size_95ci, 
+                  fill = run), 
+                alpha = 0.4,
+                color = NA,
                 position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab(expression( paste("Cascade size ", italic(X) ))) +
+  ylab("Cascade size ") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   scale_color_manual(values = pal,
                      label = labs,
                      name = key_name) +
+  scale_fill_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1,
+        legend.text.align = 0)
 
 gg_size
 
 ggsave(plot = gg_size,
        filename = paste0(out_path, "cascades/Comparison_CascadeSize.png"),
-       width = 70,
+       width = 90,
        height = 45,
        units = "mm",
        dpi = 400)
@@ -127,11 +134,14 @@ ggsave(plot = gg_size,
 # Plot: Cascade bias
 ##########
 gg_bias <- ggplot(cascade_data, aes(x = gamma, y = bias_mean, color = run)) +
-  geom_errorbar(aes(ymin = bias_mean - bias_95ci, 
-                    ymax = bias_mean + bias_95ci), 
-                size = 0.2, 
-                width = 0,
-                position = position_dodge(width = dodge_width)) +
+  geom_ribbon(aes(ymin = bias_mean - bias_95ci, 
+                  ymax = bias_mean + bias_95ci, 
+                  fill = run), 
+              alpha = 0.4,
+              color = NA,
+              position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
   ylab(expression( "Cascade bias" )) +
@@ -139,14 +149,18 @@ gg_bias <- ggplot(cascade_data, aes(x = gamma, y = bias_mean, color = run)) +
   scale_color_manual(values = pal,
                      label = labs,
                      name = key_name) +
+  scale_fill_manual(values = pal,
+                    label = labs,
+                    name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1,
+        legend.text.align = 0)
 
 gg_bias
 
 ggsave(plot = gg_bias,
        filename = paste0(out_path, "cascades/Comparison_CascadeBias.png"),
-       width = 70,
+       width = 90,
        height = 45,
        units = "mm",
        dpi = 400)
@@ -158,11 +172,14 @@ ggsave(plot = gg_bias,
 # Plot: Proportion of messages received that an individual would want (i.e., greater than threshold)
 ##########
 gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mean, color = run)) +
-  geom_errorbar(aes(ymin = correct_message_mean - correct_message_95ci,
-                    ymax = correct_message_mean + correct_message_95ci),
-                size = 0.2,
-                width = 0,
+  geom_ribbon(aes(ymin = correct_message_mean - correct_message_95ci,
+                    ymax = correct_message_mean + correct_message_95ci,
+                  fill = run),
+                alpha = 0.4,
+                color = NA,
                 position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
   ylab("Freq. correct message received") +
@@ -170,14 +187,18 @@ gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mea
   scale_color_manual(values = pal,
                      label = labs,
                      name = key_name) +
+  scale_fill_manual(values = pal,
+                    label = labs,
+                    name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1,
+        legend.text.align = 0)
 
 gg_correct
 
 ggsave(plot = gg_correct,
        filename = paste0(out_path, "fitness/Comparison_MessageCorrect.png"),
-       width = 70,
+       width = 90,
        height = 45,
        units = "mm",
        dpi = 400)
@@ -186,11 +207,14 @@ ggsave(plot = gg_correct,
 # Plot: Proportion of incorrect messages received
 ##########
 gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message_mean, color = run)) +
-  geom_errorbar(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
-                    ymax = incorrect_message_mean + incorrect_message_95ci),
-                size = 0.2,
-                width = 0,
+  geom_ribbon(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
+                  ymax = incorrect_message_mean + incorrect_message_95ci,
+                  fill = run),
+                alpha = 0.4,
+                color = NA,
                 position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
   ylab("Freq. incorrect message received") +
@@ -198,14 +222,18 @@ gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message
   scale_color_manual(values = pal,
                      label = labs,
                      name = key_name) +
+  scale_fill_manual(values = pal,
+                    label = labs,
+                    name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1,
+        legend.text.align = 0)
 
 gg_incorrect
 
 ggsave(plot = gg_incorrect,
        filename = paste0(out_path, "fitness/Comparison_MessageIncorrect.png"),
-       width = 70,
+       width = 90,
        height = 45,
        units = "mm",
        dpi = 400)
@@ -229,4 +257,4 @@ gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = fitness_mean, color
   theme_ctokita() 
 
 gg_fitness
-
+1
