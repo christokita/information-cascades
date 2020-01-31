@@ -124,7 +124,7 @@ network_change_data <- lapply(network_files, function(x) {
     group_by(gamma, metric) %>% 
     summarise(mean = mean(value), 
              sd = sd(value),
-             error = sd(value)/sqrt(length(value)))
+             error = qnorm(0.975)*sd(value)/sqrt(length(value)))
   return(run_data)
 })
 network_change_data <- do.call("rbind", network_change_data)
@@ -137,15 +137,16 @@ network_change_data <- do.call("rbind", network_change_data)
 net_type_data <- network_change_data %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 
   mutate(metric = factor(metric, levels = c("net_same", "net_diff")))
-gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean)) +
+gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)) +
   geom_hline(yintercept = 0, 
              size = 0.3, 
              linetype = "dotted") +
-  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
-                size = 0.3,
-                width = 0) +
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
+              alpha = 0.4,  
+              fill = "#525252") +
+  geom_line(size = 0.3) +
   geom_point(aes(shape = metric, fill = metric),
-             size = 0.8) +
+             size = 1) +
   ylab(expression( paste(Delta, " social ties")) ) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_shape_manual(values = c(19, 21),
@@ -175,16 +176,16 @@ ties_data <- network_change_data %>%
   mutate(metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   geom_line(size = 0.3) +
-  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
-                size = 0.3,
-                width = 0) +
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error),
+              alpha = 0.4,  
+              fill = "#525252") +
   geom_point(aes(shape = metric, fill = metric),
-             size = 0.8) +
+             size = 1) +
   ylab("Count") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
-  scale_y_continuous(limits = c(0, 1.21), 
-                     breaks = seq(0, 2, 0.2),
-                     expand = c(0, 0)) +
+  # scale_y_continuous(limits = c(0, 1.21), 
+  #                    breaks = seq(0, 2, 0.2),
+  #                    expand = c(0, 0)) +
   scale_shape_manual(values = c(19, 17, 21, 24),
                      labels = c("New tie, same ideology",
                                 "Broken tie, same ideology",
@@ -212,10 +213,11 @@ ggsave(plot = gg_ties,
 net_degree_data <- network_change_data %>% 
   filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
-  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
-                size = 0.3,
-                width = 0) +
-  geom_point(aes(shape = metric, fill = metric),
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
+              alpha = 0.4,  
+              fill = "#525252") +
+  geom_line(size = 0.3) +
+  geom_point(aes(fill = metric),
              size = 0.8) +
   ylab(expression( paste(Delta, " out-degree"))) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
