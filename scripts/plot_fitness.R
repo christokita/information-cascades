@@ -66,7 +66,7 @@ gg_correct <- ggplot(data = behav_sum, aes(x = gamma, y = correct_message_mean))
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("Reacted to true positive story") +
+  ylab("True positive reaction to story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
@@ -87,7 +87,7 @@ gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma, y = incorrect_message_me
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("Reacted to false positive story") +
+  ylab("False positive reaction to story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 

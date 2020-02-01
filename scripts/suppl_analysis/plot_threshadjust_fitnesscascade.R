@@ -182,7 +182,7 @@ gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mea
             position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab("Freq. correct message received") +
+  ylab("True positive reaction to story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_color_manual(values = pal,
                      label = labs,
@@ -217,7 +217,7 @@ gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message
             position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab("Freq. incorrect message received") +
+  ylab("False positive reaction to story") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_color_manual(values = pal,
                      label = labs,
