@@ -77,6 +77,11 @@ ggsave(plot = gg_sens,
        height = 45, 
        units = "mm", 
        dpi = 600)
+ggsave(plot = gg_sens, 
+       filename = paste0(out_path, "Sensitvity", plot_tag, ".svg"), 
+       width = 45, 
+       height = 45, 
+       units = "mm")
 
 
 # Specificity: proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
@@ -100,6 +105,11 @@ ggsave(plot = gg_specif,
        height = 45, 
        units = "mm", 
        dpi = 600)
+ggsave(plot = gg_specif, 
+       filename = paste0(out_path, "Specificity", plot_tag, ".svg"), 
+       width = 45, 
+       height = 45, 
+       units = "mm")
 
 
 # Precision: proportion of activity (x_i = 1) that is due to "important" news.
@@ -123,6 +133,11 @@ ggsave(plot = gg_precis,
        height = 45, 
        units = "mm", 
        dpi = 600)
+ggsave(plot = gg_precis, 
+       filename = paste0(out_path, "Precision", plot_tag, ".svg"), 
+       width = 45, 
+       height = 45, 
+       units = "mm")
 
 
 # Individual fitness 
@@ -146,3 +161,4 @@ ggsave(plot = gg_fitness,
        height = 45, 
        units = "mm", 
        dpi = 600)
+

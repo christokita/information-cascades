@@ -56,6 +56,19 @@ sf_sum <- sf_data %>%
             assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
   mutate(network_type = "Scale-free")
 
+# Complete network
+comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/n200_assortativity_completegraph.csv', header = TRUE)
+comp_sum <- comp_data %>% 
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  group_by(gamma) %>% 
+  summarise(assort_mean = mean(assort_final),
+            assort_sd = sd(assort_final),
+            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
+            assortchange_mean = mean(delta_assort),
+            assortchange_sd = sd(delta_assort),
+            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+  mutate(network_type = "Complete")
+
 # Regular network
 reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/n200_regular_assortativity.csv', header = TRUE)
 reg_sum <- reg_data %>% 
@@ -70,14 +83,15 @@ reg_sum <- reg_data %>%
   mutate(network_type = "Regular")
 
 # Bind
-assort_sum <- rbind(rand_sum, sf_sum, reg_sum)
+assort_sum <- rbind(rand_sum, sf_sum, comp_sum, reg_sum) %>% 
+  mutate(network_type = factor(network_type, levels = c("Random (default)", "Regular", "Scale-free", "Complete")))
 rm(rand_data, rand_sum, sf_data, sf_sum, reg_data, reg_sum)
 
 ##########
 # Plot
 ##########
 # Raw final assortativity values
-pal <- c("#e41a1c", "#377eb8", "#4daf4a")
+pal <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3")
 gg_assort_networktype <- ggplot(data = assort_sum, 
                                 aes(x = gamma, 
                                     y = assort_mean, 
@@ -94,7 +108,7 @@ gg_assort_networktype <- ggplot(data = assort_sum,
   geom_point(size = 0.8) +
   scale_color_manual(name = "Network type", values = pal) +
   scale_fill_manual(name = "Network type", values = pal) +
-  ylab(expression( paste("Assortativity, ", italic(r[global])) )) +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
   theme(aspect.ratio = 1)
