@@ -26,13 +26,13 @@ import copy
 n_of_interest = 200
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/fitness_data/' 
-thresh_dir = '../data_sim/network_break/thresh_data/'
+fit_dir = '../data_sim/network_break/__suppl-sim/complete-graph/fitness_data/' 
+thresh_dir = '../data_sim/network_break/__suppl-sim/complete-graph/thresh_data/'
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/fitness/'
-filetags = 'gamma' #added info after 'n<number>_fitness_<filetag>_
+outpath = '../data_derived/network_break/__suppl_analysis/other_network_types'
+filetags = 'completegraph' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
