@@ -9,11 +9,12 @@
 ##########
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 ####################
 # Paramters for analysis
 ####################
-data_path <- "data_derived/network_break/fitness/n200_fitness_allbehavior_gammasweep.csv" #path to data
+data_path <- "data_derived/network_break/fitness/n200_fitness_allbehavior_gamma.csv" #path to data
 out_path <- "output/network_break/fitness/" #directory you wish to save plots
 plot_tag <- "gamma" #extra info to add onto end of plot name
 if (plot_tag != "") {
@@ -32,7 +33,8 @@ theme_ctokita <- function() {
           legend.title    = element_text(size = 7, face = "bold", vjust = -1),
           legend.text     = element_text(size = 6, color = "black"),
           strip.text      = element_text(size = 7, color = "black"),
-          legend.key.size = unit(3, "mm"))
+          legend.key.size = unit(3, "mm"),
+          aspect.ratio = 1)
 }
 
 
@@ -44,75 +46,103 @@ theme_ctokita <- function() {
 behav_data <- read.csv(data_path, header = TRUE)
 behav_sum <- behav_data %>% 
   select(-replicate) %>% 
-  mutate(fitness = correct_message - incorrect_message ) %>% 
-  # mutate(fitness = ifelse(fitness == Inf, 10, fitness)) %>% #need to figure out how to deal with Inf values
-  group_by(gamma) %>% 
-  summarise_each(funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE))) %>% 
-  mutate(correct_message_95ci = qnorm(0.975) * correct_message_sd/sqrt(100 * 200),
-         incorrect_message_95ci = qnorm(0.975) * incorrect_message_sd/sqrt(100 * 200),
-         fitness_95ci = qnorm(0.975) * fitness_sd/sqrt(100 * 200))
-
-gamma_zero_fitness <- behav_sum$fitness_mean[behav_sum$gamma == 0]
-behav_sum <- behav_sum %>% 
-  mutate(fitness_mean_norm = (fitness_mean - gamma_zero_fitness) / gamma_zero_fitness)
+  mutate(fitness = sensitivity + specificity + precision) %>% 
+  gather(metric, value, -gamma, -threshold) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
 ##########
 # Plot
 ##########
-# Proportion of messages received that an individual would want (i.e., greater than threshold)
-gg_correct <- ggplot(data = behav_sum, aes(x = gamma, y = correct_message_mean)) +
-  geom_ribbon(aes(ymin = correct_message_mean - correct_message_95ci,
-                    ymax = correct_message_mean + correct_message_95ci),
-                alpha = 0.4) +
+# Sensitivity: proportion of important (i.e., greater than threshold) news stories individual reacted to
+sensitivity_data <- behav_sum %>% 
+  filter(metric == "sensitivity")
+
+gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95),
+                  alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("True positive reaction to story") +
+  ylab("Behavioral sensitivity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
-gg_correct
-
-ggsave(plot = gg_correct, 
-       filename = paste0(out_path, "MessageCorrect", plot_tag, ".png"), 
+gg_sens
+ggsave(plot = gg_sens, 
+       filename = paste0(out_path, "Sensitvity", plot_tag, ".png"), 
        width = 45, 
        height = 45, 
        units = "mm", 
-       dpi = 400)
+       dpi = 600)
 
 
-# Proportion of incorrect messages received
-gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma, y = incorrect_message_mean)) +
-  geom_ribbon(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
-                    ymax = incorrect_message_mean + incorrect_message_95ci),
-                alpha = 0.4) +
+# Specificity: proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
+specificity_data <- behav_sum %>% 
+  filter(metric == "specificity")
+
+gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95),
+              alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("False positive reaction to story") +
+  ylab("Behavioral specificity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
-gg_incorrect
-
-ggsave(plot = gg_incorrect, 
-       filename = paste0(out_path, "MessageInorrect", plot_tag, ".png"), 
+gg_specif
+ggsave(plot = gg_specif, 
+       filename = paste0(out_path, "Specificity", plot_tag, ".png"), 
        width = 45, 
        height = 45, 
        units = "mm", 
-       dpi = 400)
+       dpi = 600)
 
-# Individual fitness (i.e., ratio of correct/incorrect messages received)
-gg_fitness <- ggplot(data = behav_sum, aes(x = gamma, y = fitness_mean)) +
-  # geom_errorbar(aes(ymin = fitness_mean - fitness_95ci,
-  #                   ymax = fitness_mean + fitness_95ci),
-  #               size = 0.2,
-  #               width = 0) +
+
+# Precision: proportion of activity (x_i = 1) that is due to "important" news.
+precision_data <- behav_sum %>% 
+  filter(metric == "precision")
+
+gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95),
+              alpha = 0.4) +
+  geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  geom_hline(yintercept = 0,
-             size = 0.3,
-             linetype = "dotted") +
-  ylab("Individual fitness") +
-  xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
+  ylab("Behavioral precision") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  theme_ctokita() 
+
+gg_precis
+ggsave(plot = gg_precis, 
+       filename = paste0(out_path, "Precision", plot_tag, ".png"), 
+       width = 45, 
+       height = 45, 
+       units = "mm", 
+       dpi = 600)
+
+
+# Individual fitness 
+fitness_data <- behav_sum %>% 
+  filter(metric == "fitness")
+
+gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95),
+              alpha = 0.4) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  ylab("Information use fitness") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 
 gg_fitness
-
+ggsave(plot = gg_fitness, 
+       filename = paste0(out_path, "Fitness", plot_tag, ".png"), 
+       width = 45, 
+       height = 45, 
+       units = "mm", 
+       dpi = 600)

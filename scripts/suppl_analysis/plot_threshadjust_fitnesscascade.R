@@ -58,20 +58,15 @@ fitness_files <- list.files("data_derived/thresh_adjust/fitness/", pattern = ".*
 fitness_data <- lapply(fitness_files, function(file) {
   run_data <-  read.csv(file, header = TRUE)
   parameters <- gsub(".*_([a-z]+)\\.csv", "\\1", file, perl = TRUE)
+  run_data$run <- parameters
   run_sum <- run_data %>% 
     select(-replicate) %>% 
-    mutate(fitness = correct_message - incorrect_message ) %>% 
-    # mutate(fitness = ifelse(fitness == Inf, 10, fitness)) %>% #need to figure out how to deal with Inf values
-    group_by(gamma) %>% 
-    summarise_each(funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE))) %>% 
-    mutate(correct_message_95ci = qnorm(0.975) * correct_message_sd/sqrt(100 * 200),
-           incorrect_message_95ci = qnorm(0.975) * incorrect_message_sd/sqrt(100 * 200),
-           fitness_95ci = qnorm(0.975) * fitness_sd/sqrt(100 * 200),
-           run = parameters)
-  
-  gamma_zero_fitness <- run_sum$fitness_mean[run_sum$gamma == 0]
-  run_sum <- run_sum %>%
-    mutate(fitness_mean_norm = (fitness_mean - gamma_zero_fitness) / gamma_zero_fitness)
+    mutate(fitness = sensitivity + specificity + precision) %>% 
+    gather(metric, value, -gamma, -threshold, -run) %>% 
+    group_by(run, gamma, metric) %>% 
+    summarise(mean = mean(value, na.rm = TRUE),
+              sd = sd(value, na.rm = TRUE),
+              ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
   return(run_sum)
 })
 fitness_data <- do.call('rbind', fitness_data)
@@ -89,7 +84,8 @@ theme_ctokita <- function() {
           legend.title    = element_text(size = 7, face = "bold", vjust = -1),
           legend.text     = element_text(size = 6, color = "black"),
           strip.text      = element_text(size = 7, color = "black"),
-          legend.key.size = unit(3, "mm"))
+          legend.key.size = unit(3, "mm"),
+          aspect.ratio = 1)
 }
 
 
@@ -118,8 +114,7 @@ gg_size <- ggplot(cascade_data, aes(x = gamma, y = size_mean, color = run)) +
                      label = labs,
                      name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1,
-        legend.text.align = 0)
+  theme(legend.text.align = 0)
 
 gg_size
 
@@ -128,7 +123,7 @@ ggsave(plot = gg_size,
        width = 90,
        height = 45,
        units = "mm",
-       dpi = 400)
+       dpi = 600)
 
 ##########
 # Plot: Cascade bias
@@ -153,8 +148,7 @@ gg_bias <- ggplot(cascade_data, aes(x = gamma, y = bias_mean, color = run)) +
                     label = labs,
                     name = key_name) +
   theme_ctokita() +
-  theme(aspect.ratio = 1,
-        legend.text.align = 0)
+  theme(legend.text.align = 0)
 
 gg_bias
 
@@ -163,26 +157,29 @@ ggsave(plot = gg_bias,
        width = 90,
        height = 45,
        units = "mm",
-       dpi = 400)
+       dpi = 600)
 
 
 ########## Fitness #########
 
 ##########
-# Plot: Proportion of messages received that an individual would want (i.e., greater than threshold)
+# Plot: Sensitivity, the proportion of important (i.e., greater than threshold) news stories individual reacted to
 ##########
-gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mean, color = run)) +
-  geom_ribbon(aes(ymin = correct_message_mean - correct_message_95ci,
-                    ymax = correct_message_mean + correct_message_95ci,
+sensitivity_data <- fitness_data %>% 
+  filter(metric == "sensitivity")
+
+gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean, color = run)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95,
                   fill = run),
-                alpha = 0.4,
-                color = NA,
-                position = position_dodge(width = dodge_width)) +
+              alpha = 0.4,
+              color = NA,
+              position = position_dodge(width = dodge_width)) +
   geom_line(size = 0.3,
             position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab("True positive reaction to story") +
+  ylab("Behavioral sensitivity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_color_manual(values = pal,
                      label = labs,
@@ -190,34 +187,34 @@ gg_correct <- ggplot(data = fitness_data, aes(x = gamma, y = correct_message_mea
   scale_fill_manual(values = pal,
                     label = labs,
                     name = key_name) +
-  theme_ctokita() +
-  theme(aspect.ratio = 1,
-        legend.text.align = 0)
+  theme_ctokita() 
 
-gg_correct
-
-ggsave(plot = gg_correct,
-       filename = paste0(out_path, "fitness/Comparison_MessageCorrect.png"),
+gg_sens
+ggsave(plot = gg_sens,
+       filename = paste0(out_path, "fitness/Comparison_sensitivity.png"),
        width = 90,
        height = 45,
        units = "mm",
-       dpi = 400)
+       dpi = 600)
 
 ##########
-# Plot: Proportion of incorrect messages received
+# Plot: Specificity, the proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
 ##########
-gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message_mean, color = run)) +
-  geom_ribbon(aes(ymin = incorrect_message_mean - incorrect_message_95ci,
-                  ymax = incorrect_message_mean + incorrect_message_95ci,
+specificity_data <- fitness_data %>% 
+  filter(metric == "specificity")
+
+gg_spec <- ggplot(data = specificity_data, aes(x = gamma, y = mean, color = run)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95,
                   fill = run),
-                alpha = 0.4,
-                color = NA,
-                position = position_dodge(width = dodge_width)) +
+              alpha = 0.4,
+              color = NA,
+              position = position_dodge(width = dodge_width)) +
   geom_line(size = 0.3,
             position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab("False positive reaction to story") +
+  ylab("Behavioral specificity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_color_manual(values = pal,
                      label = labs,
@@ -225,36 +222,82 @@ gg_incorrect <- ggplot(data = fitness_data, aes(x = gamma, y = incorrect_message
   scale_fill_manual(values = pal,
                     label = labs,
                     name = key_name) +
-  theme_ctokita() +
-  theme(aspect.ratio = 1,
-        legend.text.align = 0)
+  theme_ctokita() 
 
-gg_incorrect
-
-ggsave(plot = gg_incorrect,
-       filename = paste0(out_path, "fitness/Comparison_MessageIncorrect.png"),
+gg_spec
+ggsave(plot = gg_spec,
+       filename = paste0(out_path, "fitness/Comparison_specificity.png"),
        width = 90,
        height = 45,
        units = "mm",
-       dpi = 400)
+       dpi = 600)
 
 ##########
-# Plot: Individual fitness (i.e., difference in correct/incorrect messages received)
+# Plot: Precision, the proportion of activity (x_i = 1) that is due to "important" news.
 ##########
-gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = fitness_mean, color = run)) +
-  geom_errorbar(aes(ymin = fitness_mean - fitness_95ci,
-                    ymax = fitness_mean + fitness_95ci),
-                size = 0.2,
-                width = 0,
-                position = position_dodge(width = dodge_width)) +
+prevision_data <- fitness_data %>% 
+  filter(metric == "precision")
+
+gg_precis <- ggplot(data = prevision_data, aes(x = gamma, y = mean, color = run)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95,
+                  fill = run),
+              alpha = 0.4,
+              color = NA,
+              position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
   geom_point(size = 0.8,
              position = position_dodge(width = dodge_width)) +
-  ylab("Individual fitness (True Correct - False Positive)") +
+  ylab("Behavioral precision") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_color_manual(values = pal,
                      label = labs,
                      name = key_name) +
+  scale_fill_manual(values = pal,
+                    label = labs,
+                    name = key_name) +
+  theme_ctokita() 
+
+gg_precis
+ggsave(plot = gg_precis,
+       filename = paste0(out_path, "fitness/Comparison_precision.png"),
+       width = 90,
+       height = 45,
+       units = "mm",
+       dpi = 600)
+
+##########
+# Plot: Individual fitness 
+##########
+total_fitness_data <- fitness_data %>% 
+  filter(metric == "fitness")
+
+gg_fitness <- ggplot(data = total_fitness_data, aes(x = gamma, y = mean, color = run)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95,
+                  fill = run),
+              alpha = 0.4,
+              color = NA,
+              position = position_dodge(width = dodge_width)) +
+  geom_line(size = 0.3,
+            position = position_dodge(width = dodge_width)) +
+  geom_point(size = 0.8,
+             position = position_dodge(width = dodge_width)) +
+  ylab("Information use fitness") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_color_manual(values = pal,
+                     label = labs,
+                     name = key_name) +
+  scale_fill_manual(values = pal,
+                    label = labs,
+                    name = key_name) +
   theme_ctokita() 
 
 gg_fitness
-1
+ggsave(plot = gg_fitness,
+       filename = paste0(out_path, "fitness/Comparison_fitness.png"),
+       width = 90,
+       height = 45,
+       units = "mm",
+       dpi = 600)
