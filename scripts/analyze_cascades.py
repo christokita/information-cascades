@@ -36,6 +36,7 @@ filetags = 'gammasweep' #added info after 'n<number>_fitness_<filetag>_
 # List runs
 runs = os.listdir(fit_dir)
 runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.0-9]+', run)]
+runs.sort()
 
 
 ####################
