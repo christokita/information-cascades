@@ -26,13 +26,12 @@ import copy
 n_of_interest = 200
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/__suppl-sim/complete-graph/fitness_data/' 
-thresh_dir = '../data_sim/network_break/__suppl-sim/complete-graph/thresh_data/'
+fit_dir = '../data_sim/network_break/fitness_data/'  
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/other_network_types/'
-filetags = 'completegraph' #added info after 'n<number>_fitness_<filetag>_
+outpath = '../data_derived/network_break/cascades'
+filetags = 'gammasweep' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
@@ -44,6 +43,7 @@ runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.
 ####################
 # Loop through runs
 all_cascade = pd.DataFrame()
+summarized_cascade = pd.DataFrame()
 
 for run in runs:
     
@@ -76,25 +76,25 @@ for run in runs:
         # Identifying variables, remove time steps
         cascade['gamma'] = gamma
         cascade['replicate'] = rep
-        cascade = cascade.drop(columns = ['t'])
+        
+        # Add to raw data dataframe
+        if all_cascade.empty:
+            all_cascade = copy.deepcopy(cascade)
+        else:
+            all_cascade = all_cascade.append(cascade, ignore_index = True)
         
         # Summarise data for that replicate and append
+        cascade = cascade.drop(columns = ['t']) #drop time step column
         cascade_sum = cascade.mean().to_frame().T
-        if cascade_data.empty:
-            cascade_data = copy.deepcopy(cascade_sum)
+        if summarized_cascade.empty:
+            summarized_cascade = copy.deepcopy(cascade_sum)
         else:
-            cascade_data = cascade_data.append(cascade_sum, ignore_index = True, sort = False)
+            summarized_cascade = summarized_cascade.append(cascade_sum, ignore_index = True, sort = False)
     
-    # Bind to larger dataframe for saving
-    if all_cascade.empty:
-        all_cascade = copy.deepcopy(cascade_data)
-    else:
-        all_cascade = all_cascade.append(cascade_data, ignore_index = True, sort = False)
-    
-    # Clean up
-    del(cascade_data, cascade_sum)
         
 # Write to CSV
-all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadestats_' + filetags + '.csv',
+all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadesraw_' + filetags + '.csv',
+                   index = False)
+summarized_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadestats_' + filetags + '.csv',
                    index = False)
     
