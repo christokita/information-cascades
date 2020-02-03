@@ -24,13 +24,14 @@ import copy
 ####################
 # Set group size runs of intereset
 n_of_interest = 200
+raw_data = True #set true if you want to output raw cascades data (each time step)
 
 # Directory where simulation data is found
 fit_dir = '../data_sim/network_break/fitness_data/'  
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/cascades'
+outpath = '../data_derived/network_break/cascades/'
 filetags = 'gammasweep' #added info after 'n<number>_fitness_<filetag>_
 
 # List runs
@@ -79,9 +80,9 @@ for run in runs:
         cascade['replicate'] = rep
         
         # Add to raw data dataframe
-        if all_cascade.empty:
+        if all_cascade.empty and raw_data == True:
             all_cascade = copy.deepcopy(cascade)
-        else:
+        elif raw_data == True:
             all_cascade = all_cascade.append(cascade, ignore_index = True)
         
         # Summarise data for that replicate and append
@@ -91,6 +92,13 @@ for run in runs:
             summarized_cascade = copy.deepcopy(cascade_sum)
         else:
             summarized_cascade = summarized_cascade.append(cascade_sum, ignore_index = True, sort = False)
+    
+    # Save raw data for that gamma if desired
+    if raw_data == True:
+        if not os.path.isdir(outpath + 'raw_cascade_data/'):
+            os.mkdir(outpath + 'raw_cascade_data/')
+        all_cascade.to_csv(outpath + 'raw_cascade_data/' + 'n' + str(n_of_interest) + '_cascadesraw_' + filetags + '_gamma' + str(gamma) + '.csv',
+                       index = False)
     
         
 # Write to CSV
