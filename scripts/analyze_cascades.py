@@ -24,7 +24,7 @@ import copy
 ####################
 # Set group size runs of intereset
 n_of_interest = 200
-raw_data = True #set true if you want to output raw cascades data (each time step)
+raw_data = False #set true if you want to output raw cascades data (each time step)
 
 # Directory where simulation data is found
 fit_dir = '../data_sim/network_break/fitness_data/'  
@@ -44,13 +44,15 @@ runs.sort()
 # Measure information spread (group-level fitness)
 ####################
 # Loop through runs
-all_cascade = pd.DataFrame()
 summarized_cascade = pd.DataFrame()
 
 for run in runs:
     
     # Load statement
     print("Starting on \'" + run + "\'...")
+    
+    # Create datafrane for raw data, if desired
+    all_cascade = pd.DataFrame()
     
      # Get gamma value
     gamma = float(re.search('.*_[a-z]+([-\.0-9]+)', run).group(1))
@@ -99,11 +101,10 @@ for run in runs:
             os.mkdir(outpath + 'raw_cascade_data/')
         all_cascade.to_csv(outpath + 'raw_cascade_data/' + 'n' + str(n_of_interest) + '_cascadesraw_' + filetags + '_gamma' + str(gamma) + '.csv',
                        index = False)
+        del(all_cascade)
     
         
 # Write to CSV
-all_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadesraw_' + filetags + '.csv',
-                   index = False)
 summarized_cascade.to_csv(outpath + 'n' + str(n_of_interest) + '_cascadestats_' + filetags + '.csv',
                    index = False)
     

@@ -1,0 +1,366 @@
+##############################
+#
+# PLOT: Network structure given simluation length
+#
+##############################
+
+##########
+# Load packages
+##########
+library(ggplot2)
+library(dplyr)
+
+####################
+# My preferred theme
+####################
+theme_ctokita <- function() {
+  theme_classic() +
+    theme(axis.text       = element_text(size = 6, color = "black"),
+          axis.title      = element_text(size = 7, color = "black"),
+          axis.ticks = element_line(size = 0.3, color = "black"),
+          axis.line = element_line(size = 0.3),
+          legend.title    = element_text(size = 7, face = "bold", vjust = -1),
+          legend.text     = element_text(size = 6, color = "black"),
+          strip.text      = element_text(size = 7, color = "black"),
+          legend.key.size = unit(3, "mm"))
+}
+
+############## Assortatiity ##############
+
+##########
+# Load data and summarise
+##########
+# Normal sim (10^5 steps)
+norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
+norm_data <- norm_data %>% 
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  group_by(gamma) %>% 
+  summarise(assort_mean = mean(assort_final),
+            assort_sd = sd(assort_final),
+            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
+            assortchange_mean = mean(delta_assort),
+            assortchange_sd = sd(delta_assort),
+            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+  mutate(run_time = "10^5")
+
+# Long sim (10^6)
+long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_assortativity_10^6steps.csv', header = TRUE)
+long_data <- long_data %>% 
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  group_by(gamma) %>% 
+  summarise(assort_mean = mean(assort_final),
+            assort_sd = sd(assort_final),
+            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
+            assortchange_mean = mean(delta_assort),
+            assortchange_sd = sd(delta_assort),
+            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+  mutate(run_time = "10^6")
+
+# Bind
+assort_sum <- rbind(norm_data, long_data)
+rm(norm_data, long_data)
+
+##########
+# Plot
+##########
+# Raw final assortativity values
+pal <- c("#225ea8", "#41b6c4", "#a1dab4")
+gg_assort_simlength <- ggplot(data = assort_sum, 
+                                aes(x = gamma, 
+                                    y = assort_mean, 
+                                    color = run_time, 
+                                    group = run_time, 
+                                    fill = run_time)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+              alpha = 0.4,
+              color = NA) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  scale_color_manual(name = "Simulation\nsteps", 
+                     values = pal,
+                     labels = c(expression(10^5),
+                                expression(10^6))) +
+  scale_fill_manual(name = "Simulation\nsteps", 
+                    values = pal,
+                    labels = c(expression(10^5),
+                               expression(10^6))) +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_assort_simlength
+ggsave(plot = gg_assort_simlength, 
+       filename = "output/network_break/suppl_analysis/Assortativity_by_simlength.png", 
+       height = 45, 
+       width = 90, units = "mm", dpi = 400)
+
+
+############## Changes in network structure ##############
+
+##########
+# Load data and summarise
+##########
+# Normal sim length (10^5)
+normal_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
+norm_data <- lapply(normal_files, function(x) {
+  # Read in file 
+  run_file <- read.csv(x)
+  #Summarize
+  run_data <- run_file %>% 
+    mutate(net_same = same_type_adds - same_type_breaks,
+           net_diff = diff_type_adds - diff_type_breaks,
+           net_out_degree = out_degree - out_degree_initial,
+           net_in_degree = in_degree - in_degree_initial,
+           sim_length = "10^5") %>% 
+    select(-replicate, -individual) %>% 
+    gather(metric, value, -gamma, -sim_length) %>% 
+    group_by(sim_length, gamma, metric) %>% 
+    summarise(mean = mean(value), 
+              sd = sd(value),
+              error = sd(value)/sqrt(length(value)))
+  return(run_data)
+})
+norm_data <- do.call("rbind", norm_data)
+
+# Long sim length (10^6)
+long_files <- list.files("data_derived/network_break/__suppl_analysis/sim_length/network_change/", full.names = TRUE)
+long_data <- lapply(long_files, function(x) {
+  # Read in file 
+  run_file <- read.csv(x)
+  #Summarize
+  run_data <- run_file %>% 
+    mutate(net_same = same_type_adds - same_type_breaks,
+           net_diff = diff_type_adds - diff_type_breaks,
+           net_out_degree = out_degree - out_degree_initial,
+           net_in_degree = in_degree - in_degree_initial,
+           sim_length = "10^6") %>% 
+    select(-replicate, -individual) %>% 
+    gather(metric, value, -gamma, -sim_length) %>% 
+    group_by(sim_length, gamma, metric) %>% 
+    summarise(mean = mean(value), 
+              sd = sd(value),
+              error = sd(value)/sqrt(length(value)))
+  return(run_data)
+})
+long_data <- do.call("rbind", long_data)
+
+# Bind
+network_change_data <- rbind(norm_data, long_data)
+
+##########
+# Plot
+##########
+# Change in connections by type
+net_type_data <- network_change_data %>% 
+  filter(metric %in% c("net_same", "net_diff")) %>% 
+  mutate(metric = factor(metric, levels = c("net_same", "net_diff")))
+gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, color = sim_length)) +
+  geom_hline(yintercept = 0, 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
+                size = 0.3,
+                width = 0) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 0.8) +
+  ylab(expression( paste(Delta, " social ties")) ) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_shape_manual(values = c(19, 21),
+                     labels = c("Same ideology",
+                                "Diff. ideology"),
+                     name = "Connetion type") +
+  scale_fill_manual(values = c("black", "white"),
+                    labels = c("Same ideology",
+                               "Diff. ideology"),
+                    name = "Connetion type") +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_type_change
+
+ggsave(plot = gg_type_change, 
+       filename = "output/network_break/social_networks/tiechange_gamma.png", 
+       width = 75, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+
+# Breaks/new ties by gamma
+ties_data <- network_change_data %>% 
+  filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
+  mutate(set = paste0(sim_length, "-", metric),
+         metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
+gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, color = sim_length)) +
+  geom_line(aes(group = set),
+            size = 0.3) +
+  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
+                size = 0.3,
+                width = 0) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 0.8) +
+  ylab("Count") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_shape_manual(values = c(19, 17, 21, 24),
+                     labels = c("New tie, same ideology",
+                                "Broken tie, same ideology",
+                                "New tie, diff. ideology",
+                                "Broken tie, diff. ideology"),
+                     name = "") +
+  scale_fill_manual(values = c("black", "black", "white", "white"),
+                    labels = c("New tie, same ideology",
+                               "Broken tie, same ideology",
+                               "New tie, diff. ideology",
+                               "Broken tie, diff. ideology"),
+                    name = "") +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+gg_ties
+
+ggsave(plot = gg_ties, 
+       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength.png", 
+       width = 90, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+gg_ties <- gg_ties +
+  scale_y_continuous(limits = c(0, 1.5))
+
+ggsave(plot = gg_ties, 
+       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength_zoom.png", 
+       width = 90, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+# Change in degree
+net_degree_data <- network_change_data %>% 
+  filter(metric %in% c("net_out_degree")) %>% 
+  mutate(log_mean = log10(mean))
+gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim_length)) +
+  geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
+                size = 0.3,
+                width = 0) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 0.8) +
+  ylab(expression( paste(Delta, " out-degree"))) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  # scale_y_continuous(limits = c(0, 1.5), 
+  #                    expand = c(0, 0)) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1,
+        legend.position = "none")
+
+gg_degree_change
+
+
+############## Cascades ##############
+##########
+# Load data and summarise
+##########
+# Normal sim length (10^5)
+norm_data <- read.csv('data_derived/network_break/cascades/n200_cascadestats_gammasweep.csv', header = TRUE) %>% 
+  mutate(run_time = "10^5")
+
+# Long sim data (10^6)
+long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_cascadestats_10^6steps.csv', header = TRUE) %>% 
+  mutate(run_time = "10^6")
+
+# Bind
+cascade_data <- rbind(norm_data, long_data)
+
+##########
+# Plot: Cascade size
+##########
+# Summarise by gamma
+cascade_size <- cascade_data %>% 
+  select(run_time, gamma, total_active) %>% 
+  group_by(run_time, gamma) %>% 
+  summarise_each(list(size_mean = mean, 
+                      size_sd = sd, 
+                      rep_count = length)) %>% 
+  mutate(size_95ci = qnorm(0.975) * size_sd / sqrt(rep_count))
+
+# Plot
+pal <- c("#225ea8", "#41b6c4", "#a1dab4")
+gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean, color = run_time)) +
+  # Plot all data
+  geom_ribbon(aes(ymin = size_mean - size_95ci, 
+                  ymax = size_mean + size_95ci,
+                  fill = run_time), 
+              alpha = 0.4,
+              color = NA) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  # General plotting controls
+  scale_color_manual(name = "Simulation\nsteps", 
+                     values = pal,
+                     labels = c(expression(10^5),
+                                expression(10^6))) +
+  scale_fill_manual(name = "Simulation\nsteps", 
+                    values = pal,
+                    labels = c(expression(10^5),
+                               expression(10^6))) +
+  ylab("Cascade size") +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_size
+ggsave(plot = gg_size, 
+       filename = "output/network_break/suppl_analysis/CasacadeSize_simlength.png", 
+       width = 65, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
+##########
+# Plot: Cascade bias
+##########
+# Summarise by gamma
+cascade_diff <- cascade_data %>% 
+  select(run_time, gamma, active_diff_prop) %>% 
+  group_by(run_time, gamma) %>% 
+  summarise_each(list(bias_mean = mean, 
+                      bias_sd = sd, 
+                      rep_count = length)) %>% 
+  mutate(bias_95ci = qnorm(0.975) * bias_sd / sqrt(rep_count))
+
+# Summarizing plot
+gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean, color = run_time)) +
+  # Plot all data
+  geom_ribbon(aes(ymin = bias_mean - bias_95ci, 
+                  ymax = bias_mean + bias_95ci,
+                  fill = run_time),
+              alpha = 0.4,
+              color = NA) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  # General plotting controls
+  # scale_y_continuous(limits = c(0, 0.16)) +
+  scale_color_manual(name = "Simulation\nsteps", 
+                     values = pal,
+                     labels = c(expression(10^5),
+                                expression(10^6))) +
+  scale_fill_manual(name = "Simulation\nsteps", 
+                    values = pal,
+                    labels = c(expression(10^5),
+                               expression(10^6))) +
+  ylab(expression( paste("Cascade bias" ))) +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+
+gg_diff
+ggsave(plot = gg_diff, 
+       filename = "output/network_break/suppl_analysis/CasacadeBias_simlength.png", 
+       width = 65, 
+       height = 45, 
+       units = "mm", 
+       dpi = 400)
+
