@@ -71,17 +71,8 @@ gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 
 gg_sens
-ggsave(plot = gg_sens, 
-       filename = paste0(out_path, "Sensitvity", plot_tag, ".png"), 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 600)
-ggsave(plot = gg_sens, 
-       filename = paste0(out_path, "Sensitvity", plot_tag, ".svg"), 
-       width = 45, 
-       height = 45, 
-       units = "mm")
+ggsave(plot = gg_sens, filename = paste0(out_path, "Sensitvity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_sens, filename = paste0(out_path, "Sensitvity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Specificity: proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
@@ -99,17 +90,8 @@ gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 
 gg_specif
-ggsave(plot = gg_specif, 
-       filename = paste0(out_path, "Specificity", plot_tag, ".png"), 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 600)
-ggsave(plot = gg_specif, 
-       filename = paste0(out_path, "Specificity", plot_tag, ".svg"), 
-       width = 45, 
-       height = 45, 
-       units = "mm")
+ggsave(plot = gg_specif, filename = paste0(out_path, "Specificity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_specif, filename = paste0(out_path, "Specificity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Precision: proportion of activity (x_i = 1) that is due to "important" news.
@@ -127,17 +109,8 @@ gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 
 gg_precis
-ggsave(plot = gg_precis, 
-       filename = paste0(out_path, "Precision", plot_tag, ".png"), 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 600)
-ggsave(plot = gg_precis, 
-       filename = paste0(out_path, "Precision", plot_tag, ".svg"), 
-       width = 45, 
-       height = 45, 
-       units = "mm")
+ggsave(plot = gg_precis, filename = paste0(out_path, "Precision", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_precis, filename = paste0(out_path, "Precision", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Individual fitness 
@@ -155,10 +128,5 @@ gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 
 gg_fitness
-ggsave(plot = gg_fitness, 
-       filename = paste0(out_path, "Fitness", plot_tag, ".png"), 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 600)
+ggsave(plot = gg_fitness, filename = paste0(out_path, "Fitness", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
 

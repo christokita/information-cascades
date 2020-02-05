@@ -62,7 +62,7 @@ fitness_data <- lapply(fitness_files, function(file) {
   run_sum <- run_data %>% 
     select(-replicate) %>% 
     mutate(fitness = sensitivity + specificity + precision) %>% 
-    gather(metric, value, -gamma, -threshold, -run) %>% 
+    tidyr::gather(metric, value, -gamma, -threshold, -run) %>% 
     group_by(run, gamma, metric) %>% 
     summarise(mean = mean(value, na.rm = TRUE),
               sd = sd(value, na.rm = TRUE),
@@ -118,13 +118,8 @@ gg_size <- ggplot(cascade_data, aes(x = gamma, y = size_mean, color = run)) +
   theme(legend.text.align = 0)
 
 gg_size
-
-ggsave(plot = gg_size,
-       filename = paste0(out_path, "cascades/Comparison_CascadeSize.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
+ggsave(plot = gg_size, filename = paste0(out_path, "cascades/Comparison_CascadeSize.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_size, filename = paste0(out_path, "cascades/Comparison_CascadeSize.svg"), width = 90, height = 45, units = "mm")
 
 ##########
 # Plot: Cascade bias
@@ -152,14 +147,8 @@ gg_bias <- ggplot(cascade_data, aes(x = gamma, y = bias_mean, color = run)) +
   theme(legend.text.align = 0)
 
 gg_bias
-
-ggsave(plot = gg_bias,
-       filename = paste0(out_path, "cascades/Comparison_CascadeBias.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
-
+ggsave(plot = gg_bias, filename = paste0(out_path, "cascades/Comparison_CascadeBias.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_bias, filename = paste0(out_path, "cascades/Comparison_CascadeBias.svg"), width = 90, height = 45, units = "mm")
 
 ########## Fitness #########
 
@@ -191,12 +180,8 @@ gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean, color = run)
   theme_ctokita() 
 
 gg_sens
-ggsave(plot = gg_sens,
-       filename = paste0(out_path, "fitness/Comparison_sensitivity.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
+ggsave(plot = gg_sens, filename = paste0(out_path, "fitness/Comparison_sensitivity.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_sens, filename = paste0(out_path, "fitness/Comparison_sensitivity.svg"), width = 90, height = 45, units = "mm")
 
 ##########
 # Plot: Specificity, the proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
@@ -226,12 +211,8 @@ gg_spec <- ggplot(data = specificity_data, aes(x = gamma, y = mean, color = run)
   theme_ctokita() 
 
 gg_spec
-ggsave(plot = gg_spec,
-       filename = paste0(out_path, "fitness/Comparison_specificity.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
+ggsave(plot = gg_spec, filename = paste0(out_path, "fitness/Comparison_specificity.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_spec, filename = paste0(out_path, "fitness/Comparison_specificity.svg"), width = 90, height = 45, units = "mm")
 
 ##########
 # Plot: Precision, the proportion of activity (x_i = 1) that is due to "important" news.
@@ -261,12 +242,8 @@ gg_precis <- ggplot(data = prevision_data, aes(x = gamma, y = mean, color = run)
   theme_ctokita() 
 
 gg_precis
-ggsave(plot = gg_precis,
-       filename = paste0(out_path, "fitness/Comparison_precision.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
+ggsave(plot = gg_precis, filename = paste0(out_path, "fitness/Comparison_precision.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_precis, filename = paste0(out_path, "fitness/Comparison_precision.svg"), width = 90, height = 45, units = "mm")
 
 ##########
 # Plot: Individual fitness 
@@ -296,9 +273,5 @@ gg_fitness <- ggplot(data = total_fitness_data, aes(x = gamma, y = mean, color =
   theme_ctokita() 
 
 gg_fitness
-ggsave(plot = gg_fitness,
-       filename = paste0(out_path, "fitness/Comparison_fitness.png"),
-       width = 90,
-       height = 45,
-       units = "mm",
-       dpi = 600)
+ggsave(plot = gg_fitness, filename = paste0(out_path, "fitness/Comparison_fitness.png"), width = 90, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_fitness, filename = paste0(out_path, "fitness/Comparison_fitness.svg"), width = 90, height = 45, units = "mm")

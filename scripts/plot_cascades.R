@@ -75,7 +75,7 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean)) +
 
 gg_size 
 ggsave(paste0(out_path, "CascadeSize", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
-
+ggsave(paste0(out_path, "CascadeSize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ##########
 # Plot: Cascade bias
@@ -105,5 +105,6 @@ gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean)) +
 
 gg_diff
 ggsave(paste0(out_path, "CascadeBias", plot_tag,".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(paste0(out_path, "CascadeBias", plot_tag,".svg"), width = 45, height = 45, units = "mm")
 
 
