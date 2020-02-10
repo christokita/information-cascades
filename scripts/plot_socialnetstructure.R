@@ -21,23 +21,24 @@ source("scripts/plot_theme_ctokita.R")
 assort_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
 assort_sum <- assort_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort)))
+  select(gamma, delta_assort, assort_final) %>% 
+  gather(metric, value, -gamma) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value),
+            sd = sd(value),
+            ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) ))
 
 ##########
 # Plot
 ##########
 # Raw final assortativity values
-gg_assort <- ggplot(data = assort_sum, aes(x = gamma, y = assort_mean)) +
+assort_raw <- assort_sum %>% 
+  filter(metric == "assort_final")
+gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
@@ -50,18 +51,16 @@ ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assort
 ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assortativity_gamma.svg", width = 45, height = 45, units = "mm", dpi = 400)
 
 # Change in assortativity
-gg_assortchange <- ggplot(data = assort_sum, aes(x = gamma, y = assortchange_mean)) +
+assort_change <- assort_sum %>% 
+  filter(metric == "delta_assort")
+gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  # geom_errorbar(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error),
-  #               size = 0.3,
-  #               width = 0) +
-  geom_ribbon(aes(ymin = assortchange_mean - assortchange_95error, ymax = assortchange_mean + assortchange_95error), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4) +
   geom_line(size = 0.3) +
-  geom_point(color = "#000000", 
-             size = 0.8) +
+  geom_point(size = 0.8) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 

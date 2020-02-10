@@ -9,6 +9,7 @@
 ##########
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 source("scripts/plot_theme_ctokita.R")
 
 ####################
@@ -36,17 +37,17 @@ cascade_data <- read.csv(data_path, header = TRUE)
 # Summarise by gamma
 cascade_size <- cascade_data %>% 
   select(gamma, total_active) %>% 
-  group_by(gamma) %>% 
-  summarise_each(list(size_mean = mean, 
-                      size_sd = sd, 
-                      rep_count = length)) %>% 
-  mutate(size_95ci = qnorm(0.975) * size_sd / sqrt(rep_count))
+  gather(metric, value, -gamma) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
 # Plot
-gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean)) +
+gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
   # Plot all data
-  geom_ribbon(aes(ymin = size_mean - size_95ci, 
-                    ymax = size_mean + size_95ci), 
+  geom_ribbon(aes(ymin = mean - ci95, 
+                    ymax = mean + ci95), 
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
@@ -65,17 +66,17 @@ ggsave(paste0(out_path, "CascadeSize", plot_tag ,".svg"), width = 45, height = 4
 # Summarise by gamma
 cascade_diff <- cascade_data %>% 
   select(gamma, active_diff_prop) %>% 
-  group_by(gamma) %>% 
-  summarise_each(list(bias_mean = mean, 
-                      bias_sd = sd, 
-                      rep_count = length)) %>% 
-  mutate(bias_95ci = qnorm(0.975) * bias_sd / sqrt(rep_count))
+  gather(metric, value, -gamma) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value),
+            sd = sd(value),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) ))
 
 # Summarizing plot
-gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = bias_mean)) +
+gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = mean)) +
   # Plot all data
-  geom_ribbon(aes(ymin = bias_mean - bias_95ci, 
-                    ymax = bias_mean + bias_95ci),
+  geom_ribbon(aes(ymin = mean - ci95, 
+                    ymax = mean + ci95),
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
