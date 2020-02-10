@@ -8,11 +8,8 @@
 # Load packages
 ##########
 library(ggplot2)
-library(tidyr)
 library(dplyr)
-library(RColorBrewer)
-library(scales)
-library(ggpubr)
+source("scripts/plot_theme_ctokita.R")
 
 ####################
 # Paramters for analysis
@@ -22,21 +19,6 @@ out_path <- "output/network_break/cascades/" #directory you wish to save plots
 plot_tag <- "gamma" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
-}
-
-####################
-# My preferred theme
-####################
-theme_ctokita <- function() {
-  theme_classic() +
-    theme(axis.text       = element_text(size = 6, color = "black"),
-          axis.title      = element_text(size = 7, color = "black"),
-          axis.ticks = element_line(size = 0.3, color = "black"),
-          axis.line = element_line(size = 0.3),
-          legend.title    = element_text(size = 7, face = "bold", vjust = -1),
-          legend.text     = element_text(size = 6, color = "black"),
-          strip.text      = element_text(size = 7, color = "black"),
-          legend.key.size = unit(3, "mm"))
 }
 
 
