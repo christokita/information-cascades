@@ -82,29 +82,29 @@ ggsave(plot = gg_assortchange,
 network_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
 network_change_data <- lapply(network_files, function(x) {
   # Read in file 
-  run_file <- read.csv(x)
-  #Summarize
-  run_data <- run_file %>% 
+  run_file <- read.csv(x) %>% 
     mutate(net_same = same_type_adds - same_type_breaks,
            net_diff = diff_type_adds - diff_type_breaks,
            net_out_degree = out_degree - out_degree_initial,
-           net_in_degree = in_degree - in_degree_initial) %>% 
-    select(-replicate, -individual) %>% 
-    gather(metric, value, -gamma) %>% 
-    group_by(gamma, metric) %>% 
-    summarise(mean = mean(value), 
-             sd = sd(value),
-             error = qnorm(0.975)*sd(value)/sqrt(length(value)))
-  return(run_data)
+           net_in_degree = in_degree - in_degree_initial)
+  return(run_file)
 })
 network_change_data <- do.call("rbind", network_change_data)
+#Summarize
+network_change_sum <- network_change_data %>% 
+  select(-replicate, -individual) %>% 
+  gather(metric, value, -gamma) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value), 
+            sd = sd(value),
+            error = qnorm(0.975)*sd(value)/sqrt(length(value)))
 
 
 ##########
 # Plot
 ##########
 # Change in connections by type
-net_type_data <- network_change_data %>% 
+net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 
   mutate(metric = factor(metric, levels = c("net_same", "net_diff")))
 gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)) +
@@ -145,7 +145,7 @@ ggsave(plot = gg_type_change,
 
 
 # Breaks/new ties by gamma
-ties_data <- network_change_data %>% 
+ties_data <- network_change_sum %>% 
   filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
   mutate(metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
@@ -188,7 +188,7 @@ ggsave(plot = gg_ties,
        units = "mm")
 
 # Change in degree
-net_degree_data <- network_change_data %>% 
+net_degree_data <- network_change_sum %>% 
   filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
