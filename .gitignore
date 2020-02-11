@@ -1,3 +1,4 @@
 data_sim/
-.Rproj.user
+.Rproj.user/*
+.Rhisstory
 **/__pycache__/
