@@ -96,7 +96,6 @@ ggsave(plot = gg_precis, filename = paste0(out_path, "precision", plot_tag, ".sv
 # Individual fitness 
 fitness_data <- behav_sum %>% 
   filter(metric == "fitness")
-
 gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95,
                   ymax =  mean + ci95),
