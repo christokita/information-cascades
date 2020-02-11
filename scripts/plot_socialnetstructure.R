@@ -13,7 +13,8 @@ library(tidyr)
 source("scripts/plot_theme_ctokita.R")
 
 
-############## Assortatiity ##############
+
+############################## Assortatiity ##############################
 
 ##########
 # Load data and summarise
@@ -45,8 +46,7 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_assort
+gg_assort #show plot before saving
 ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assortativity_gamma.svg", width = 45, height = 45, units = "mm", dpi = 400)
 
@@ -64,17 +64,12 @@ gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_assortchange
-ggsave(plot = gg_assortchange, 
-       filename = "output/network_break/social_networks/assortchange_gamma.png", 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
+gg_assortchange #show plot before saving
+ggsave(gg_assortchange, "output/network_break/social_networks/assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
 
 
-############## Changes in network structure ##############
+
+############################## Changes in network structure ##############################
 
 ##########
 # Load data and summarise
@@ -128,21 +123,9 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
                     name = "Connetion type") +
   theme_ctokita() +
   theme(aspect.ratio = 1)
-
-gg_type_change
-
-ggsave(plot = gg_type_change, 
-       filename = "output/network_break/social_networks/tiechange_gamma.png", 
-       width = 75, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
-ggsave(plot = gg_type_change, 
-       filename = "output/network_break/social_networks/tiechange_gamma.svg", 
-       width = 75, 
-       height = 45, 
-       units = "mm")
-
+gg_type_change #show plot before saving
+ggsave(gg_type_change, "output/network_break/social_networks/tiechange_gamma.png", width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_type_change, "output/network_break/social_networks/tiechange_gamma.svg", width = 75, height = 45, units = "mm")
 
 # Breaks/new ties by gamma
 ties_data <- network_change_sum %>% 
@@ -173,19 +156,9 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
                     name = "") +
   theme_ctokita() +
   theme(aspect.ratio = 1)
-gg_ties
-
-ggsave(plot = gg_ties, 
-       filename = "output/network_break/social_networks/tie_breaksandadds_gamma.png", 
-       width = 90, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
-ggsave(plot = gg_ties, 
-       filename = "output/network_break/social_networks/tie_breaksandadds_gamma.svg", 
-       width = 90, 
-       height = 45, 
-       units = "mm")
+gg_ties #show plot before saving
+ggsave(gg_ties, "output/network_break/social_networks/tie_breaksandadds_gamma.png", width = 90, height = 45, units = "mm", dpi = 400)
+ggsave(gg_ties, "output/network_break/social_networks/tie_breaksandadds_gamma.svg", width = 90, height = 45, units = "mm")
 
 # Change in degree
 net_degree_data <- network_change_sum %>% 
@@ -203,19 +176,8 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   theme_ctokita() +
   theme(aspect.ratio = 1,
         legend.position = "none")
-
-gg_degree_change
-
-ggsave(plot = gg_degree_change, 
-       filename = "output/network_break/social_networks/outdegreechange_gamma.png", 
-       width = 45, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
-ggsave(plot = gg_degree_change, 
-       filename = "output/network_break/social_networks/outdegreechange_gamma.svg", 
-       width = 45, 
-       height = 45, 
-       units = "mm")
+gg_degree_change #show plot before saving
+ggsave(gg_degree_change, "output/network_break/social_networks/outdegreechange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(gg_degree_change, "output/network_break/social_networks/outdegreechange_gamma.svg", width = 45, height = 45, units = "mm")
 
 
