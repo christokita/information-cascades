@@ -11,57 +11,55 @@ library(ggplot2)
 library(dplyr)
 source("scripts/plot_theme_ctokita.R")
 
+##########
+# Plot parameteres
+##########
+pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 
-############## Assortatiity ##############
+
+
+############################## Assortatiity ##############################
 
 ##########
 # Load data and summarise
 ##########
 # Normal sim (10^5 steps)
-norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
-norm_data <- norm_data %>% 
+norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
   mutate(run_time = "10^5")
 
 # Long sim (10^6)
-long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_assortativity_10^6steps.csv', header = TRUE)
-long_data <- long_data %>% 
+long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_assortativity_10^6steps.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
   mutate(run_time = "10^6")
 
 # Bind
-assort_sum <- rbind(norm_data, long_data)
+assort_data <- rbind(norm_data, long_data)
 rm(norm_data, long_data)
+assort_sum <- assort_data %>% 
+  tidyr::gather(metric, value, -gamma, -run_time) %>% 
+  group_by(gamma, run_time, metric) %>% 
+  summarise(mean = mean(value),
+            sd = sd(value),
+            ci95 = qnorm(0.975) * sd(value) / sqrt( sum(!is.na(value)) ))
+
 
 ##########
 # Plot
 ##########
 # Raw final assortativity values
-pal <- c("#225ea8", "#41b6c4", "#a1dab4")
-gg_assort_simlength <- ggplot(data = assort_sum, 
+assort_raw <- assort_sum %>% 
+  filter(metric == "assort_final")
+gg_assort_simlength <- ggplot(data = assort_raw, 
                                 aes(x = gamma, 
-                                    y = assort_mean, 
+                                    y = mean, 
                                     color = run_time, 
                                     group = run_time, 
                                     fill = run_time)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4,
               color = NA) +
   geom_line(size = 0.3) +
@@ -78,15 +76,12 @@ gg_assort_simlength <- ggplot(data = assort_sum,
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
   theme(aspect.ratio = 1)
-
-gg_assort_simlength
-ggsave(plot = gg_assort_simlength, 
-       filename = "output/network_break/suppl_analysis/Assortativity_by_simlength.png", 
-       height = 45, 
-       width = 90, units = "mm", dpi = 400)
+gg_assort_simlength 
+ggsave(plot = gg_assort_simlength, filename = "output/network_break/suppl_analysis/Assortativity_by_simlength.png", height = 45, width = 90, units = "mm", dpi = 400)
 
 
-############## Changes in network structure ##############
+
+############################## Changes in network structure ##############################
 
 ##########
 # Load data and summarise
@@ -96,19 +91,13 @@ normal_files <- list.files("data_derived/network_break/social_networks/network_c
 norm_data <- lapply(normal_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)
-  #Summarize
+  # Create extra metrics
   run_data <- run_file %>% 
     mutate(net_same = same_type_adds - same_type_breaks,
            net_diff = diff_type_adds - diff_type_breaks,
            net_out_degree = out_degree - out_degree_initial,
            net_in_degree = in_degree - in_degree_initial,
-           sim_length = "10^5") %>% 
-    select(-replicate, -individual) %>% 
-    gather(metric, value, -gamma, -sim_length) %>% 
-    group_by(sim_length, gamma, metric) %>% 
-    summarise(mean = mean(value), 
-              sd = sd(value),
-              error = sd(value)/sqrt(length(value)))
+           sim_length = "10^5") 
   return(run_data)
 })
 norm_data <- do.call("rbind", norm_data)
@@ -118,31 +107,43 @@ long_files <- list.files("data_derived/network_break/__suppl_analysis/sim_length
 long_data <- lapply(long_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)
-  #Summarize
+  # Create extra metrics
   run_data <- run_file %>% 
     mutate(net_same = same_type_adds - same_type_breaks,
            net_diff = diff_type_adds - diff_type_breaks,
            net_out_degree = out_degree - out_degree_initial,
            net_in_degree = in_degree - in_degree_initial,
-           sim_length = "10^6") %>% 
-    select(-replicate, -individual) %>% 
-    gather(metric, value, -gamma, -sim_length) %>% 
-    group_by(sim_length, gamma, metric) %>% 
-    summarise(mean = mean(value), 
-              sd = sd(value),
-              error = sd(value)/sqrt(length(value)))
+           sim_length = "10^6") 
   return(run_data)
 })
 long_data <- do.call("rbind", long_data)
 
-# Bind
+# Bind and sum
 network_change_data <- rbind(norm_data, long_data)
+rm(norm_data, long_data)
+network_change_sum <- network_change_data %>% 
+  select(-replicate, -individual) %>% 
+  tidyr::gather(metric, value, -gamma, -sim_length) %>% 
+  group_by(sim_length, gamma, metric) %>% 
+  summarise(mean = mean(value), 
+            sd = sd(value),
+            error = sd(value)/sqrt(length(value)))
 
 ##########
-# Plot
+# Plot raw data to inspect
+##########
+sample_data <- network_change_data %>% 
+  filter(gamma %in% seq(-1, 1, 0.5))
+ggplot(data = sample_data, aes(x = as.factor(same_type_adds), y = as.factor(diff_type_adds))) +
+  geom_bin2d() +
+  theme_ctokita() +
+  facet_grid(gamma ~ sim_length)
+
+##########
+# Plot summarized data
 ##########
 # Change in connections by type
-net_type_data <- network_change_data %>% 
+net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 
   mutate(metric = factor(metric, levels = c("net_same", "net_diff")))
 gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, color = sim_length)) +
@@ -166,9 +167,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, color = sim_len
                     name = "Connetion type") +
   theme_ctokita() +
   theme(aspect.ratio = 1)
-
 gg_type_change
-
 ggsave(plot = gg_type_change, 
        filename = "output/network_break/social_networks/tiechange_gamma.png", 
        width = 75, 
@@ -178,7 +177,7 @@ ggsave(plot = gg_type_change,
 
 
 # Breaks/new ties by gamma
-ties_data <- network_change_data %>% 
+ties_data <- network_change_sum %>% 
   filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
   mutate(set = paste0(sim_length, "-", metric),
          metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
@@ -207,26 +206,14 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, color = si
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_ties
-
-ggsave(plot = gg_ties, 
-       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength.png", 
-       width = 90, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
+ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/Breaksandadds_simlength.png", width = 90, height = 45, units = "mm", dpi = 400)
 
 gg_ties <- gg_ties +
   scale_y_continuous(limits = c(0, 1.5))
-
-ggsave(plot = gg_ties, 
-       filename = "output/network_break/suppl_analysis/Breaksandadds_simlength_zoom.png", 
-       width = 90, 
-       height = 45, 
-       units = "mm", 
-       dpi = 400)
+ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/Breaksandadds_simlength_zoom.png", width = 90, height = 45, units = "mm", dpi = 400)
 
 # Change in degree
-net_degree_data <- network_change_data %>% 
+net_degree_data <- network_change_sum %>% 
   filter(metric %in% c("net_out_degree")) %>% 
   mutate(log_mean = log10(mean))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim_length)) +
@@ -242,6 +229,5 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim
   theme_ctokita() +
   theme(aspect.ratio = 1,
         legend.position = "none")
-
 gg_degree_change
 
