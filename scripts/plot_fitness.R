@@ -45,7 +45,6 @@ behav_sum <- behav_data %>%
 # Sensitivity: proportion of important (i.e., greater than threshold) news stories individual reacted to
 sensitivity_data <- behav_sum %>% 
   filter(metric == "sensitivity")
-
 gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95,
                   ymax =  mean + ci95),
@@ -55,16 +54,14 @@ gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean)) +
   ylab("Behavioral sensitivity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_sens
-ggsave(plot = gg_sens, filename = paste0(out_path, "Sensitvity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
-ggsave(plot = gg_sens, filename = paste0(out_path, "Sensitvity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+gg_sens #show plot before saving
+ggsave(plot = gg_sens, filename = paste0(out_path, "sensitvity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_sens, filename = paste0(out_path, "sensitvity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Specificity: proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
 specificity_data <- behav_sum %>% 
   filter(metric == "specificity")
-
 gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95,
                   ymax =  mean + ci95),
@@ -74,16 +71,14 @@ gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean)) +
   ylab("Behavioral specificity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_specif
-ggsave(plot = gg_specif, filename = paste0(out_path, "Specificity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
-ggsave(plot = gg_specif, filename = paste0(out_path, "Specificity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+gg_specif #show plot before saving
+ggsave(plot = gg_specif, filename = paste0(out_path, "specificity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_specif, filename = paste0(out_path, "specificity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Precision: proportion of activity (x_i = 1) that is due to "important" news.
 precision_data <- behav_sum %>% 
   filter(metric == "precision")
-
 gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95,
                   ymax =  mean + ci95),
@@ -93,10 +88,9 @@ gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean)) +
   ylab("Behavioral precision") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_precis
-ggsave(plot = gg_precis, filename = paste0(out_path, "Precision", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
-ggsave(plot = gg_precis, filename = paste0(out_path, "Precision", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+gg_precis #show plot before saving
+ggsave(plot = gg_precis, filename = paste0(out_path, "precision", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_precis, filename = paste0(out_path, "precision", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 # Individual fitness 
@@ -112,7 +106,6 @@ gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
   ylab("Information use fitness") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-
-gg_fitness
-ggsave(plot = gg_fitness, filename = paste0(out_path, "Fitness", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+gg_fitness #show plot before saving
+ggsave(plot = gg_fitness, filename = paste0(out_path, "fitness", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
 
