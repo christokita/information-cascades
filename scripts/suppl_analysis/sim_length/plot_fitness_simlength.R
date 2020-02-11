@@ -34,15 +34,29 @@ long_data <- read.csv("data_derived/network_break/__suppl_analysis/sim_length/n2
          fitness = sensitivity + specificity + precision)
 
 # Bind and summarise
-fitness_data <- rbind(norm_data, long_data) %>% 
-  select(-replicate) %>% 
-  tidyr::gather(metric, value, -gamma, -run_time)
+fitness_data <- rbind(norm_data, long_data) 
 rm(norm_data, long_data)
 fitness_sum <- fitness_data  %>% 
+  select(-replicate) %>% 
+  tidyr::gather(metric, value, -gamma, -run_time) %>% 
   group_by(gamma, metric, run_time) %>% 
   summarise(mean = mean(value, na.rm = TRUE),
             sd = sd(value, na.rm = TRUE),
             ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
+
+##########
+# Plot raw data to inspect
+##########
+ggplot(data = fitness_data, aes(x = gamma, y = precision, color = run_time)) +
+  geom_point(size = 0.2,
+             alpha = 0.3,
+             position = position_jitterdodge(dodge.width = 0.05, jitter.height = 0, jitter.width = 0.01)) +
+  scale_color_manual(name = "Simulation\nsteps", 
+                     values = pal,
+                     labels = c(expression(10^5),
+                                expression(10^6))) +
+  theme_ctokita()
+
 
 ##########
 # Plot
@@ -96,7 +110,7 @@ gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean, color = ru
 gg_specif #show plot before saving
 
 # Precision: proportion of activity (x_i = 1) that is due to "important" news.
-precision_data <- fitness_data %>% 
+precision_data <- fitness_sum %>% 
   filter(metric == "precision")
 gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean, color = run_time)) +
   geom_ribbon(aes(ymin = mean - ci95,
