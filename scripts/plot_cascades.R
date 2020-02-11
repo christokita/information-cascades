@@ -23,7 +23,8 @@ if (plot_tag != "") {
 }
 
 
-########## Ftiness trials ##########
+
+############################## Ftiness trials: Cascade dynamics ##############################
 
 ##########
 # Load data 
@@ -45,18 +46,15 @@ cascade_size <- cascade_data %>%
 
 # Plot
 gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
-  # Plot all data
   geom_ribbon(aes(ymin = mean - ci95, 
                     ymax = mean + ci95), 
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  # General plotting controls
   ylab("Cascade size") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
-
-gg_size 
+gg_size #show plot before saving
 ggsave(paste0(out_path, "CascadeSize", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(paste0(out_path, "CascadeSize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
@@ -74,19 +72,16 @@ cascade_diff <- cascade_data %>%
 
 # Summarizing plot
 gg_diff <- ggplot(cascade_diff, aes(x = gamma, y = mean)) +
-  # Plot all data
   geom_ribbon(aes(ymin = mean - ci95, 
                     ymax = mean + ci95),
                 alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  # General plotting controls
   # scale_y_continuous(limits = c(0, 0.16)) +
   ylab(expression( paste("Cascade bias" ))) +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
-
-gg_diff
+gg_diff #show plot before saving
 ggsave(paste0(out_path, "CascadeBias", plot_tag,".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(paste0(out_path, "CascadeBias", plot_tag,".svg"), width = 45, height = 45, units = "mm")
 
