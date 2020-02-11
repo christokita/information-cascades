@@ -13,7 +13,7 @@ library(tidyr)
 source("scripts/plot_theme_ctokita.R")
 
 ####################
-# Paramters for analysis
+# Paramters for analysis: paths to data, paths for output, and filename
 ####################
 data_path <- "data_derived/network_break/fitness/n200_fitness_allbehavior_gamma.csv" #path to data
 out_path <- "output/network_break/fitness/" #directory you wish to save plots
@@ -22,7 +22,9 @@ if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
 
-########## Fitness trials #########
+
+
+############################## Fitness trials: individual behavior/information use ##############################
 
 ##########
 # Load data and summarise

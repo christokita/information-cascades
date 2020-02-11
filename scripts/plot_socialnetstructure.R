@@ -12,6 +12,17 @@ library(dplyr)
 library(tidyr)
 source("scripts/plot_theme_ctokita.R")
 
+####################
+# Paramters for analysis: paths to data, paths for output, and filename
+####################
+assort_file <- "data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv" #path to file containing assortativity data
+network_data_dir <- "data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
+out_path <- "output/network_break/social_networks/" #directory you wish to save plots
+plot_tag <- "gamma" #extra info to add onto end of plot name
+if (plot_tag != "") {
+  plot_tag <- paste0("_", plot_tag)
+}
+
 
 
 ############################## Assortatiity ##############################
@@ -19,7 +30,7 @@ source("scripts/plot_theme_ctokita.R")
 ##########
 # Load data and summarise
 ##########
-assort_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
+assort_data <- read.csv(assort_file, header = TRUE)
 assort_sum <- assort_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   select(gamma, delta_assort, assort_final) %>% 
@@ -47,8 +58,8 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assortativity_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_assort, filename = "output/network_break/social_networks/assortativity_gamma.svg", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 # Change in assortativity
 assort_change <- assort_sum %>% 
@@ -65,7 +76,8 @@ gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assortchange #show plot before saving
-ggsave(gg_assortchange, "output/network_break/social_networks/assortchange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assortchange, filename = paste0(out_path, "assortchange", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assortchange, filename = paste0(out_path, "assortchange", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
 
@@ -74,7 +86,7 @@ ggsave(gg_assortchange, "output/network_break/social_networks/assortchange_gamma
 ##########
 # Load data and summarise
 ##########
-network_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
+network_files <- list.files(network_data_dir, full.names = TRUE)
 network_change_data <- lapply(network_files, function(x) {
   # Read in file 
   run_file <- read.csv(x) %>% 
@@ -85,6 +97,7 @@ network_change_data <- lapply(network_files, function(x) {
   return(run_file)
 })
 network_change_data <- do.call("rbind", network_change_data)
+
 #Summarize
 network_change_sum <- network_change_data %>% 
   select(-replicate, -individual) %>% 
@@ -124,8 +137,8 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_type_change #show plot before saving
-ggsave(gg_type_change, "output/network_break/social_networks/tiechange_gamma.png", width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(gg_type_change, "output/network_break/social_networks/tiechange_gamma.svg", width = 75, height = 45, units = "mm")
+ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".svg"), width = 75, height = 45, units = "mm")
 
 # Breaks/new ties by gamma
 ties_data <- network_change_sum %>% 
@@ -157,8 +170,8 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_ties #show plot before saving
-ggsave(gg_ties, "output/network_break/social_networks/tie_breaksandadds_gamma.png", width = 90, height = 45, units = "mm", dpi = 400)
-ggsave(gg_ties, "output/network_break/social_networks/tie_breaksandadds_gamma.svg", width = 90, height = 45, units = "mm")
+ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".png"), width = 90, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".svg"), width = 90, height = 45, units = "mm")
 
 # Change in degree
 net_degree_data <- network_change_sum %>% 
@@ -177,7 +190,7 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   theme(aspect.ratio = 1,
         legend.position = "none")
 gg_degree_change #show plot before saving
-ggsave(gg_degree_change, "output/network_break/social_networks/outdegreechange_gamma.png", width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(gg_degree_change, "output/network_break/social_networks/outdegreechange_gamma.svg", width = 45, height = 45, units = "mm")
+ggsave(plot = gg_degree_change, filename = paste0(out_path, "outdegreechange", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_degree_change, filename = paste0(out_path, "outdegreechange", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 
