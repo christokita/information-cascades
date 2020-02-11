@@ -12,7 +12,7 @@ library(dplyr)
 source("scripts/plot_theme_ctokita.R")
 
 
-############## Assortatiity ##############
+############################## Assortatiity ##############################
 
 ##########
 # Load data and summarise
@@ -99,12 +99,12 @@ gg_assort_networktype <- ggplot(data = assort_sum,
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
   theme(aspect.ratio = 1)
-
 gg_assort_networktype
 ggsave(plot = gg_assort_networktype, filename = "output/network_break/suppl_analysis/Assortativity_by_networktype.png", height = 45, width = 90, units = "mm", dpi = 400)
 
 
-############## Fitness ##############
+
+############################## Fitness ##############################
 
 ##########
 # Load fitness data and summarise
@@ -175,9 +175,7 @@ gg_correct <- ggplot(data = behav_sum, aes(x = gamma,
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   scale_color_manual(name = "Network type", values = pal) +
   theme_ctokita() 
-
 gg_correct
-
 ggsave(plot = gg_correct, 
        filename = "output/network_break/suppl_analysis/MessageCorrect_networktype.png", 
        width = 90, 
@@ -200,9 +198,7 @@ gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma,
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   scale_color_manual(name = "Network type", values = pal) +
   theme_ctokita() 
-
 gg_incorrect
-
 ggsave(plot = gg_incorrect, 
        filename = "output/network_break/suppl_analysis/MessageInorrect_netowrktype.png", 
        width = 90, 
@@ -225,5 +221,4 @@ gg_fitness <- ggplot(data = behav_sum, aes(x = gamma,
   xlab(expression( paste("Information correlation, ", italic(gamma)) )) +
   scale_color_manual(name = "Network type", values = pal) +
   theme_ctokita() 
-
 gg_fitness
