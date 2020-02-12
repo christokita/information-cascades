@@ -90,7 +90,7 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
         # Randomly select one individual and adjust thresholds according to behavior (correct/incorrect)
-        thresholds = adjust_thresh(thresholds =  thresh_mat,
+        thresh_mat = adjust_thresh(thresholds =  thresh_mat,
                                    states = state_mat,
                                    correct_behavior = correct_state,
                                    phi = phi,

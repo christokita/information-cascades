@@ -214,8 +214,7 @@ ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/Breaksand
 
 # Change in degree
 net_degree_data <- network_change_sum %>% 
-  filter(metric %in% c("net_out_degree")) %>% 
-  mutate(log_mean = log10(mean))
+  filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim_length)) +
   geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
                 size = 0.3,
