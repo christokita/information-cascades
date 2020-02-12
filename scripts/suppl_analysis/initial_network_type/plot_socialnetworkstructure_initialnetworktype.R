@@ -134,6 +134,15 @@ network_change_sum <- network_change_data %>%
             error = sd(value)/sqrt(length(value)))
 
 ##########
+# Plot raw data
+##########
+sample_data <- network_change_data %>% 
+  filter(gamma %in% seq(-1, 1, 0.5))
+ggplot(data = sample_data, aes(x = as.factor(gamma), y = as.factor(net_diff), color = network_type, group = network_type)) +
+  geom_point(size = 0.3, alpha = 0.1, position = position_jitterdodge(dodge.width = 0.2, jitter.width = 0.05)) +
+  theme_ctokita()
+
+##########
 # Plot summarized data
 ##########
 # Change in connections by type
