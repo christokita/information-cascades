@@ -82,19 +82,8 @@ for run in runs:
             all_behavior = copy.deepcopy(behavior)
         else:
             all_behavior = all_behavior.append(behavior, ignore_index = True)
-            
-        # Summarize and add to data-summarizing dataframe
-        behavior_sum = behavior.drop(columns = 'threshold')
-        behavior_sum = behavior_sum.mean(skipna = True)
-        behavior_sum = behavior_sum.to_frame().T #flip so categories remain on column
-        if summarized_behav.empty:
-            summarized_behav = copy.deepcopy(behavior_sum)
-        else:
-            summarized_behav = summarized_behav.append(behavior_sum, ignore_index = True)
 
             
 # Write to CSV
 all_behavior.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_allbehavior_' + filetags + '.csv',
-                   index = False)
-summarized_behav.to_csv(outpath + 'n' + str(n_of_interest) + '_fitness_behaviorsum_' + filetags + '.csv',
                    index = False)
