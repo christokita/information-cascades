@@ -127,8 +127,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
     behavior_data.to_pickle(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
-    fitness_size.to_pickle(output_dirs[5] + "fit_size_rep" + rep_label + ".pkl")
-    fitness_behavior.to_pickle(output_dirs[5] + "fit_behav_rep" + rep_label + ".pkl")
+    fitness_size.to_pickle(output_dirs[5] + "fitness_cascades_rep" + rep_label + ".pkl")
+    fitness_behavior.to_pickle(output_dirs[5] + "fitness_behavior_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
