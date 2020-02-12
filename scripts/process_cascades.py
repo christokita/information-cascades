@@ -6,7 +6,7 @@ Created on Thu Jan 16 13:58:11 2020
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to analyze group-level information spread from fitness trials at end of simulations.
+Script to process fitness trial cascade data.
 """
 
 ####################

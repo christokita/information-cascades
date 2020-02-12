@@ -6,7 +6,7 @@ Created on Mon Oct 28 11:15:43 2019
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to analyze individual fitness from fitness trials at end of simulations.
+Script to process fitness trial behavioral data.
 """
 
 ####################

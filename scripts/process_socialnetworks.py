@@ -6,7 +6,7 @@ Created on Tue Aug 20 10:02:31 2019
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to analyze social network structure produced by simulations
+Script to process social network data produced by simulations.
 """
 
 ####################
