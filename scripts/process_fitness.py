@@ -44,7 +44,6 @@ runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.
 ####################
 # Dataframes for collecting data
 all_behavior = pd.DataFrame()
-summarized_behav = pd.DataFrame()
 
 # Loop through runs
 for run in runs:
