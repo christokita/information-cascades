@@ -86,7 +86,7 @@ for run in runs:
             all_cascade = copy.deepcopy(cascade)
         elif raw_data == True:
             all_cascade = all_cascade.append(cascade, ignore_index = True)
-        
+
         # Summarise data for that replicate and append
         cascade = cascade.drop(columns = ['t']) #drop time step column
         cascade_sum = cascade.mean().to_frame().T
