@@ -17,8 +17,6 @@ import numpy as np
 import os
 import re
 import copy
-import sys
-
 
 ####################
 # List files to be read
@@ -33,7 +31,7 @@ tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/fitness_trials/'
-filetags = 'gammasweep' #added info after 'n<number>_fitness_<filetag>_
+filetags = 'gammasweep' #added info after e.g., 'fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
