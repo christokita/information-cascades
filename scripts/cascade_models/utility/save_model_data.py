@@ -10,16 +10,19 @@ import numpy as np
 import pandas as pd
 
 def save_model_data(output_directories, output_tags, data_list, replicate):
-    # Response threshold function dictating the behavioral state of individuals.
+    # Saves simulation from model
     # ** Not currently in use **
     #
     # INPUTS:
-    # - stimulus:    stimulus value that the threshold is compared against (float).
-    # - threshold:   threshold value of individual (float).
+    # - output_directories:   list of full paths to output directores (list of str)
+    # - output_tags:          
+    # - data_list: 
+    # - replicate:
 
     # Create replicate label for saving the data
     replicate_label = str(replicate)
     replicate_label = replicate_label.zfill(2)
+    replicate_label = "_rep" + replicate_label
     
     # Check if number of output directories, output_tags, and data files match
     if not len(output_directories) == len(output_tags) == len(data_list):
@@ -36,7 +39,13 @@ def save_model_data(output_directories, output_tags, data_list, replicate):
                         data = data,
                         element_in_datalist = i)
         else:
-            
+            for j in np.arange(len(data_list)):
+                data = data_list[i][j]
+                output_data(ouput_directory = output_directories[i],
+                            output_tag = output_tags[i][j],
+                            replicate_label = replicate_label,
+                            data = data,
+                            element_in_datalist = i)                
             
 def output_data(ouput_directory, output_tag, replicate_label, data, element_in_datalist):
     #
@@ -46,14 +55,4 @@ def output_data(ouput_directory, output_tag, replicate_label, data, element_in_d
         data.to_pickle(ouput_directory + output_tag + replicate_label + ".pkl")
     else: 
         print("ERROR: Canot save element" + str(element_in_datalist) + " in the data list is not a known data type. Check whether numpy array or pandas dataframe.")
-    
-        
-    cascade_size.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
-    np.save(output_dirs[1] + "sn_rep" + rep_label + ".npy", adjacency)
-    np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
-    np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
-    np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
-    behavior_data.to_pickle(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
-    fitness_size.to_pickle(output_dirs[5] + "fitness_cascades_rep" + rep_label + ".pkl")
-    fitness_behavior.to_pickle(output_dirs[5] + "fitness_behavior_rep" + rep_label + ".pkl")
     
