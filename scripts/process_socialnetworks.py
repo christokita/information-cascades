@@ -26,19 +26,19 @@ import igraph
 n_of_interest = 200
 
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl-sim/complete-graph/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl-sim/complete-graph/type_data/' #type data
+sn_dir = '../data_sim/network_break/__suppl-sim/complete-network-longsim/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/__suppl-sim/complete-network-longsim/type_data/' #type data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/__suppl_analysis/other_network_types/'
-filetags = 'completegraph' #added info after 'n<number>_assortativity
+filetags = 'completnetwork-longsim' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
 # List runs
 runs = os.listdir(sn_dir)
-runs = [run for run in runs if re.findall(str(n_of_interest) + '_' + tags + '[-.0-9]+', run)]
+runs = [run for run in runs if re.findall(tags + '[-.0-9]+', run)]
 runs.sort()
 
 
