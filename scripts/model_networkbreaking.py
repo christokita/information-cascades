@@ -107,7 +107,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     
     ########## Save files ##########
     # Create output folder
-    output_name = "n" + str(n) + "_gamma" + str(gamma)
+    output_name = "gamma" + str(gamma)
     data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data', 'fitness_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
