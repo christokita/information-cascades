@@ -28,8 +28,8 @@ type_dir = '../data_sim/network_break/type_data/' #type data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/social_networks'
-filetags = 'completnetwork-longsim' #added info after 'n<number>_assortativity
+outpath = '../data_derived/network_break/social_networks/'
+filetags = 'gammasweep' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -93,7 +93,7 @@ for run in runs:
             
 # Save
 assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_final', 'assort_initial'])
-assort_data.to_csv(outpath + 'n' + str(n_of_interest) + '_assortativity' + filetags + '.csv', index = False)
+assort_data.to_csv(outpath + 'assortativity' + filetags + '.csv', index = False)
 
 
 ####################
@@ -166,7 +166,7 @@ for run in runs:
             # Count
             same_type_adds, same_type_breaks = len(same_type_adds), len(same_type_breaks)
             diff_type_adds, diff_type_breaks = len(diff_type_adds), len(diff_type_breaks)
-            # Summarize
+            # Compile into dataframe row
             data_row = pd.DataFrame(data = [[gamma, replicate, i, 
                                              out_degree[i], out_degree_initial[i],
                                              in_degree[i], in_degree_initial[i],
@@ -176,5 +176,5 @@ for run in runs:
             network_change_data = network_change_data.append(data_row, ignore_index = True)
             
     # Save
-    network_change_data.to_csv(outpath + 'network_change/' + 'n' + str(n_of_interest) + '_networkchange' + filetags + str(gamma) + '.csv', index = False)
+    network_change_data.to_csv(outpath + 'network_change/networkchange' + filetags + str(gamma) + '.csv', index = False)
     del(network_change_data)
