@@ -57,7 +57,7 @@ for run in runs:
     all_cascade = pd.DataFrame()
     
      # Get gamma value
-    gamma = float(re.search('.*_[a-z]+([-\.0-9]+)', run).group(1))
+    gamma = float(re.search('[a-z]+([-\.0-9]+)', run).group(1))
     
     # List cascade and and behavior files
     all_files = os.listdir(fit_dir + run +'/')
@@ -76,8 +76,9 @@ for run in runs:
         rep = int(re.search('([0-9]+)', replicate).group(1))
         
         # Calculate additional statistics: Cascades
+        cascade['avg_cascade_size'] = cascade['total_active'] / cascade ['samplers_active']
         cascade['active_diff'] = abs(cascade['active_A'] - cascade['active_B'])
-        cascade['active_diff_prop'] = cascade['active_diff'] / cascade['total_active']
+        cascade['casacde_bias'] = cascade['active_diff'] / cascade['total_active']
         cascade['gamma'] = gamma
         cascade['replicate'] = rep
         
