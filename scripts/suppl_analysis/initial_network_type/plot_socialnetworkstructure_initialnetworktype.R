@@ -81,7 +81,7 @@ gg_assort_networktype <- ggplot(data = assort_raw,
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_assort_networktype
-ggsave(plot = gg_assort_networktype, filename = "output/network_break/suppl_analysis/Assortativity_by_networktype.png", height = 45, width = 90, units = "mm", dpi = 400)
+ggsave(plot = gg_assort_networktype, filename = "output/network_break/suppl_analysis/Assortativity_by_networktype_longersim.png", height = 45, width = 90, units = "mm", dpi = 400)
 
 
 
