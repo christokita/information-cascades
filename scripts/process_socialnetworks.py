@@ -22,17 +22,14 @@ import igraph
 ####################
 # List files to be read
 ####################
-# Set group size runs of intereset
-n_of_interest = 200
-
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl-sim/complete-network-longsim/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl-sim/complete-network-longsim/type_data/' #type data
+sn_dir = '../data_sim/network_break/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/type_data/' #type data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/other_network_types/'
-filetags = 'completnetwork-longsim' #added info after 'n<number>_assortativity
+outpath = '../data_derived/network_break/social_networks/'
+filetags = 'gammasweep' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -46,7 +43,7 @@ runs.sort()
 # Measure assortativity
 ####################
 # Set array for data collection
-assort_values = np.empty((0,3))
+assort_values = np.empty((0,4))
 
 # Loop through runs
 for run in runs:
@@ -55,7 +52,7 @@ for run in runs:
     print("Starting on \'" + run + "\'...")
     
     # Get gamma value
-    gamma = float(re.search('.*_gamma([-\.0-9]+)', run).group(1))
+    gamma = float(re.search('gamma([-\.0-9]+)', run).group(1))
     
     # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
@@ -80,6 +77,7 @@ for run in runs:
         adjacency = np.load(sn_dir + run + '/' + sn_final[i])
         adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[i])
         type_mat = np.load(type_dir +  run + '/' + type_files[i])
+        rep = int(re.search('([0-9]+)', sn_final[i]).group(1))
         
         # Calculate assortativity
         g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency))
@@ -90,12 +88,12 @@ for run in runs:
         initial_assort = g_initial.assortativity(types1 = g_initial.vs['Type'], directed = True)
         
         # Return
-        to_return = np.array([[gamma, final_assort, initial_assort]])
+        to_return = np.array([[gamma, rep, final_assort, initial_assort]])
         assort_values = np.vstack([assort_values, to_return])
             
 # Save
-assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'assort_final', 'assort_initial'])
-assort_data.to_csv(outpath + 'n' + str(n_of_interest) + '_assortativity' + filetags + '.csv', index = False)
+assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_final', 'assort_initial'])
+assort_data.to_csv(outpath + 'assortativity' + filetags + '.csv', index = False)
 
 
 ####################
@@ -112,7 +110,7 @@ for run in runs:
     print("Starting on \'" + run + "\'...")
     
     # Get gamma value
-    gamma = float(re.search('.*_gamma([-\.0-9]+)', run).group(1))
+    gamma = float(re.search('gamma([-\.0-9]+)', run).group(1))
     
      # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
@@ -168,7 +166,7 @@ for run in runs:
             # Count
             same_type_adds, same_type_breaks = len(same_type_adds), len(same_type_breaks)
             diff_type_adds, diff_type_breaks = len(diff_type_adds), len(diff_type_breaks)
-            # Summarize
+            # Compile into dataframe row
             data_row = pd.DataFrame(data = [[gamma, replicate, i, 
                                              out_degree[i], out_degree_initial[i],
                                              in_degree[i], in_degree_initial[i],
@@ -178,5 +176,5 @@ for run in runs:
             network_change_data = network_change_data.append(data_row, ignore_index = True)
             
     # Save
-    network_change_data.to_csv(outpath + 'network_change/' + 'n' + str(n_of_interest) + '_networkchange' + filetags + str(gamma) + '.csv', index = False)
+    network_change_data.to_csv(outpath + 'network_change/networkchange' + filetags + str(gamma) + '.csv', index = False)
     del(network_change_data)
