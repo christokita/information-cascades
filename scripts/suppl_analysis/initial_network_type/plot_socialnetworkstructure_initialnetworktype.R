@@ -28,23 +28,24 @@ rand_data <- read.csv('data_derived/network_break/social_networks/assortativity_
          network_type = "Random (default)") 
 
 # Scale-free network
-sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/scalefree_assortativity.csv', header = TRUE) %>% 
+sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_scalefree.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Scale-free") 
 
 # Complete network
-comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_completnetwork-longsim.csv', header = TRUE) %>% 
+comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_completenetwork-longsim.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Complete (100x longer sim)")
 
 # Regular network
-reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/regular_assortativity.csv', header = TRUE) %>% 
+reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_regular.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Regular")
 
 # Bind and summarize
 assort_data <- rbind(rand_data, sf_data, comp_data, reg_data) %>% 
-  mutate(network_type = factor(network_type, levels = c("Random (default)", "Regular", "Scale-free", "Complete (100x longer sim)")))
+  mutate(network_type = factor(network_type, 
+                               levels = c("Random (default)", "Regular", "Scale-free", "Complete (100x longer sim)")))
 rm(rand_data, sf_data, comp_data, reg_data)
 assort_sum <- assort_data %>% 
   tidyr::gather(metric, value, -gamma, -network_type) %>% 
