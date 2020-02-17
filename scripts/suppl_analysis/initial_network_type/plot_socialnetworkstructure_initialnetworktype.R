@@ -23,29 +23,29 @@ pal <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3")
 # Load data and summarise
 ##########
 # Normal sim (random network)
-rand_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE) %>% 
+rand_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Random (default)") 
 
 # Scale-free network
-sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/n200_scalefree_assortativity.csv', header = TRUE) %>% 
+sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/scalefree_assortativity.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Scale-free") 
 
 # Complete network
-comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/n200_assortativity_completegraph.csv', header = TRUE) %>% 
+comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_completnetwork-longsim.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
-         network_type = "Complete")
+         network_type = "Complete (100x longer sim)")
 
 # Regular network
-reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/n200_regular_assortativity.csv', header = TRUE) %>% 
+reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/regular_assortativity.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Regular")
 
 # Bind and summarize
 assort_data <- rbind(rand_data, sf_data, comp_data, reg_data) %>% 
-  mutate(network_type = factor(network_type, levels = c("Random (default)", "Regular", "Scale-free", "Complete")))
-rm(rand_data, rand_sum, sf_data, sf_sum, reg_data, reg_sum)
+  mutate(network_type = factor(network_type, levels = c("Random (default)", "Regular", "Scale-free", "Complete (100x longer sim)")))
+rm(rand_data, sf_data, comp_data, reg_data)
 assort_sum <- assort_data %>% 
   tidyr::gather(metric, value, -gamma, -network_type) %>% 
   group_by(gamma, network_type, metric) %>% 
