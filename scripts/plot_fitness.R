@@ -10,7 +10,7 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-source("scripts/plot_theme_ctokita.R")
+source("scripts/_plot_themes/theme_ctokita.R")
 
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename

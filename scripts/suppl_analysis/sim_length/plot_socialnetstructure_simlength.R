@@ -9,7 +9,7 @@
 ##########
 library(ggplot2)
 library(dplyr)
-source("scripts/plot_theme_ctokita.R")
+source("scripts/_plot_themes/theme_ctokita.R")
 
 ##########
 # Plot parameteres

@@ -9,7 +9,7 @@
 ##########
 library(ggplot2)
 library(dplyr)
-source("scripts/plot_theme_ctokita.R")
+source("scripts/_plot_themes/theme_ctokita.R")
 
 ##########
 # Plot parameters
@@ -33,7 +33,7 @@ sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_t
          network_type = "Scale-free") 
 
 # Complete network
-comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_completenetwork-longsim.csv', header = TRUE) %>% 
+comp_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/assortativity_complete-longsim.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Complete (100x longer sim)")
 
