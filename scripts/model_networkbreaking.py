@@ -146,11 +146,8 @@ def break_tie(network, states, correct_behavior):
         breaker_active = np.random.choice(actives, size = 1)
         breaker_correct = correct_behavior[breaker_active]
         if not breaker_correct:
-             # Assess behavior of interaction partners of focal individual
-            breaker_neighbors = np.squeeze(network[breaker_active,:])
-            neighbor_behavior = breaker_neighbors * np.ndarray.flatten(states) 
-            perceived_incorrect = np.where(neighbor_behavior == 1)[0]
-            # Break ties with one randomly-selected "incorrect" neighbor
+            breaker_neighbors = np.where(network[breaker_active,:] == 1)[1]
+            perceived_incorrect = [ind for ind in actives if ind in breaker_neighbors] #which neighbors are active
             break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
             network[breaker_active, break_tie] = 0
     return network
@@ -167,8 +164,8 @@ def make_tie(network, connect_prob):
     n = network.shape[0] # Get number of individuals in system
     former_individual = np.random.choice(range(0, n), size = 1)
     form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob)) #determine if individual will form new tie
-    former_neighbors = np.squeeze(network[former_individual,:]) #get individual's neighbors
-    potential_ties = np.where(former_neighbors == 0)[0]
+    former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
+    potential_ties = np.where(former_connections == 0)[0]
     potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
     if form_connection == True and len(potential_ties) > 0: #form connection only if selected to form connection and isn't already connected to everyone
         new_tie = np.random.choice(potential_ties, size = 1, replace = False)
