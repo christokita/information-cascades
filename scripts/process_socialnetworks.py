@@ -29,7 +29,7 @@ tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/__suppl_analysis/other_network_types/'
-filetags = 'completenetwork-longsim' #added info after 'n<number>_assortativity
+filetags = 'complete-longsim' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
