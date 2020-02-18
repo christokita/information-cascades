@@ -1,28 +1,28 @@
-##############################
+########################################
 #
 # PLOT: How initial network type affects network-breaking model results 
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameters
-##########
+####################
 pal <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3")
 
 
 
 ############################## Fitness ##############################
 
-##########
+####################
 # Load fitness data and summarise
-##########
+####################
 # Normal sim (random network)
 rand_data <- read.csv('data_derived/network_break/cascades/n200_fitness_allbehavior_gammasweep.csv', header = TRUE)
 rand_sum <- rand_data %>% 
@@ -70,9 +70,9 @@ gamma_zero_fitness <- behav_sum$fitness_mean[behav_sum$gamma == 0]
 behav_sum <- behav_sum %>% 
   mutate(fitness_mean_norm = (fitness_mean - gamma_zero_fitness) / gamma_zero_fitness)
 
-##########
+####################
 # Plot fitness 
-##########
+####################
 pal <- c("#e41a1c", "#377eb8", "#4daf4a")
 
 # Proportion of messages received that an individual would want (i.e., greater than threshold)

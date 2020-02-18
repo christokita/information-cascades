@@ -1,28 +1,28 @@
-##############################
+########################################
 #
 # PLOT: Network structure given simluation length
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameteres
-##########
+####################
 pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 
 
 
 ############################## Assortatiity ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim (10^5 steps)
 norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
@@ -43,10 +43,9 @@ assort_sum <- assort_data %>%
             sd = sd(value),
             ci95 = qnorm(0.975) * sd(value) / sqrt( sum(!is.na(value)) ))
 
-
-##########
+####################
 # Plot
-##########
+####################
 # Raw final assortativity values
 assort_raw <- assort_sum %>% 
   filter(metric == "assort_final")
@@ -83,9 +82,9 @@ ggsave(plot = gg_assort_simlength, filename = "output/network_break/suppl_analys
 
 ############################## Changes in network structure ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim length (10^5)
 normal_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
 norm_data <- lapply(normal_files, function(x) {
@@ -129,9 +128,9 @@ network_change_sum <- network_change_data %>%
             sd = sd(value),
             error = sd(value)/sqrt(length(value)))
 
-##########
+####################
 # Plot raw data to inspect
-##########
+####################
 sample_data <- network_change_data %>% 
   filter(gamma %in% seq(-1, 1, 0.5))
 ggplot(data = sample_data, aes(x = as.factor(same_type_adds), y = as.factor(diff_type_adds))) +
@@ -139,9 +138,9 @@ ggplot(data = sample_data, aes(x = as.factor(same_type_adds), y = as.factor(diff
   theme_ctokita() +
   facet_grid(gamma ~ sim_length)
 
-##########
+####################
 # Plot summarized data
-##########
+####################
 # Change in connections by type
 net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 

@@ -1,28 +1,28 @@
-##############################
+########################################
 #
 # PLOT: Individual fitness given simluation length
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameteres
-##########
+####################
 pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 
 
 
 ############################## Fitness trials: individual behavior/information use ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sims (10^5 steps)
 norm_data <- read.csv("data_derived/network_break/fitness/n200_fitness_behaviorsum_gamma.csv", header = TRUE) %>% 
   mutate(run_time = "10^5",
@@ -57,10 +57,9 @@ ggplot(data = fitness_data, aes(x = gamma, y = precision, color = run_time)) +
                                 expression(10^6))) +
   theme_ctokita()
 
-
-##########
+####################
 # Plot
-##########
+####################
 # Sensitivity: proportion of important (i.e., greater than threshold) news stories individual reacted to
 sensitivity_data <- fitness_sum %>% 
   filter(metric == "sensitivity")

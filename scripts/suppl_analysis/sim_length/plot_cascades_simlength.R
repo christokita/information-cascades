@@ -1,28 +1,28 @@
-##############################
+########################################
 #
 # PLOT: Cascade dynamics during fitness trials given simluation length
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameteres
-##########
+####################
 pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 
 
 
 ############################## Fitness trials: cascades ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim length (10^5)
 norm_data <- read.csv('data_derived/network_break/cascades/n200_cascadestats_gammasweep.csv', header = TRUE) %>% 
   mutate(run_time = "10^5")
@@ -35,9 +35,9 @@ long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n2
 cascade_data <- rbind(norm_data, long_data) %>% 
   tidyr::gather()
 
-##########
+####################
 # Plot: Cascade size
-##########
+####################
 # Summarise by gamma
 cascade_size <- cascade_data %>% 
   select(run_time, gamma, total_active) %>% 
@@ -74,9 +74,9 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean, color = run_time))
 gg_size
 ggsave(plot = gg_size, filename = "output/network_break/suppl_analysis/CasacadeSize_simlength.png", width = 65, height = 45, units = "mm", dpi = 400)
 
-##########
+####################
 # Plot: Cascade bias
-##########
+####################
 # Summarise by gamma
 cascade_bias <- cascade_data %>% 
   select(run_time, gamma, active_diff_prop) %>% 

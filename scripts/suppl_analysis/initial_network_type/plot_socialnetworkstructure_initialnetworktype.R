@@ -1,27 +1,28 @@
-##############################
+########################################
 #
 # PLOT: How initial network type affects network-breaking model results 
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameters
-##########
+####################
 pal <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3")
+
 
 
 ############################## Assortatiity ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim (random network)
 rand_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
@@ -55,9 +56,9 @@ assort_sum <- assort_data %>%
             ci95 = qnorm(0.975) * sd(value) / sqrt( sum(!is.na(value)) ))
   
 
-##########
+####################
 # Plot assortativity
-##########
+####################
 # Raw final assortativity values
 assort_raw <- assort_sum %>% 
   filter(metric == "assort_final")
@@ -88,9 +89,9 @@ ggsave(plot = gg_assort_networktype, filename = "output/network_break/suppl_anal
 
 ############################## Changes in network structure ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim (random network)
 rand_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
 rand_data <- lapply(rand_files, function(x) {
@@ -134,18 +135,18 @@ network_change_sum <- network_change_data %>%
             sd = sd(value),
             error = sd(value)/sqrt(length(value)))
 
-##########
+####################
 # Plot raw data
-##########
+####################
 sample_data <- network_change_data %>% 
   filter(gamma %in% seq(-1, 1, 0.5))
 ggplot(data = sample_data, aes(x = as.factor(gamma), y = as.factor(net_diff), color = network_type, group = network_type)) +
   geom_point(size = 0.3, alpha = 0.1, position = position_jitterdodge(dodge.width = 0.2, jitter.width = 0.05)) +
   theme_ctokita()
 
-##########
+####################
 # Plot summarized data
-##########
+####################
 # Change in connections by type
 net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 

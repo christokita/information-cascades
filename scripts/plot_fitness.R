@@ -1,12 +1,12 @@
-##############################
+########################################
 #
 # PLOT: Individual fitness as inferred from behavior
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -26,9 +26,9 @@ if (plot_tag != "") {
 
 ############################## Fitness trials: individual behavior/information use ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 behav_data <- read.csv(data_path, header = TRUE)
 behav_sum <- behav_data %>% 
   select(-replicate) %>% 
@@ -39,9 +39,9 @@ behav_sum <- behav_data %>%
             sd = sd(value, na.rm = TRUE),
             ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
-##########
+####################
 # Plot
-##########
+####################
 # Sensitivity: proportion of important (i.e., greater than threshold) news stories individual reacted to
 sensitivity_data <- behav_sum %>% 
   filter(metric == "sensitivity")

@@ -1,22 +1,23 @@
-##############################
+########################################
 #
 # PLOT: Network structure given simluation length
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
 
-############## Assortatiity ##############
 
-##########
+############################## Assortatiity ##############################
+
+####################
 # Load data and summarise
-##########
+####################
 # Normal sim (uniform threshold distribution)
 norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
 norm_data <- norm_data %>% 
@@ -48,9 +49,9 @@ assort_sum <- rbind(norm_data, iden_data) %>%
   mutate(threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical")))
 rm(norm_data, iden_data)
 
-##########
+####################
 # Plot
-##########
+####################
 # Raw final assortativity values
 pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 gg_assort_threhsolds <- ggplot(data = assort_sum, 
@@ -83,11 +84,12 @@ ggsave(plot = gg_assort_threhsolds,
        width = 90, units = "mm", dpi = 400)
 
 
-############## Changes in network structure ##############
 
-##########
+############################## Changes in network structure ##############################
+
+####################
 # Load data and summarise
-##########
+####################
 # Normal simulation (uniform disturbion)
 uniform_files <- list.files("data_derived/network_break/social_networks/network_change/", full.names = TRUE)
 uniform_data <- lapply(uniform_files, function(x) {
@@ -135,9 +137,9 @@ identical_data <- do.call("rbind", identical_data)
 # Bind
 network_change_data <- rbind(uniform_data, identical_data)
 
-##########
+####################
 # Plot
-##########
+####################
 # Change in connections by type
 net_type_data <- network_change_data %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 

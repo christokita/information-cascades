@@ -1,12 +1,12 @@
-##############################
+########################################
 #
 # PLOT: Cascade dynamics figures
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -26,15 +26,15 @@ if (plot_tag != "") {
 
 ############################## Ftiness trials: Cascade dynamics ##############################
 
-##########
+####################
 # Load data 
-##########
+####################
 # Read in data
 cascade_data <- read.csv(data_path, header = TRUE)
 
-##########
+####################
 # Plot: Cascade size
-##########
+####################
 # Summarise by gamma
 cascade_size <- cascade_data %>% 
   select(gamma, total_active) %>% 
@@ -58,9 +58,9 @@ gg_size #show plot before saving
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
-##########
+####################
 # Plot: Cascade bias
-##########
+####################
 # Summarise by gamma
 cascade_bias <- cascade_data %>% 
   select(gamma, active_diff_prop) %>% 

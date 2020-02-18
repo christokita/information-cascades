@@ -1,19 +1,19 @@
-##############################
+########################################
 #
 # PLOT: Compare threshold-adjusting model outputs for fitness anc cascades
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-##########
+####################
 # Plot parameters
-##########
+####################
 # Plot out
 out_path <- "output/thresh_adjust/"
 
@@ -91,11 +91,11 @@ theme_ctokita <- function() {
 }
 
 
-########## Cascades #########
+############################## Cascades ##############################
 
-##########
+####################
 # Plot: Cascade size
-##########
+####################
 gg_size <- ggplot(cascade_data, aes(x = gamma, y = size_mean, color = run)) +
   geom_ribbon(aes(ymin = size_mean - size_95ci, 
                     ymax = size_mean + size_95ci, 
@@ -151,11 +151,13 @@ gg_bias
 ggsave(plot = gg_bias, filename = paste0(out_path, "cascades/Comparison_CascadeBias.png"), width = 90, height = 45, units = "mm", dpi = 600)
 ggsave(plot = gg_bias, filename = paste0(out_path, "cascades/Comparison_CascadeBias.svg"), width = 90, height = 45, units = "mm")
 
-########## Fitness #########
 
-##########
+
+############################## Fitness ##############################
+
+####################
 # Plot: Sensitivity, the proportion of important (i.e., greater than threshold) news stories individual reacted to
-##########
+####################
 sensitivity_data <- fitness_data %>% 
   filter(metric == "sensitivity")
 
@@ -184,9 +186,9 @@ gg_sens
 ggsave(plot = gg_sens, filename = paste0(out_path, "fitness/Comparison_sensitivity.png"), width = 90, height = 45, units = "mm", dpi = 600)
 ggsave(plot = gg_sens, filename = paste0(out_path, "fitness/Comparison_sensitivity.svg"), width = 90, height = 45, units = "mm")
 
-##########
+####################
 # Plot: Specificity, the proportion of "unimportant" (i.e, less than threshold) stories an individual did *not* react to
-##########
+####################
 specificity_data <- fitness_data %>% 
   filter(metric == "specificity")
 
@@ -215,9 +217,9 @@ gg_spec
 ggsave(plot = gg_spec, filename = paste0(out_path, "fitness/Comparison_specificity.png"), width = 90, height = 45, units = "mm", dpi = 600)
 ggsave(plot = gg_spec, filename = paste0(out_path, "fitness/Comparison_specificity.svg"), width = 90, height = 45, units = "mm")
 
-##########
+####################
 # Plot: Precision, the proportion of activity (x_i = 1) that is due to "important" news.
-##########
+####################
 prevision_data <- fitness_data %>% 
   filter(metric == "precision")
 
@@ -246,9 +248,9 @@ gg_precis
 ggsave(plot = gg_precis, filename = paste0(out_path, "fitness/Comparison_precision.png"), width = 90, height = 45, units = "mm", dpi = 600)
 ggsave(plot = gg_precis, filename = paste0(out_path, "fitness/Comparison_precision.svg"), width = 90, height = 45, units = "mm")
 
-##########
+####################
 # Plot: Individual fitness 
-##########
+####################
 total_fitness_data <- fitness_data %>% 
   filter(metric == "fitness")
 

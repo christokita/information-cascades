@@ -1,12 +1,12 @@
-##############################
+########################################
 #
 # PLOT: Effect of initial social network structure on ending network structure
 #
-##############################
+########################################
 
-##########
+####################
 # Load packages
-##########
+####################
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -27,9 +27,9 @@ if (plot_tag != "") {
 
 ############################## Assortatiity ##############################
 
-##########
+####################
 # Load data and summarise
-##########
+####################
 assort_data <- read.csv(assort_file, header = TRUE)
 assort_sum <- assort_data %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
@@ -40,9 +40,9 @@ assort_sum <- assort_data %>%
             sd = sd(value),
             ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) ))
 
-##########
+####################
 # Plot
-##########
+####################
 # Raw final assortativity values
 assort_raw <- assort_sum %>% 
   filter(metric == "assort_final")
@@ -108,9 +108,9 @@ network_change_sum <- network_change_data %>%
             error = qnorm(0.975)*sd(value)/sqrt(length(value)))
 
 
-##########
+####################
 # Plot
-##########
+####################
 # Change in connections by type
 net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 
