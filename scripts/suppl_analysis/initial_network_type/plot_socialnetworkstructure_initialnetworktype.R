@@ -109,7 +109,7 @@ rand_data <- lapply(rand_files, function(x) {
 rand_data <- do.call("rbind", rand_data)
 
 # Complete network
-comp_files <- list.files("data_derived/network_break/__suppl_analysis/other_network_types/network_change/", pattern = "_completegraph", full.names = TRUE)
+comp_files <- list.files("data_derived/network_break/__suppl_analysis/other_network_types/network_change/", pattern = "_complete-longsim", full.names = TRUE)
 comp_data <- lapply(comp_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)
