@@ -23,7 +23,7 @@ import copy
 # List files to be read
 ####################
 # Directory where simulation data is found
-casc_dir = '../data_sim/network_break/__suppl-sim/long-sim/cascade_data/'  
+casc_dir = '../data_sim/network_break/cascade_data/'  
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
