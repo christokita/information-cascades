@@ -87,13 +87,18 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
                                                             stimuli = stim_sources, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
-        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-        adjacency = break_tie(network = adjacency,
+        # Adjust ties
+        adjacency = adjust_tie(network = adjacency,
                               states = state_mat,
                               correct_behavior = correct_state)
-        # Randomly select one individual to form new tie
-        adjacency = make_tie(network = adjacency, 
-                             connect_prob = p)
+        
+#        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
+#        adjacency = break_tie(network = adjacency,
+#                              states = state_mat,
+#                              correct_behavior = correct_state)
+#        # Randomly select one individual to form new tie
+#        adjacency = make_tie(network = adjacency, 
+#                             connect_prob = p)
     
     ########## Assess fitness ##########
     # Get fitness of individuals (based on behavior) and size of cascades
