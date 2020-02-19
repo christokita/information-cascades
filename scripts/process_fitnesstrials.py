@@ -25,13 +25,13 @@ import copy
 raw_data = True
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/fitness_data/'  
-thresh_dir = '../data_sim/network_break/thresh_data/'
+fit_dir = '../data_sim/network_break/__suppl-sim/adjust-tie-function/fitness_data/'  
+thresh_dir = '../data_sim/network_break/__suppl-sim/adjust-tie-function/thresh_data/'
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/fitness_trials/'
-filetags = 'gammasweep' #added info after e.g., 'fitness_<filetag>_
+outpath = '../data_derived/network_break/__suppl_analysis/adjust-tie-function/'
+filetags = 'adjusttie' #added info after e.g., 'fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
