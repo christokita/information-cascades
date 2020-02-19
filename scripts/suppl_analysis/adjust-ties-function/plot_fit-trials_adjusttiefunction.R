@@ -57,7 +57,6 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 gg_size #show plot before saving
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
 # Plot: Cascade bias
@@ -84,8 +83,6 @@ gg_bias <- ggplot(cascade_bias, aes(x = gamma, y = mean)) +
   theme_ctokita() 
 gg_bias #show plot before saving
 ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag,".png"), width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag,".svg"), width = 45, height = 45, units = "mm")
-
 
 
 
