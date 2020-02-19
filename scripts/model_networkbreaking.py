@@ -89,8 +89,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
                                                             behavior_df = behavior_data)
         # Adjust ties
         adjacency = adjust_tie(network = adjacency,
-                              states = state_mat,
-                              correct_behavior = correct_state)
+                               states = state_mat,
+                               correct_behavior = correct_state)
         
 #        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
 #        adjacency = break_tie(network = adjacency,
