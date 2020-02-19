@@ -15,9 +15,9 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-data_path <- 'data_derived/network_break/cascades/n200_cascadestats_gammasweep.csv' #path to data
+data_path <- 'data_derived/network_break/fitness_trials/fitness_cascadestats_gammasweep.csv' #path to data
 out_path <- "output/network_break/cascades/" #directory you wish to save plots
-plot_tag <- "gamma" #extra info to add onto end of plot name
+plot_tag <- "gammasweep" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
@@ -63,7 +63,7 @@ ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".sv
 ####################
 # Summarise by gamma
 cascade_bias <- cascade_data %>% 
-  select(gamma, active_diff_prop) %>% 
+  select(gamma, cascade_bias) %>% 
   gather(metric, value, -gamma) %>% 
   group_by(gamma, metric) %>% 
   summarise(mean = mean(value),

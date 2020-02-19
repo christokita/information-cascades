@@ -15,7 +15,7 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-assort_file <- "data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv" #path to file containing assortativity data
+assort_file <- "data_derived/network_break/social_networks/assortativity_gammasweep.csv" #path to file containing assortativity data
 network_data_dir <- "data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
 out_path <- "output/network_break/social_networks/" #directory you wish to save plots
 plot_tag <- "gamma" #extra info to add onto end of plot name
@@ -58,7 +58,7 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity1", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 # Change in assortativity
