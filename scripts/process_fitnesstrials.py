@@ -25,13 +25,13 @@ import copy
 raw_data = True
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/fitness_data/'  
-thresh_dir = '../data_sim/network_break/thresh_data/'
+fit_dir = '../data_sim/network_break/__suppl-sim/adjust-tie-function/fitness_data/'  
+thresh_dir = '../data_sim/network_break/__suppl-sim/adjust-tie-function/thresh_data/'
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/fitness_trials/'
-filetags = 'gammasweep' #added info after e.g., 'fitness_<filetag>_
+outpath = '../data_derived/network_break/__suppl_analysis/adjust-tie-function/'
+filetags = 'adjusttie' #added info after e.g., 'fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)
@@ -69,16 +69,16 @@ for run in runs:
     for replicate in replicates:
         
         # Read in files and get replicate number
-        cascade = pd.read_pickle(fit_dir + run +'/fit_size_' + replicate + '.pkl')
+        cascade = pd.read_pickle(fit_dir + run +'/fitness_cascades_' + replicate + '.pkl')
         cascade = cascade.astype(float)
-        behavior = pd.read_pickle(fit_dir + run +'/fit_behav_' + replicate + '.pkl')
+        behavior = pd.read_pickle(fit_dir + run +'/fitness_behavior_' + replicate + '.pkl')
         thresholds = np.load(thresh_dir + run + '/thresh_' + replicate + '.npy')
         rep = int(re.search('([0-9]+)', replicate).group(1))
         
         # Calculate additional statistics: Cascades
         cascade['avg_cascade_size'] = cascade['total_active'] / cascade ['samplers_active']
         cascade['active_diff'] = abs(cascade['active_A'] - cascade['active_B'])
-        cascade['casacde_bias'] = cascade['active_diff'] / cascade['total_active']
+        cascade['cascade_bias'] = cascade['active_diff'] / cascade['total_active']
         cascade['gamma'] = gamma
         cascade['replicate'] = rep
         

@@ -94,6 +94,11 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
         # Randomly select one individual to form new tie
         adjacency = make_tie(network = adjacency, 
                              connect_prob = p)
+        
+#        # ALT model format: Adjust ties
+#        adjacency = adjust_tie(network = adjacency,
+#                               states = state_mat,
+#                               correct_behavior = correct_state)
     
     ########## Assess fitness ##########
     # Get fitness of individuals (based on behavior) and size of cascades
@@ -134,7 +139,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
 # Define model-specific functions
 ####################
 def break_tie(network, states, correct_behavior):
-    # Randomly selects individual and breaks tie with active neighbor iff selected invidual is incorrect.
+    # Randomly selects active individual and breaks tie with active neighbor iff selected invidual is incorrect.
     #
     # INPUTS:
     # - network:      the network connecting individuals (numpy array).
@@ -146,11 +151,8 @@ def break_tie(network, states, correct_behavior):
         breaker_active = np.random.choice(actives, size = 1)
         breaker_correct = correct_behavior[breaker_active]
         if not breaker_correct:
-             # Assess behavior of interaction partners of focal individual
-            breaker_neighbors = np.squeeze(network[breaker_active,:])
-            neighbor_behavior = breaker_neighbors * np.ndarray.flatten(states) 
-            perceived_incorrect = np.where(neighbor_behavior == 1)[0]
-            # Break ties with one randomly-selected "incorrect" neighbor
+            breaker_neighbors = np.where(network[breaker_active,:] == 1)[1]
+            perceived_incorrect = [ind for ind in actives if ind in breaker_neighbors] #which neighbors are active
             break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
             network[breaker_active, break_tie] = 0
     return network
@@ -167,10 +169,36 @@ def make_tie(network, connect_prob):
     n = network.shape[0] # Get number of individuals in system
     former_individual = np.random.choice(range(0, n), size = 1)
     form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob)) #determine if individual will form new tie
-    former_neighbors = np.squeeze(network[former_individual,:]) #get individual's neighbors
-    potential_ties = np.where(former_neighbors == 0)[0]
+    former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
+    potential_ties = np.where(former_connections == 0)[0]
     potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
     if form_connection == True and len(potential_ties) > 0: #form connection only if selected to form connection and isn't already connected to everyone
         new_tie = np.random.choice(potential_ties, size = 1, replace = False)
         network[former_individual, new_tie] = 1
+    return network
+
+def adjust_tie(network, states, correct_behavior):
+    # Randomly selects active individual and breaks/forms tie depending on whether her cascade behavior was correct.
+    #
+    # INPUTS:
+    # - network:      the network connecting individuals (numpy array).
+    # - states:       matrix listing the behavioral state of every individual (numpy array).
+    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    
+    actives = np.where(states == 1)[0]
+    if sum(actives) > 0: #error catch when no individual are active
+        individual_active = np.random.choice(actives, size = 1)
+        individual_correct = correct_behavior[individual_active]
+        individual_neighbors = np.where(network[individual_active,:] == 1)[1]
+        if individual_correct:
+            # Form new tie to another active individual
+            potential_ties = np.delete(actives, np.where(actives == individual_active))
+            if len(potential_ties) > 0:
+                new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+                network[individual_active, new_tie] = 1
+        if not individual_correct:
+            # Break ties with one randomly-selected "incorrect" neighbor
+            perceived_incorrect = [ind for ind in actives if ind in individual_neighbors] #which neighbors are active
+            break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
+            network[individual_active, break_tie] = 0
     return network

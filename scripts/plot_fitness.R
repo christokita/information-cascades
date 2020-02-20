@@ -15,9 +15,9 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-data_path <- "data_derived/network_break/fitness/n200_fitness_allbehavior_gamma.csv" #path to data
+data_path <- "data_derived/network_break/fitness_trials/fitness_behavior_gammasweep.csv" #path to data
 out_path <- "output/network_break/fitness/" #directory you wish to save plots
-plot_tag <- "gamma" #extra info to add onto end of plot name
+plot_tag <- "gammasweep" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
