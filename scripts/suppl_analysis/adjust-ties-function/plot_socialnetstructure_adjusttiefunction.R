@@ -149,9 +149,9 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
              size = 1) +
   ylab("Count") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
-  # scale_y_continuous(limits = c(0, 1.21), 
-  #                    breaks = seq(0, 2, 0.2),
-  #                    expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 1.21),
+                     breaks = seq(0, 2, 0.2),
+                     expand = c(0, 0)) +
   scale_shape_manual(values = c(19, 17, 21, 24),
                      labels = c("New tie, same ideology",
                                 "Broken tie, same ideology",
