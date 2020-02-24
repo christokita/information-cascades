@@ -24,12 +24,12 @@ pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 # Load data and summarise
 ####################
 # Normal sim (10^5 steps)
-norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE) %>% 
+norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   mutate(run_time = "10^5")
 
 # Long sim (10^6)
-long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_assortativity_10^6steps.csv', header = TRUE) %>% 
+long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/assortativity_10^6steps.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   mutate(run_time = "10^6")
 
@@ -76,7 +76,7 @@ gg_assort_simlength <- ggplot(data = assort_raw,
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_assort_simlength 
-ggsave(plot = gg_assort_simlength, filename = "output/network_break/suppl_analysis/Assortativity_by_simlength.png", height = 45, width = 90, units = "mm", dpi = 400)
+ggsave(plot = gg_assort_simlength, filename = "output/network_break/suppl_analysis/assortativity_simlength.png", height = 45, width = 90, units = "mm", dpi = 400)
 
 
 
@@ -168,7 +168,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, color = sim_len
   theme(aspect.ratio = 1)
 gg_type_change
 ggsave(plot = gg_type_change, 
-       filename = "output/network_break/social_networks/tiechange_gamma.png", 
+       filename = "output/network_break/suppl_analysis/tiechange_simlength.png", 
        width = 75, 
        height = 45, 
        units = "mm", 
@@ -205,11 +205,11 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric, color = si
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_ties
-ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/Breaksandadds_simlength.png", width = 90, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/breakadds_simlength.png", width = 90, height = 45, units = "mm", dpi = 400)
 
 gg_ties <- gg_ties +
   scale_y_continuous(limits = c(0, 1.5))
-ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/Breaksandadds_simlength_zoom.png", width = 90, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_ties, filename = "output/network_break/suppl_analysis/breaksadds_simlength_zoom.png", width = 90, height = 45, units = "mm", dpi = 400)
 
 # Change in degree
 net_degree_data <- network_change_sum %>% 
