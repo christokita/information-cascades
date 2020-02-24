@@ -32,7 +32,7 @@ def simulate_cascade(network, states, thresholds):
         states[turn_on] = 1
         
         # Break if it reaches stable state
-        if np.array_equal(states, states_last) == True:
+        if np.array_equal(states, states_last):
             
             # Stop cascade
             return states
