@@ -7,7 +7,7 @@ Created on Mon Nov 25 11:01:16 2019
 """
 
 import numpy as np
-import scipy as sp
+import scipy.stats as stats
 
 def generate_stimuli_percentile(correlation, mean):
     # Generates a single pair of stimuli/infromation values for the two news sources.
@@ -19,5 +19,5 @@ def generate_stimuli_percentile(correlation, mean):
     
     covar = [[1, correlation ], [correlation, 1]]
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)
-    stims_perc = sp.stats.norm.cdf(stims, loc = 0, scale = 1) # Translate stims to percentiles
+    stims_perc = stats.norm.cdf(stims, loc = 0, scale = 1) # Translate stims to percentiles
     return stims_perc

@@ -15,9 +15,10 @@ found in util_scripts/stimulusfunctions.py
 ####################
 import numpy as np
 import scipy as sp
-from util_scripts.socialnetworkfunctions import *
-from util_scripts.thresholdfunctions import *
-from util_scripts.stimulusfunctions import *
+import cascade_models.social_networks as sn
+import cascade_models.thresholds as th
+import cascade_models.cascades as cs
+import cascade_models.stimulus as st
 import copy
 import matplotlib.pyplot as plt
 
@@ -26,12 +27,12 @@ import matplotlib.pyplot as plt
 # Generate different stim values
 ####################
 mu = 0 #mean for thresholds
-gamma = -0.4 # correlation between two information sources
+gamma = -0.2 # correlation between two information sources
 
 for i in range(20000):      
-    stim_sources_perc = generate_stimuli_perc(correlation = gamma, mean = mu)
-    stim_sources_raw = generate_stimuli_raw(correlation = gamma, mean = mu)
-    stim_sources_sig = generate_stimuli_sig(correlation = gamma, mean = mu)
+    stim_sources_perc = st.generate_stimuli_percentile(correlation = gamma, mean = mu)
+    stim_sources_raw = st.generate_stimuli_raw(correlation = gamma, mean = mu)
+    stim_sources_sig = st.generate_stimuli_sigmoid(correlation = gamma, mean = mu)
     if i == 0:
         stims_perc = stim_sources_perc
         stims_raw = stim_sources_raw
