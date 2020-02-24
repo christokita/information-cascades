@@ -1,4 +1,4 @@
-from .generate_stimuli_percentile import generate_stimuli_percentile
+from .generate_stimuli_cdf import generate_stimuli_cdf
 from .generate_stimuli_raw import generate_stimuli_raw
 from .generate_stimuli_sigmoid import generate_stimuli_sigmoid
 from .generate_stimuli import generate_stimuli
