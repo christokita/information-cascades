@@ -23,13 +23,13 @@ import igraph
 # List files to be read
 ####################
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl-sim/long-sim/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl-sim/long-sim/type_data/' #type data
+sn_dir = '../data_sim/network_break/__suppl-sim/stims-cdf-function/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/__suppl-sim/stims-cdf-function/type_data/' #type data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/sim_length/'
-filetags = '10^6steps' #added info after 'n<number>_assortativity
+outpath = '../data_derived/network_break/__suppl_analysis/stims-cdf-function/'
+filetags = 'stimsCDF' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
