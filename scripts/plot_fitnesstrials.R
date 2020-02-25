@@ -38,7 +38,7 @@ cascade_data <- read.csv(fit_cascade_path, header = TRUE)
 ####################
 # Summarise by gamma
 cascade_size <- cascade_data %>% 
-  select(gamma, total_active) %>% 
+  select(gamma, avg_cascade_size) %>% 
   gather(metric, value, -gamma) %>% 
   group_by(gamma, metric) %>% 
   summarise(mean = mean(value, na.rm = TRUE),
@@ -52,12 +52,38 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
               alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab("Cascade size") +
+  ylab("Avg.cascade size") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
 gg_size #show plot before saving
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
+
+####################
+# Plot: Total cascade activity
+####################
+# Summarise by gamma
+cascade_active <- cascade_data %>% 
+  select(gamma, total_active) %>% 
+  gather(metric, value, -gamma) %>% 
+  group_by(gamma, metric) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
+
+# Plot
+gg_activity <- ggplot(cascade_active, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95, 
+                  ymax = mean + ci95), 
+              alpha = 0.4) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  ylab("Total cascade activity") +
+  xlab(expression(paste("Information correlation ", italic(gamma) ))) +
+  theme_ctokita() 
+gg_activity #show plot before saving
+ggsave(plot = gg_size, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_size, filename = paste0(out_path, "cascadeactivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
 # Plot: Cascade bias

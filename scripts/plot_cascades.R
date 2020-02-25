@@ -52,7 +52,7 @@ ggplot(data = sample_data, aes(x = time, y = value, color = gamma, group = repli
   theme_ctokita() 
 
 ####################
-# Plot: Cascade size at the beginning and end of the simulation
+# Plot: Cascade activity at the beginning and end of the simulation
 ####################
 # Filter
 beginend_size <- beginend_sum %>% 
@@ -71,11 +71,11 @@ gg_beginend_size <- ggplot(beginend_size, aes(x = time, y = mean, color = gamma,
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal) +
   scale_x_discrete(labels = c("First 5,000", "Last 5,000")) +
-  ylab("Cascade size") +
+  ylab("Cascade activity") +
   xlab("Time steps") +
   theme_ctokita()
 gg_beginend_size #show plot before saving
-ggsave(plot = gg_beginend_size, filename = paste0(out_path, "beginend_size", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_beginend_size, filename = paste0(out_path, "beginend_activity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
 # ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
@@ -98,6 +98,9 @@ gg_beginend_bias <- ggplot(beginend_bias, aes(x = time, y = mean, color = gamma,
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal) +
   scale_x_discrete(labels = c("First 5,000", "Last 5,000")) +
+  scale_y_continuous(limits = c(0.2, 0.605), 
+                     breaks = seq(0, 1, 0.1),
+                     expand = c(0, 0)) +
   ylab("Cascade bias") +
   xlab("Time steps") +
   theme_ctokita() 
