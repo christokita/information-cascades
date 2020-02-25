@@ -30,7 +30,7 @@ mu = 0 #mean for thresholds
 gamma = -0.2 # correlation between two information sources
 
 for i in range(20000):      
-    stim_sources_perc = st.generate_stimuli_percentile(correlation = gamma, mean = mu)
+    stim_sources_perc = st.generate_stimuli_cdf(correlation = gamma, mean = mu)
     stim_sources_raw = st.generate_stimuli_raw(correlation = gamma, mean = mu)
     stim_sources_sig = st.generate_stimuli_sigmoid(correlation = gamma, mean = mu)
     if i == 0:
@@ -68,3 +68,7 @@ np.mean(stims_raw[:,0])
 np.mean(stims_raw[:,1])
 np.std(stims_raw[:,0])
 np.std(stims_raw[:,1])
+
+# See whether ~20% of values lie above 0.8 in the CDF and sigmoid function approach
+sum(stims_sig[:,0] > 0.8) / stims_sig.shape[0] # ~0.08
+sum(stims_perc[:,0] > 0.8) / stims_sig.shape[0] # ~0.2
