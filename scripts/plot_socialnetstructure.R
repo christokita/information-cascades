@@ -177,6 +177,9 @@ ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag
 net_degree_data <- network_change_sum %>% 
   filter(metric %in% c("net_out_degree"))
 gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
+  geom_hline(yintercept = 0, 
+             size = 0.3, 
+             linetype = "dotted") +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
               alpha = 0.4) +
   geom_line(size = 0.3) +
@@ -184,7 +187,7 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
              size = 0.8) +
   ylab(expression( paste(Delta, " out-degree"))) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
-  scale_y_continuous(limits = c(0, 1.5), 
+  scale_y_continuous(limits = c(-0.5, 1.5), 
                      expand = c(0, 0)) +
   theme_ctokita() +
   theme(aspect.ratio = 1,
