@@ -22,16 +22,16 @@ import copy
 # List files to be read
 ####################
 # Set if you want to output raw cascade data (each time step of each trial))
-raw_data = True
+raw_data = False
 
 # Directory where simulation data is found
-fit_dir = '../data_sim/network_break/fitness_data/'  
-thresh_dir = '../data_sim/network_break/thresh_data/'
+fit_dir = '../data_sim/network_break/__suppl_sims/long_sim/fitness_data/'  
+thresh_dir = '../data_sim/network_break/__suppl_sims/long_sim/thresh_data/'
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/fitness_trials/'
-filetags = 'gammasweep' #added info after e.g., 'fitness_<filetag>_
+outpath = '../data_derived/network_break/__supple_analysis/sim_length/fitness_trials/'
+filetags = '10^6steps' #added info after e.g., 'fitness_<filetag>_
 
 # List runs
 runs = os.listdir(fit_dir)

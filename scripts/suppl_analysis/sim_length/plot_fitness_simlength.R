@@ -24,12 +24,12 @@ pal <- c("#225ea8", "#41b6c4", "#a1dab4")
 # Load data and summarise
 ####################
 # Normal sims (10^5 steps)
-norm_data <- read.csv("data_derived/network_break/fitness/n200_fitness_behaviorsum_gamma.csv", header = TRUE) %>% 
+norm_data <- read.csv("data_derived/network_break/fitness_trials/fitness_behavior_gammasweep.csv", header = TRUE) %>% 
   mutate(run_time = "10^5",
          fitness = sensitivity + specificity + precision)
 
 # Long sims (10^6 steps)
-long_data <- read.csv("data_derived/network_break/__suppl_analysis/sim_length/n200_fitness_behaviorsum_10^6steps.csv", header = TRUE) %>% 
+long_data <- read.csv("data_derived/network_break/__suppl_analysis/sim_length/fitness_trials/fitness_behavior_10^6steps.csv", header = TRUE) %>% 
   mutate(run_time = "10^6",
          fitness = sensitivity + specificity + precision)
 
