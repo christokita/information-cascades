@@ -30,7 +30,7 @@ thresh_dir = '../data_sim/network_break/__suppl_sims/long_sim/thresh_data/'
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/__supple_analysis/sim_length/fitness_trials/'
+outpath = '../data_derived/network_break/__suppl_analysis/sim_length/fitness_trials/'
 filetags = '10^6steps' #added info after e.g., 'fitness_<filetag>_
 
 # List runs
