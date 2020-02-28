@@ -48,7 +48,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     seed = int( (replicate + 1 + gamma) * 323 )
     np.random.seed(seed)
     # Seed individual's thresholds
-    thresh_mat = th.seed_thresholds(n = n, lower = 0, upper = 1)
+    thresh_mat = th.seed_thresholds(n = n, lower = 0.5, upper = 0.5)
     # Assign type
     type_mat = th.assign_type(n = n)
     # Set up social network
