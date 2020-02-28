@@ -94,11 +94,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
         # Randomly select one individual to form new tie
         adjacency = make_tie(network = adjacency, 
                              connect_prob = p)
-        
-#        # ALT model format: Adjust ties
-#        adjacency = adjust_tie(network = adjacency,
-#                               states = state_mat,
-#                               correct_behavior = correct_state)
     
     ########## Assess fitness ##########
     # Get fitness of individuals (based on behavior) and size of cascades
@@ -127,7 +122,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     rep_label = str(replicate)
     rep_label = rep_label.zfill(2)
     cascade_size.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
-    np.save(output_dirs[1] + "sn_rep" + rep_label + ".npy", adjacency)
+    np.save(output_dirs[1] + "sn_final_rep" + rep_label + ".npy", adjacency)
     np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
