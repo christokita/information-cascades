@@ -18,7 +18,7 @@ n = 200 #number of individuals
 k = 5 #mean degree on networks
 gamma = -1 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-p = 0.005 # probability selected individual forms new connection **CHANGED**
+p = 0 # probability selected individual forms new connection **CHANGED**
 timesteps = 100000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
 
@@ -60,7 +60,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     seed = int( (replicate + 1 + gamma) * 323 )
     np.random.seed(seed)
     # Seed individual's thresholds
-    thresh_mat = th.seed_thresholds(n = n, lower = 0, upper = 1)
+    thresh_mat = th.seed_thresholds(n = n, lower = 0.5, upper = 0.5) # CHANGED
     # Assign type
     type_mat = th.assign_type(n = n)
     # Set up social network
@@ -209,8 +209,7 @@ assort_over_time, tiechanges_over_time = sim_adjusting_network(replicate = 0,
                                                                psi = psi, 
                                                                p = p, 
                                                                timesteps = timesteps,
-                                                               outpath = outpath,
-                                                               network_type = "complete")
+                                                               outpath = outpath)
 
 
 ##########
@@ -224,15 +223,13 @@ f, axes = plt.subplots(1, 2, figsize=(8, 4), sharex=True)
 sns.despine()
 
 # Assortativity over time
-sns.lineplot(x = "t", y = "assort_type", data = assort_over_time, ax = axes[0], palette = ['#34495e'])
+sns.lineplot(x = "t", y = "assort_type", data = assort_over_time, ax = axes[0], color = '#34495e')
 plt.ylabel("Assortativity")
 
 # Breaks and new ties over time
-sns.set_palette(sns.color_palette(['#e74c3c', '#3498db']))
 tiechanges = pd.melt(tiechanges_over_time, id_vars = "t", value_vars = ["breaks", "new_ties"])
-sns.lineplot(x = "t", y = "value", hue = "variable", data = tiechanges, estimator = None, ax = axes[1])
+sns.lineplot(x = "t", y = "value", hue = "variable", data = tiechanges, estimator = None, ax = axes[1], palette = ['#e74c3c', '#3498db'])
 plt.ylabel("Count")
-
 
 
 

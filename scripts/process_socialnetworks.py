@@ -23,13 +23,13 @@ import igraph
 # List files to be read
 ####################
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl-sim/long-sim/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl-sim/long-sim/type_data/' #type data
+sn_dir = '../data_sim/network_break/__suppl_sims/identical_thresholds/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/__suppl_sims/identical_thresholds/type_data/' #type data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/sim_length/social_networks/'
-filetags = '10^6steps' #added info after 'n<number>_assortativity
+outpath = '../data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/'
+filetags = 'identicalthresh' #added info after 'n<number>_assortativity
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -56,7 +56,7 @@ for run in runs:
     
     # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
-    sn_final = [file for file in sn_files if re.findall('sn_rep[0-9]+.npy', file)] 
+    sn_final = [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] 
     sn_initial = [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] 
     sn_final.sort()
     sn_initial.sort()
@@ -90,8 +90,10 @@ for run in runs:
         # Return
         to_return = np.array([[gamma, rep, final_assort, initial_assort]])
         assort_values = np.vstack([assort_values, to_return])
-            
+
 # Save
+if not os.path.exists(outpath):
+    os.makedirs(outpath)
 assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_final', 'assort_initial'])
 assort_data.to_csv(outpath + 'assortativity' + filetags + '.csv', index = False)
 
@@ -114,7 +116,7 @@ for run in runs:
     
      # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
-    sn_final = [file for file in sn_files if re.findall('sn_rep[0-9]+.npy', file)] 
+    sn_final = [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] 
     sn_initial = [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] 
     sn_final.sort()
     sn_initial.sort()
