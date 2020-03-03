@@ -11,6 +11,9 @@ library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
+# Palette for plotting
+pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
+
 
 
 ############################## Assortatiity ##############################
@@ -19,59 +22,60 @@ source("scripts/_plot_themes/theme_ctokita.R")
 # Load data and summarise
 ####################
 # Normal sim (uniform threshold distribution)
-norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE)
-norm_data <- norm_data %>% 
-  mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Uniform dist.")
 
 # Identical thresholds
-iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0/social_networks/assortativity_identicalthresh_p0.csv', header = TRUE)
-iden_data <- iden_data %>% 
-  mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0/social_networks/assortativity_identicalthresh_p0.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Identical")
 
+# Identical thresholds
+iden_long_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0_longsim/social_networks/assortativity_identicalthresh_p0_10^6steps.csv', header = TRUE) %>% 
+  mutate(threshold_dist = "Identical_10^6steps")
+
 # Bind
-assort_sum <- rbind(norm_data, iden_data) %>% 
-  mutate(threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical")))
-rm(norm_data, iden_data)
+assort_sum <- rbind(norm_data, iden_data, iden_long_data) %>% 
+  mutate(delta_assort = assort_final - assort_initial,
+         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Identical_10^6steps"))) %>% 
+  select(-replicate) %>% 
+  tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
+  group_by(gamma, threshold_dist, metric) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
+rm(norm_data, iden_data, iden_long_data)
 
 ####################
 # Plot
 ####################
 # Raw final assortativity values
-pal <- c("#225ea8", "#41b6c4", "#a1dab4")
-gg_assort_threhsolds <- ggplot(data = assort_sum, 
+final_assort_sum <- assort_sum %>% 
+  filter(metric == "assort_final")
+
+gg_assort_threhsolds <- ggplot(data = final_assort_sum, 
                                aes(x = gamma, 
-                                   y = assort_mean, 
+                                   y = mean, 
                                    color = threshold_dist, 
                                    group = threshold_dist, 
                                    fill = threshold_dist)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4,
               color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   scale_color_manual(name = "Thresholds", 
-                     values = pal) +
+                     values = pal,
+                     labels = c("Uniform dist.",
+                                "Identical",
+                                expression(paste("Identical (", 10^6, " time steps)")))) +
   scale_fill_manual(name = "Thresholds", 
-                    values = pal) +
+                    values = pal,
+                    labels = c("Uniform dist.",
+                               "Identical",
+                               expression(paste("Identical (", 10^6, " time steps)")))) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
@@ -79,7 +83,7 @@ gg_assort_threhsolds <- ggplot(data = assort_sum,
 
 gg_assort_threhsolds
 ggsave(plot = gg_assort_threhsolds, 
-       filename = "output/network_break/suppl_analysis/Assortativity_by_thresholddistribution.png", 
+       filename = "output/network_break/__suppl_analysis/identical_thresholds/assortativity_by_thresholddistribution.png", 
        height = 45, 
        width = 90, units = "mm", dpi = 400)
 

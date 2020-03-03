@@ -17,6 +17,7 @@ theme_ctokita <- function() {
           axis.line       = element_line(size = 0.3),
           legend.title    = element_text(size = 7, face = "bold", vjust = -1),
           legend.text     = element_text(size = 6, color = "black"),
+          legend.text.align = 0,
           strip.text      = element_text(size = 7, color = "black"),
           legend.key.size = unit(3, "mm"),
           legend.key.width = unit(2, "mm"),

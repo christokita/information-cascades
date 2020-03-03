@@ -51,14 +51,15 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+              alpha = 0.4,
+              fill = "#225ea8") +
+  geom_line(size = 0.3, color = "#225ea8") +
+  geom_point(size = 0.8, color = "#225ea8") +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity1", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
 ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 # Change in assortativity
