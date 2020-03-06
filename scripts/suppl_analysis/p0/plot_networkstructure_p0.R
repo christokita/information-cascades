@@ -1,6 +1,6 @@
 ########################################
 #
-# PLOT: Network structure given identical thresholds and no new tie formation
+# PLOT: Network structure given no new tie formation
 #
 ########################################
 
@@ -23,20 +23,16 @@ pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
 ####################
 # Normal sim (uniform threshold distribution)
 norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
-  mutate(threshold_dist = "Uniform dist.")
+  mutate(threshold_dist = "Tie formation (default)")
 
-# Identical thresholds
-iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0/social_networks/assortativity_identicalthresh_p0.csv', header = TRUE) %>% 
-  mutate(threshold_dist = "Identical")
-
-# Identical thresholds
-iden_long_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0_longsim/social_networks/assortativity_identicalthresh_p0_10^6steps.csv', header = TRUE) %>% 
-  mutate(threshold_dist = "Identical_10^6steps")
+# No new ties formed
+p0_data <- read.csv('data_derived/network_break/__suppl_analysis/p0/social_networks/assortativity_p0.csv', header = TRUE) %>% 
+  mutate(threshold_dist = "No tie formation")
 
 # Bind
-assort_sum <- rbind(norm_data, iden_data, iden_long_data) %>% 
+assort_sum <- rbind(norm_data, p0_data) %>% 
   mutate(delta_assort = assort_final - assort_initial,
-         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Identical_10^6steps"))) %>% 
+         threshold_dist = factor(threshold_dist, levels = c("Tie formation (default)", "No tie formation"))) %>% 
   select(-replicate) %>% 
   tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
   group_by(gamma, threshold_dist, metric) %>% 
@@ -67,15 +63,9 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   scale_color_manual(name = "Thresholds", 
-                     values = pal,
-                     labels = c("Uniform dist.",
-                                "Identical, no tie formation",
-                                expression(paste("Identical, no tie formation (", 10^6, " time steps)")))) +
+                     values = pal) +
   scale_fill_manual(name = "Thresholds", 
-                    values = pal,
-                    labels = c("Uniform dist.",
-                               "Identical, no tie formation",
-                               expression(paste("Identical, no tie formation (", 10^6, " time steps)")))) +
+                    values = pal) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
@@ -83,9 +73,9 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
 
 gg_assort_threhsolds
 ggsave(plot = gg_assort_threhsolds, 
-       filename = "output/network_break/__suppl_analysis/identical_thresholds_p0/assortativity_by_thresholddistribution.png", 
+       filename = "output/network_break/__suppl_analysis/p0/assortativity_by_tieformation.png", 
        height = 45, 
-       width = 100, units = "mm", dpi = 400)
+       width = 70, units = "mm", dpi = 400)
 
 
 
