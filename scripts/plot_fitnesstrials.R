@@ -23,6 +23,9 @@ if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
 
+# Plot color
+plot_color <- "#225ea8"
+
 
 
 ############################## Ftiness trials: Cascade dynamics ##############################
@@ -48,10 +51,11 @@ cascade_size <- cascade_data %>%
 # Plot
 gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95, 
-                  ymax = mean + ci95), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   ylab("Avg.cascade size") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
@@ -74,10 +78,11 @@ cascade_active <- cascade_data %>%
 # Plot
 gg_activity <- ggplot(cascade_active, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95, 
-                  ymax = mean + ci95), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   ylab("Total cascade activity") +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
@@ -101,9 +106,10 @@ cascade_bias <- cascade_data %>%
 gg_bias <- ggplot(cascade_bias, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - ci95, 
                   ymax = mean + ci95),
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   # scale_y_continuous(limits = c(0, 0.16)) +
   ylab(expression( paste("Cascade bias" ))) +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
