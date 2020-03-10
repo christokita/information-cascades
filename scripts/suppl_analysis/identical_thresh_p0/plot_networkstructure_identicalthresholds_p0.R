@@ -12,7 +12,7 @@ library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
 # Palette for plotting
-pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
+pal <- c("#225ea8", "#41b6c4", "#9DDBDA", "#a1dab4")
 
 
 
@@ -33,10 +33,14 @@ iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thr
 iden_long_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds_p0_longsim/social_networks/assortativity_identicalthresh_p0_10^6steps.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Identical_10^6steps")
 
+# Narrow thresholds
+narrow_dist_data <- read.csv('data_derived/network_break/__suppl_analysis/narrow_threshold_dist/social_networks/assortativity_narrowthreshdist.csv', header = TRUE) %>% 
+  mutate(threshold_dist = "Narrow dist.")
+
 # Bind
-assort_sum <- rbind(norm_data, iden_data, iden_long_data) %>% 
+assort_sum <- rbind(norm_data, iden_data, iden_long_data, narrow_dist_data) %>% 
   mutate(delta_assort = assort_final - assort_initial,
-         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Identical_10^6steps"))) %>% 
+         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Identical_10^6steps", "Narrow dist."))) %>% 
   select(-replicate) %>% 
   tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
   group_by(gamma, threshold_dist, metric) %>% 
@@ -70,12 +74,14 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
                      values = pal,
                      labels = c("Uniform dist.",
                                 "Identical, no tie formation",
-                                expression(paste("Identical, no tie formation (", 10^6, " time steps)")))) +
+                                expression(paste("Identical, no tie formation (", 10^6, " time steps)")),
+                                "Narrow dist.")) +
   scale_fill_manual(name = "Thresholds", 
                     values = pal,
                     labels = c("Uniform dist.",
                                "Identical, no tie formation",
-                               expression(paste("Identical, no tie formation (", 10^6, " time steps)")))) +
+                               expression(paste("Identical, no tie formation (", 10^6, " time steps)")),
+                               "Narrow dist.")) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() +
@@ -83,7 +89,7 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
 
 gg_assort_threhsolds
 ggsave(plot = gg_assort_threhsolds, 
-       filename = "output/network_break/__suppl_analysis/identical_thresholds_p0/assortativity_by_thresholddistribution.png", 
+       filename = "output/network_break/__suppl_analysis/identical_thresholds_p0/assortativity_by_thresholddistribution_nonewties.png", 
        height = 45, 
        width = 100, units = "mm", dpi = 400)
 
