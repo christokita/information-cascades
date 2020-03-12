@@ -11,6 +11,8 @@ library(ggplot2)
 library(dplyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
+# Palette for plotting
+pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
 
 
 ############################## Assortatiity ##############################
@@ -19,51 +21,46 @@ source("scripts/_plot_themes/theme_ctokita.R")
 # Load data and summarise
 ####################
 # Normal sim (uniform threshold distribution)
-norm_data <- read.csv('data_derived/network_break/social_networks/n200_assortativity_gammasweep.csv', header = TRUE)
-norm_data <- norm_data %>% 
-  mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Uniform dist.")
 
 # Identical thresholds
-iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical-thresholds/n200_assortativity_identicalthresholds.csv', header = TRUE)
-iden_data <- iden_data %>% 
-  mutate(delta_assort = assort_final - assort_initial) %>% 
-  group_by(gamma) %>% 
-  summarise(assort_mean = mean(assort_final),
-            assort_sd = sd(assort_final),
-            assort_95error = qnorm(0.975)*sd(assort_final)/sqrt(length(assort_final)),
-            assortchange_mean = mean(delta_assort),
-            assortchange_sd = sd(delta_assort),
-            assortchange_95error = qnorm(0.975)*sd(delta_assort)/sqrt(length(delta_assort))) %>% 
+iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/assortativity_identicalthresh.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Identical")
 
+# Narrow thresholds
+narrow_dist_data <- read.csv('data_derived/network_break/__suppl_analysis/narrow_threshdist_0.5/social_networks/assortativity_narrowthresh0.5.csv', header = TRUE) %>% 
+  mutate(threshold_dist = "Narrow dist.")
+
 # Bind
-assort_sum <- rbind(norm_data, iden_data) %>% 
-  mutate(threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical")))
-rm(norm_data, iden_data)
+assort_sum <- rbind(norm_data, iden_data, narrow_dist_data) %>% 
+  mutate(delta_assort = assort_final - assort_initial,
+         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Narrow dist."))) %>% 
+  select(-replicate) %>% 
+  tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
+  group_by(gamma, threshold_dist, metric) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
+rm(norm_data, iden_data, narrow_dist_data)
 
 ####################
 # Plot
 ####################
 # Raw final assortativity values
-pal <- c("#225ea8", "#41b6c4", "#a1dab4")
-gg_assort_threhsolds <- ggplot(data = assort_sum, 
-                                aes(x = gamma, 
-                                    y = assort_mean, 
-                                    color = threshold_dist, 
-                                    group = threshold_dist, 
-                                    fill = threshold_dist)) +
+final_assort_sum <- assort_sum %>% 
+  filter(metric == "assort_final")
+
+gg_assort_threhsolds <- ggplot(data = final_assort_sum, 
+                               aes(x = gamma, 
+                                   y = mean, 
+                                   color = threshold_dist, 
+                                   group = threshold_dist, 
+                                   fill = threshold_dist)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = assort_mean - assort_95error, ymax = assort_mean + assort_95error), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4,
               color = NA) +
   geom_line(size = 0.3) +
@@ -79,7 +76,7 @@ gg_assort_threhsolds <- ggplot(data = assort_sum,
 
 gg_assort_threhsolds
 ggsave(plot = gg_assort_threhsolds, 
-       filename = "output/network_break/suppl_analysis/Assortativity_by_thresholddistribution.png", 
+       filename = "output/network_break/__suppl_analysis/threshold_distribution/assortativity_by_thresholddistribution.png", 
        height = 45, 
        width = 90, units = "mm", dpi = 400)
 
@@ -103,7 +100,7 @@ uniform_data <- lapply(uniform_files, function(x) {
            net_in_degree = in_degree - in_degree_initial,
            threshold_dist = "Uniform dist.") %>% 
     select(-replicate, -individual) %>% 
-    gather(metric, value, -gamma, -threshold_dist) %>% 
+    tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
     group_by(threshold_dist, gamma, metric) %>% 
     summarise(mean = mean(value), 
               sd = sd(value),
@@ -113,7 +110,7 @@ uniform_data <- lapply(uniform_files, function(x) {
 uniform_data <- do.call("rbind", uniform_data)
 
 # Identical thresholds
-identical_files <- list.files("data_derived/network_break/__suppl_analysis/identical-thresholds/network_change/", full.names = TRUE)
+identical_files <- list.files("data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/network_change/", full.names = TRUE)
 identical_data <- lapply(identical_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)
@@ -125,7 +122,7 @@ identical_data <- lapply(identical_files, function(x) {
            net_in_degree = in_degree - in_degree_initial,
            threshold_dist = "Identical") %>% 
     select(-replicate, -individual) %>% 
-    gather(metric, value, -gamma, -threshold_dist) %>% 
+    tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
     group_by(threshold_dist, gamma, metric) %>% 
     summarise(mean = mean(value), 
               sd = sd(value),
@@ -135,7 +132,9 @@ identical_data <- lapply(identical_files, function(x) {
 identical_data <- do.call("rbind", identical_data)
 
 # Bind
-network_change_data <- rbind(uniform_data, identical_data)
+network_change_data <- rbind(uniform_data, identical_data) %>% 
+  ungroup(threshold_dist) %>%
+  mutate(threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical")))
 
 ####################
 # Plot
@@ -227,7 +226,7 @@ ggsave(plot = gg_ties,
 net_degree_data <- network_change_data %>% 
   filter(metric %in% c("net_out_degree")) %>% 
   mutate(log_mean = log10(mean))
-gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim_length)) +
+gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = threshold_dist)) +
   geom_errorbar(aes(ymax = mean + error, ymin = mean - error),
                 size = 0.3,
                 width = 0) +
@@ -240,7 +239,7 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean, color = sim
   #                    expand = c(0, 0)) +
   theme_ctokita() +
   theme(aspect.ratio = 1,
-        legend.position = "none")
+        legend.position = "right")
 
 gg_degree_change
 
