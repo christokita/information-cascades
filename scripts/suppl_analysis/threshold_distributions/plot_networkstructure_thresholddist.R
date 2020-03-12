@@ -22,7 +22,7 @@ pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
 ####################
 # Normal sim (uniform threshold distribution)
 norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_gammasweep.csv', header = TRUE) %>% 
-  mutate(threshold_dist = "Uniform dist.")
+  mutate(threshold_dist = "Uniform (default)")
 
 # Identical thresholds
 iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/assortativity_identicalthresh.csv', header = TRUE) %>% 
@@ -30,12 +30,12 @@ iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thr
 
 # Narrow thresholds
 narrow_dist_data <- read.csv('data_derived/network_break/__suppl_analysis/narrow_threshdist_0.5/social_networks/assortativity_narrowthresh0.5.csv', header = TRUE) %>% 
-  mutate(threshold_dist = "Narrow dist.")
+  mutate(threshold_dist = "Narrow")
 
 # Bind
 assort_sum <- rbind(norm_data, iden_data, narrow_dist_data) %>% 
   mutate(delta_assort = assort_final - assort_initial,
-         threshold_dist = factor(threshold_dist, levels = c("Uniform dist.", "Identical", "Narrow dist."))) %>% 
+         threshold_dist = factor(threshold_dist, levels = c("Uniform (default)", "Narrow", "Identical"))) %>% 
   select(-replicate) %>% 
   tidyr::gather(metric, value, -gamma, -threshold_dist) %>% 
   group_by(gamma, threshold_dist, metric) %>% 
@@ -65,9 +65,9 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
               color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  scale_color_manual(name = "Thresholds", 
+  scale_color_manual(name = "Thresh. distribution,\nwith tie breaks", 
                      values = pal) +
-  scale_fill_manual(name = "Thresholds", 
+  scale_fill_manual(name = "Thresh. distribution,\nwith tie breaks", 
                     values = pal) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
