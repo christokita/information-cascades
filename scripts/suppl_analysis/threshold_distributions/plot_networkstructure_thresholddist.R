@@ -65,9 +65,9 @@ gg_assort_threhsolds <- ggplot(data = final_assort_sum,
               color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  scale_color_manual(name = "Thresh. distribution,\nwith tie breaks", 
+  scale_color_manual(name = "Thresh. distribution,\nwith new tie formation", 
                      values = pal) +
-  scale_fill_manual(name = "Thresh. distribution,\nwith tie breaks", 
+  scale_fill_manual(name = "Thresh. distribution,\nwith new tie formation", 
                     values = pal) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
