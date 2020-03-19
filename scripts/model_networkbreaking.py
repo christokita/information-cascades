@@ -95,10 +95,10 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
         adjacency = make_tie(network = adjacency, 
                              connect_prob = p)
         
-        # ALT model format: Adjust ties
-        adjacency = adjust_tie(network = adjacency,
-                               states = state_mat,
-                               correct_behavior = correct_state)
+#        # ALT model format: Adjust ties
+#        adjacency = adjust_tie(network = adjacency,
+#                               states = state_mat,
+#                               correct_behavior = correct_state)
     
     ########## Assess fitness ##########
     # Get fitness of individuals (based on behavior) and size of cascades
