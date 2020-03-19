@@ -29,7 +29,7 @@ k = 5 #mean degree on networks
 gamma = float(sys.argv[1]) #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.005 # probability selected individual forms new connection
-timesteps = 100000 #number of rounds simulation will run
+timesteps = 1000000 #number of rounds simulation will run
 rep = int(sys.argv[2]) #replicate ID number
 
 outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/'
