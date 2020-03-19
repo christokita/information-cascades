@@ -16,7 +16,7 @@ Run the model once, in which we track assortativity and the breaking/forming of 
 ##########
 n = 200 #number of individuals
 k = 5 #mean degree on networks
-gamma = 0 #correlation between two information sources
+gamma = 0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 p = 0.0002 # probability selected individual forms new connection **CHANGED**
 timesteps = 2*1000000 #number of rounds simulation will run
@@ -60,7 +60,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     seed = int( (replicate + 1 + gamma) * 323 )
     np.random.seed(seed)
     # Seed individual's thresholds
-    thresh_mat = th.seed_thresholds(n = n, lower = 0.5, upper = 0.5) # CHANGED
+    thresh_mat = th.seed_thresholds(n = n, lower = 0, upper = 1)
     # Assign type
     type_mat = th.assign_type(n = n)
     # Set up social network
@@ -93,17 +93,17 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
                                                             stimuli = stim_sources, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
-        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-        adjacency, broken_tie = break_tie(network = adjacency,
-                                          states = state_mat,
-                                          correct_behavior = correct_state)
-        # Randomly select one individual to form new tie
-        adjacency, formed_tie = make_tie(network = adjacency, 
-                                         connect_prob = p)
-#        # ALT model format: Adjust ties
-#        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
-#                                                       states = state_mat,
-#                                                       correct_behavior = correct_state)
+#        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
+#        adjacency, broken_tie = break_tie(network = adjacency,
+#                                          states = state_mat,
+#                                          correct_behavior = correct_state)
+#        # Randomly select one individual to form new tie
+#        adjacency, formed_tie = make_tie(network = adjacency, 
+#                                         connect_prob = p)
+        # ALT model format: Adjust ties
+        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
+                                                       states = state_mat,
+                                                       correct_behavior = correct_state)
         
         # Sum up tie forms/breaks
         break_count += broken_tie
@@ -184,20 +184,27 @@ def adjust_tie(network, states, correct_behavior):
         individual_active = np.random.choice(actives, size = 1)
         individual_correct = correct_behavior[individual_active]
         individual_neighbors = np.where(network[individual_active,:] == 1)[1]
-        if individual_correct:
-            # Form new tie to another active individual
-            potential_ties = np.delete(actives, np.where(actives == individual_active))
-            if len(potential_ties) > 0:
-                new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-                network[individual_active, new_tie] = 1
-                tie_formed += 1
         if not individual_correct:
+            
             # Break ties with one randomly-selected "incorrect" neighbor
             perceived_incorrect = [ind for ind in actives if ind in individual_neighbors] #which neighbors are active
             break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
             network[individual_active, break_tie] = 0
             tie_broken += 1
+            
+            # Randomly select another individual to form a new tie
+            n = network.shape[0] # Get number of individuals in system
+            former_individual = np.random.choice(range(0, n), size = 1)
+            former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
+            potential_ties = np.where(former_connections == 0)[0]
+            potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
+            if len(potential_ties) > 0: #catch in case the individual is already attached to every other individual
+                new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+                network[individual_active, new_tie] = 1
+                tie_formed += 1
+                
     return network, tie_formed, tie_broken
+
 
 ##########
 # Run model
