@@ -12,33 +12,31 @@ library(dplyr)
 library(tidyr)
 source("scripts/_plot_themes/theme_ctokita.R")
 
-####################
-# Paramters for analysis: paths to data, paths for output, and filename
-####################
-assort_file <- "data_derived/network_break/__suppl_analysis/adjust-tie-function/assortativity_adjusttie.csv" #path to file containing assortativity data
-network_data_dir <- "data_derived/network_break/__suppl_analysis/adjust-tie-function/network_change/" #path to directory containing network change data
-out_path <- "output/network_break/suppl_analysis/" #directory you wish to save plots
-plot_tag <- "adjustties" #extra info to add onto end of plot name
-if (plot_tag != "") {
-  plot_tag <- paste0("_", plot_tag)
-}
-
-
+# Palette for plotting
+pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
 
 ############################## Assortatiity ##############################
 
 ####################
 # Load data and summarise
 ####################
-assort_data <- read.csv(assort_file, header = TRUE) %>% 
-  mutate(delta_assort = assort_final - assort_initial) 
-assort_sum <- assort_data %>% 
-  select(gamma, delta_assort, assort_final) %>% 
-  gather(metric, value, -gamma) %>% 
-  group_by(gamma, metric) %>% 
-  summarise(mean = mean(value),
-            sd = sd(value),
-            ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) ))
+# Adjust_tie_function
+adjust_tie_data <- read.csv('data_derived/network_break/__suppl_analysis/adjust_tie_function/social_networks/assortativity_adjusttie.csv', header = TRUE) %>% 
+  mutate(model = "Adjust tie")
+
+# No new ties formed, 10^6 steps
+p0_longdata <- read.csv('data_derived/network_break/__suppl_analysis/p0_longsim/social_networks/assortativity_p0_10^6steps.csv', header = TRUE) %>% 
+  mutate(model = "No new ties")
+
+# Bind
+assort_sum <- rbind(adjust_tie_data, p0_longdata) %>% 
+  mutate(delta_assort = assort_final - assort_initial) %>% 
+  select(-replicate) %>% 
+  tidyr::gather(metric, value, -gamma, -model) %>% 
+  group_by(gamma, metric, model) %>% 
+  summarise(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
 ####################
 # Plot
@@ -46,38 +44,21 @@ assort_sum <- assort_data %>%
 # Raw final assortativity values
 assort_raw <- assort_sum %>% 
   filter(metric == "assort_final")
-gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
+gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, fill = model)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
-              alpha = 0.4) +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), 
+              alpha = 0.4,
+              color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
-  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  scale_color_manual(values = pal) +
+  scale_fill_manual(values = pal) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assort #show plot before saving
 ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
-
-# Change in assortativity
-assort_change <- assort_sum %>% 
-  filter(metric == "delta_assort")
-gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
-  geom_hline(aes(yintercept = 0), 
-             size = 0.3, 
-             linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
-  ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
-  theme_ctokita() 
-gg_assortchange #show plot before saving
-#ggsave(plot = gg_assortchange, filename = paste0(out_path, "assortchange", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
-
-
 
 ############################## Changes in network structure ##############################
 
