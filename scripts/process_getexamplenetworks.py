@@ -23,13 +23,13 @@ import copy
 # Parameters of files to be read
 ####################
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl_sims/identical_thresholds_p0_longsim/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl_sims/identical_thresholds_p0_longsim/type_data/' #type data
-thresh_dir = '../data_sim/network_break/__suppl_sims/identical_thresholds_p0_longsim/thresh_data/' #threshold data
+sn_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/type_data/' #type data
+thresh_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/thresh_data/' #threshold data
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/identical_thresholds_p0_longsim/social_networks/'
-filetags = 'identicalthresh_p0_10^6' #added info for save file
+outpath = '../data_derived/network_break/__suppl_analysis/adjust_tie_function/social_networks/'
+filetags = 'adjusttie' #added info for save file
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -47,7 +47,7 @@ else:
 # Find high assortatiity graph
 assort_percentile = np.percentile(assort_data.assort_final, 95)
 high_assort = assort_data[assort_data.assort_final > assort_percentile] #grab high assort values
-high_assort = high_assort[high_assort.gamma.isin([-1, -0.9])] #grab gammas of interest
+high_assort = high_assort[high_assort.gamma.isin([-1, -0.9, -0.8, -0.7])] #grab gammas of interest
 high_assort_ind = high_assort.assort_final.idxmax() #get index of max value
 
 # Grab corresponding graph 
