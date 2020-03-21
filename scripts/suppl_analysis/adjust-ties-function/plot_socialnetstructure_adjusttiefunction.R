@@ -55,10 +55,14 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, f
   geom_point(size = 0.8) +
   scale_color_manual(values = pal) +
   scale_fill_manual(values = pal) +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, 
+       filename = "output/network_break/__suppl_analysis/adjust_tie_function/assortativity_adjustties.png", 
+       height = 45, 
+       width = 100, units = "mm", dpi = 400)
 
 ############################## Changes in network structure ##############################
 
