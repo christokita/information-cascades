@@ -200,7 +200,7 @@ def adjust_tie(network, states, correct_behavior):
             potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
             if len(potential_ties) > 0: #catch in case the individual is already attached to every other individual
                 new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-                network[individual_active, new_tie] = 1
+                network[former_individual, new_tie] = 1
                 tie_formed += 1
                 
     return network, tie_formed, tie_broken
