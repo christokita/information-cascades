@@ -26,10 +26,14 @@ adjust_tie_data <- read.csv('data_derived/network_break/__suppl_analysis/adjust_
 
 # No new ties formed, 10^6 steps
 p0_longdata <- read.csv('data_derived/network_break/__suppl_analysis/p0_longsim/social_networks/assortativity_p0_10^6steps.csv', header = TRUE) %>% 
-  mutate(model = "No new ties")
+  mutate(model = "P = 0")
+
+# No new ties formed, 10^6 steps
+psmall_data <- read.csv('data_derived/network_break/__suppl_analysis/psmall/social_networks/assortativity_psmall.csv', header = TRUE) %>% 
+  mutate(model = "p = 0.0005")
 
 # Bind
-assort_sum <- rbind(adjust_tie_data, p0_longdata) %>% 
+assort_sum <- rbind(adjust_tie_data, p0_longdata, psmall_data) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   select(-replicate) %>% 
   tidyr::gather(metric, value, -gamma, -model) %>% 
@@ -48,7 +52,7 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, f
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
               alpha = 0.4,
               color = NA) +
   geom_line(size = 0.3) +

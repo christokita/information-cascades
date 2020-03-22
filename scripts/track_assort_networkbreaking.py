@@ -16,9 +16,9 @@ Run the model once, in which we track assortativity and the breaking/forming of 
 ##########
 n = 200 #number of individuals
 k = 5 #mean degree on networks
-gamma = 0.9 #correlation between two information sources
+gamma = -0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-p = 0.0002 # probability selected individual forms new connection **CHANGED**
+p = 0.0005 # probability selected individual forms new connection **CHANGED**
 timesteps = 2*1000000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
 
@@ -93,17 +93,17 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
                                                             stimuli = stim_sources, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
-#        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-#        adjacency, broken_tie = break_tie(network = adjacency,
-#                                          states = state_mat,
-#                                          correct_behavior = correct_state)
-#        # Randomly select one individual to form new tie
-#        adjacency, formed_tie = make_tie(network = adjacency, 
-#                                         connect_prob = p)
-        # ALT model format: Adjust ties
-        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
-                                                       states = state_mat,
-                                                       correct_behavior = correct_state)
+        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
+        adjacency, broken_tie = break_tie(network = adjacency,
+                                          states = state_mat,
+                                          correct_behavior = correct_state)
+        # Randomly select one individual to form new tie
+        adjacency, formed_tie = make_tie(network = adjacency, 
+                                         connect_prob = p)
+#        # ALT model format: Adjust ties
+#        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
+#                                                       states = state_mat,
+#                                                       correct_behavior = correct_state)
         
         # Sum up tie forms/breaks
         break_count += broken_tie
