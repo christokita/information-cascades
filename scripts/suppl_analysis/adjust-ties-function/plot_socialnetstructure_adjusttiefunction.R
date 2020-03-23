@@ -26,7 +26,7 @@ adjust_tie_data <- read.csv('data_derived/network_break/__suppl_analysis/adjust_
 
 # No new ties formed, 10^6 steps
 p0_longdata <- read.csv('data_derived/network_break/__suppl_analysis/p0_longsim/social_networks/assortativity_p0_10^6steps.csv', header = TRUE) %>% 
-  mutate(model = "P = 0")
+  mutate(model = "p = 0")
 
 # No new ties formed, 10^6 steps
 psmall_data <- read.csv('data_derived/network_break/__suppl_analysis/psmall/social_networks/assortativity_psmall.csv', header = TRUE) %>% 
@@ -40,33 +40,63 @@ assort_sum <- rbind(adjust_tie_data, p0_longdata, psmall_data) %>%
   group_by(gamma, metric, model) %>% 
   summarise(mean = mean(value, na.rm = TRUE),
             sd = sd(value, na.rm = TRUE),
-            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
+            ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) ),
+            iqr_low = mean(value, na.rm = TRUE) - quantile(value, 0.25),
+            iqr_high = quantile(value, 0.75) - mean(value, na.rm = TRUE)) #denominator removes NA values from count
 
 ####################
 # Plot
 ####################
-# Raw final assortativity values
+# Raw final assortativity values in comparison with other models
 assort_raw <- assort_sum %>% 
   filter(metric == "assort_final")
-gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, fill = model)) +
+gg_assort_comp <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, fill = model)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
+  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95),
               alpha = 0.4,
               color = NA) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
   scale_color_manual(values = pal) +
   scale_fill_manual(values = pal) +
+  scale_y_continuous(breaks = seq(-0.5, 0.3, 0.05)) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
+gg_assort_comp #show plot before saving
+ggsave(plot = gg_assort_comp, 
+       filename = "output/network_break/__suppl_analysis/adjust_tie_function/assortativity_adjusttiescomparison.png", 
+       height = 45, 
+       width = 100, units = "mm", dpi = 400)
+
+
+# Raw final assortativity values
+assort_raw <- assort_sum %>% 
+  filter(metric == "assort_final", model == "Adjust tie")
+gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean, color = model, fill = model)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
+              alpha = 0.4,
+              color = NA) +
+  geom_line(size = 0.3) +
+  geom_point(size = 0.8) +
+  scale_color_manual(values = pal) +
+  scale_fill_manual(values = pal) +
+  scale_y_continuous(breaks = seq(-0.05, 0.3, 0.05)) +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  theme_ctokita()  +
+  theme(legend.position = "none")
 gg_assort #show plot before saving
 ggsave(plot = gg_assort, 
        filename = "output/network_break/__suppl_analysis/adjust_tie_function/assortativity_adjustties.png", 
        height = 45, 
-       width = 100, units = "mm", dpi = 400)
+       width = 45, units = "mm", dpi = 600)
+
 
 ############################## Changes in network structure ##############################
 
