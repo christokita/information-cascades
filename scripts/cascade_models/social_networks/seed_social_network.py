@@ -10,7 +10,7 @@ import numpy as np
 import igraph
 
  
-def seed_social_network(n, k, network_type):
+def seed_social_network(n, k, network_type, directed = False):
     # This function generates a social network.
     #
     # INPUTS:
@@ -20,13 +20,13 @@ def seed_social_network(n, k, network_type):
     
     # Generate graph using Erdo-Renyi algorithm
     if network_type == "random":
-        g = igraph.Graph.Erdos_Renyi(n = n, m = n*k, directed = True, loops = False)
+        g = igraph.Graph.Erdos_Renyi(n = n, m = n*k, directed = directed, loops = False)
     elif network_type == "scalefree":
-        g = igraph.Graph.Barabasi(n = n, m = k, directed = True, power = 1)
+        g = igraph.Graph.Barabasi(n = n, m = k, directed = directed, power = 1)
     elif network_type == "regular":
-        g = igraph.Graph.K_Regular(n = n, k = k, directed = True, multiple = False)
+        g = igraph.Graph.K_Regular(n = n, k = k, directed = directed, multiple = False)
     elif network_type == "complete":
-        g = igraph.Graph.Full(n = n, directed = True, loops = False)
+        g = igraph.Graph.Full(n = n, directed = directed, loops = False)
     # Make into adjacency matrix
     network = g.get_adjacency()
     network = np.array(network.data)
