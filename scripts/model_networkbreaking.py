@@ -64,11 +64,11 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     ########## Run simulation ##########
     for t in range(timesteps):
         # Initial information sampling
-        stim_sources, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
-                                                                                       gamma = gamma,
-                                                                                       psi = psi,
-                                                                                       types = type_mat,
-                                                                                       thresholds = thresh_mat)
+        info_values, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
+                                                                                      gamma = gamma,
+                                                                                      psi = psi,
+                                                                                      types = type_mat,
+                                                                                      thresholds = thresh_mat)
         # Simulate information cascade 
         state_mat = cs.simulate_cascade(network = adjacency, 
                                         states = state_mat, 
@@ -84,7 +84,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
         # Evaluate behavior of individuals relative to threshold and stimuli
         correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
                                                             thresholds = thresh_mat, 
-                                                            stimuli = stim_sources, 
+                                                            information = info_values, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
         # Adjust social network ties

@@ -8,19 +8,19 @@ Created on Mon Nov 25 11:45:37 2019
 
 import numpy as np
 
-def evaluate_behavior(states, thresholds, stimuli, types, behavior_df):
+def evaluate_behavior(states, thresholds, information, types, behavior_df):
     # Evaluates the behavior of active individuals in the cascade and updates data on correct/incorrect behavior.
     #
     # INPUTS:
-    # - states:       array listing the behavioral state of every individual (numpy array).
-    # - thresholds:   array of thresholds for each individual (numpy array).
-    # - stimuli:      array of stimuli/infromation values (numpy array).
-    # - types:        array of type assignments for each individual (numpy array).
-    # - behavior_df:  dataframe to store the behavioral performance of individuals (pandas dataframe).
+    # - states:           array listing the behavioral state of every individual (numpy array).
+    # - thresholds:       array of thresholds for each individual (numpy array).
+    # - information:      array of stimuli/infromation values (numpy array).
+    # - types:            array of type assignments for each individual (numpy array).
+    # - behavior_df:      dataframe to store the behavioral performance of individuals (pandas dataframe).
     
     # Assess what all individuals would have done if they had sampled info directly
-    true_stim = np.dot(types, np.transpose(stimuli))
-    correct_behavior = true_stim > thresholds
+    relative_info = np.dot(types, np.transpose(information))
+    correct_behavior = relative_info > thresholds
     
     # Assess error types
     true_positive = (states == 1) & correct_behavior #did behavior when they should have

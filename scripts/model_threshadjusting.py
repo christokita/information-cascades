@@ -66,7 +66,7 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
     ########## Run simulation ##########
     for t in range(timesteps):
         # Initial information sampling
-        stim_sources, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
+        info_values, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
                                                                                        gamma = gamma,
                                                                                        psi = psi,
                                                                                        types = type_mat,
@@ -86,7 +86,7 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
         # Evaluate behavior of individuals relative to threshold and stimuli
         correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
                                                             thresholds = thresh_mat, 
-                                                            stimuli = stim_sources, 
+                                                            information = info_values, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
         # Randomly select one individual and adjust thresholds according to behavior (correct/incorrect)
