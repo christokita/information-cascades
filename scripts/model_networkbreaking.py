@@ -87,15 +87,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
                                                             stimuli = stim_sources, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
-#        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
-#        adjacency = break_tie(network = adjacency,
-#                              states = state_mat,
-#                              correct_behavior = correct_state)
-#        # Randomly select one individual to form new tie
-#        adjacency = make_tie(network = adjacency, 
-#                             connect_prob = p)
-        
-        # ALT model format: Adjust ties
+        # Adjust social network ties
         adjacency = adjust_tie(network = adjacency,
                                states = state_mat,
                                correct_behavior = correct_state)
@@ -138,45 +130,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
 ####################
 # Define model-specific functions
 ####################
-def break_tie(network, states, correct_behavior):
-    # Randomly selects active individual and breaks tie with active neighbor iff selected invidual is incorrect.
-    #
-    # INPUTS:
-    # - network:      the network connecting individuals (numpy array).
-    # - states:       matrix listing the behavioral state of every individual (numpy array).
-    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
-    
-    actives = np.where(states == 1)[0]
-    if sum(actives) > 0: #error catch when no individual are active
-        breaker_active = np.random.choice(actives, size = 1)
-        breaker_correct = correct_behavior[breaker_active]
-        if not breaker_correct:
-            breaker_neighbors = np.where(network[breaker_active,:] == 1)[1]
-            perceived_incorrect = [ind for ind in actives if ind in breaker_neighbors] #which neighbors are active
-            break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
-            network[breaker_active, break_tie] = 0
-    return network
-    
-def make_tie(network, connect_prob):
-    # Randomly selects individual and makes new tie with constant probability.
-    #
-    # INPUTS:
-    # - network:      the network connecting individuals (numpy array).
-    # - states:       matrix listing the behavioral state of every individual (numpy array).
-    # - stims:         matrix of thresholds for each individual (numpy array).
-    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
-    
-    n = network.shape[0] # Get number of individuals in system
-    former_individual = np.random.choice(range(0, n), size = 1)
-    form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob)) #determine if individual will form new tie
-    former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
-    potential_ties = np.where(former_connections == 0)[0]
-    potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
-    if form_connection == True and len(potential_ties) > 0: #form connection only if selected to form connection and isn't already connected to everyone
-        new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-        network[former_individual, new_tie] = 1
-    return network
-
 def adjust_tie(network, states, correct_behavior):
     # Randomly selects active individual and breaks tie if incorrect.
     # Another individual randomly forms like iff a tie is broken in that round.
