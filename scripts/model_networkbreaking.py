@@ -144,6 +144,7 @@ def adjust_tie(network, states, correct_behavior):
         individual_active = np.random.choice(actives, size = 1)
         individual_correct = correct_behavior[individual_active]
         individual_neighbors = np.where(network[individual_active,:] == 1)[1]
+        
         if not individual_correct:
             
             # Break ties with one randomly-selected "incorrect" neighbor
@@ -153,14 +154,13 @@ def adjust_tie(network, states, correct_behavior):
             network[break_tie, individual_active] = 0 #undirected network, symmetric edges
             
             # Randomly select another individual to form a new tie
-            n = network.shape[0] # Get number of individuals in system
-            former_individual = np.random.choice(range(0, n), size = 1)
+            candidate_individuals = np.where(np.sum(network, axis = 1))[0] #list individuals who are not already connected to everyone
+            former_individual = np.random.choice(candidate_individuals, size = 1)
             former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
             potential_ties = np.where(former_connections == 0)[0]
             potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
-            if len(potential_ties) > 0: #catch in case the individual is already attached to every other individual
-                new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-                network[former_individual, new_tie] = 1
-                network[new_tie, former_individual] = 1 #undirected network, symmetric edges
+            new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+            network[former_individual, new_tie] = 1
+            network[new_tie, former_individual] = 1 #undirected network, symmetric edges
                 
     return network
