@@ -34,7 +34,6 @@ for rep in np.arange(reps):
                                 k = k, 
                                 gamma = gamma, 
                                 psi = psi, 
-                                p = p, 
                                 timesteps = timesteps,
                                 outpath = outpath)
 

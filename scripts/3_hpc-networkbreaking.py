@@ -42,7 +42,6 @@ model.sim_adjusting_network(replicate = rep,
                             k = k, 
                             gamma = gamma, 
                             psi = psi, 
-                            p = p, 
                             timesteps = timesteps,
                             outpath = outpath)
 

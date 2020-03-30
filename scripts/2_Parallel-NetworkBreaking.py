@@ -48,7 +48,6 @@ for rep in np.arange(reps):
     k_array = [k] * len(reps_array)
     gamma_array = [gamma] * len(reps_array)
     psi_array = [psi] * len(reps_array)
-    p_array = [p] * len(reps_array)
     timesteps_array = [timesteps] * len(reps_array)
     outpath_array = [outpath] * len(reps_array)
     
@@ -59,7 +58,6 @@ for rep in np.arange(reps):
                                 k_array, 
                                 gamma_array, 
                                 psi_array, 
-                                p_array, 
                                 timesteps_array,
                                 outpath_array))
 
