@@ -29,7 +29,7 @@ np.seterr(divide='ignore', invalid='ignore')
 # Define simulation function
 ####################
 
-def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, network_type = "random") :
+def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, network_type = "random") :
     # Simulates a single replicate simulation of the network-breaking information cascade model. 
     #
     # INPUTS:
@@ -38,7 +38,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
     # - k:              mean out-degree of initial social network (int). k > 0.
     # - gamma:          correlation between information sources (float). gamma = [-1, 1].
     # - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
-    # - p:              probability that randomly selected individual forms a new connection (float). p = [0, 1].
     # - timesteps:      length of simulation (int).
     # - outpath:        path to directory where output folders and files will be created (str). 
     # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
