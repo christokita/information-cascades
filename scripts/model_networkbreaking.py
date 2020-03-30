@@ -155,7 +155,8 @@ def adjust_tie(network, states, correct_behavior):
             network[break_tie, individual_active] = 0 #undirected network, symmetric edges
             
             # Randomly select another individual to form a new tie
-            candidate_individuals = np.where(np.sum(network, axis = 1))[0] #list individuals who are not already connected to everyone
+            max_connections = network.shape[0] - 1 #can't connect to self
+            candidate_individuals = np.where(np.sum(network, axis = 1) != max_connections)[0] #list individuals who are not already connected to everyone
             former_individual = np.random.choice(candidate_individuals, size = 1)
             former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
             potential_ties = np.where(former_connections == 0)[0]
