@@ -72,7 +72,8 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, ne
         # Simulate information cascade 
         state_mat = cs.simulate_cascade(network = adjacency, 
                                         states = state_mat, 
-                                        thresholds = thresh_mat)
+                                        thresholds = thresh_mat,
+                                        samplers = samplers)
         # Get cascade data for beginning and end of simulation
         if (t < 5000 or t >= timesteps - 5000):
             cascade_size = cs.get_cascade_stats(t = t,
