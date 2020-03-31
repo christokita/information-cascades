@@ -31,11 +31,11 @@ def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
     # Run trials
     for t in np.arange(trial_count):
         # Initial information sampling
-        stims, states, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
-                                                                             gamma = gamma,
-                                                                             psi = psi,
-                                                                             types = types,
-                                                                             thresholds = thresholds)
+        info_values, states, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
+                                                                                   gamma = gamma,
+                                                                                   psi = psi,
+                                                                                   types = types,
+                                                                                   thresholds = thresholds)
         # Simulate information cascade 
         states = cs.simulate_cascade(network = network, 
                                      states = states, 
@@ -51,7 +51,7 @@ def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
         # Evaluate behavior of individuals relative to threshold and stimuli
         correct_state, behavior_stats = cs.evaluate_behavior(states = states, 
                                                               thresholds = thresholds, 
-                                                              stimuli = stims, 
+                                                              information = info_values, 
                                                               types = types,
                                                               behavior_df = behavior_stats)
         
