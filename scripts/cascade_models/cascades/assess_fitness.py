@@ -38,9 +38,9 @@ def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
                                                                              thresholds = thresholds)
         # Simulate information cascade 
         states = cs.simulate_cascade(network = network, 
-                                      states = states, 
-                                      thresholds = thresholds,
-                                      samplers = samplers)
+                                     states = states, 
+                                     thresholds = thresholds,
+                                     samplers = samplers)
         # Collect behavior data
         cascade_stats = cs.get_cascade_stats(t = t,
                                              samplers = samplers,
