@@ -80,12 +80,12 @@ for run in runs:
         rep = int(re.search('([0-9]+)', sn_final[i]).group(1))
         
         # Calculate assortativity
-        g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency))
+        g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency), mode = 'undirected')
         g_final.vs['Type'] = type_mat[:,0]
-        final_assort = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = True) #type categories are nominal, despite being numbers
-        g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial))
+        final_assort = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = False) #type categories are nominal, despite being numbers
+        g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirect')
         g_initial.vs['Type'] = type_mat[:,0]
-        initial_assort = g_initial.assortativity(types1 = g_initial.vs['Type'], directed = True)
+        initial_assort = g_initial.assortativity(types1 = g_initial.vs['Type'], directed = False)
         
         # Return
         to_return = np.array([[gamma, rep, final_assort, initial_assort]])
