@@ -23,7 +23,8 @@ if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
 
-
+pal <- "#1B3B6F"
+# pal <- "#225ea8"
 
 ############################## Assortatiity ##############################
 
@@ -55,9 +56,9 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   #               size = 0.3, color = "#225ea8") +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
-              fill = "#225ea8") +
-  geom_line(size = 0.3, color = "#225ea8") +
-  geom_point(size = 0.8, color = "#225ea8") +
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
+  geom_point(size = 0.8, color = pal) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
