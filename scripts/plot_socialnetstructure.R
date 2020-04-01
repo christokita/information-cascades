@@ -50,7 +50,10 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
+  # geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), 
+  #               width = 0,
+  #               size = 0.3, color = "#225ea8") +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = "#225ea8") +
   geom_line(size = 0.3, color = "#225ea8") +
@@ -69,7 +72,7 @@ gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - ci95, ymax = mean + ci95), 
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), 
               alpha = 0.4) +
   geom_line(size = 0.3) +
   geom_point(size = 0.8) +
