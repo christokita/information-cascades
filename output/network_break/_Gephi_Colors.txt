@@ -14,3 +14,6 @@ Blue - #0070C0
 Red - #AE172A
 
 Darker blue - #365592
+
+Muted Blue - #376c8b
+Muted Red - #ff5757

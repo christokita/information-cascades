@@ -23,13 +23,13 @@ import copy
 # Parameters of files to be read
 ####################
 # Directory where simulation data is found
-sn_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/social_network_data/' #social network data
-type_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/type_data/' #type data
-thresh_dir = '../data_sim/network_break/__suppl_sims/adjust_tie_function/thresh_data/' #threshold data
+sn_dir = '../data_sim/network_break/social_network_data/' #social network data
+type_dir = '../data_sim/network_break/type_data/' #type data
+thresh_dir = '../data_sim/network_break/thresh_data/' #threshold data
 
 # For output
-outpath = '../data_derived/network_break/__suppl_analysis/adjust_tie_function/social_networks/'
-filetags = 'adjusttie' #added info for save file
+outpath = '../data_derived/network_break/social_networks/'
+filetags = 'gammasweep' #added info for save file
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -51,7 +51,7 @@ high_assort = high_assort[high_assort.gamma < 0] #grab gammas of interest
 high_assort = high_assort.sort_values(by = ['assort_final'], ascending = False)
 high_assort_ind = high_assort.assort_final.idxmax() #get index of max value
 
-high_assort_ind = high_assort.index[5] #manual override
+high_assort_ind = high_assort.index[2] #manual override
 
 # Grab corresponding graph 
 high_assort_value = high_assort.assort_final[high_assort_ind]
@@ -83,6 +83,50 @@ high_assort_nodes = pd.DataFrame({"Id": np.arange(0, n_individuals),
 filename = "examplenet_highassort"
 high_assort_graph.to_csv(outpath + filename + "_network" + filetags + ".csv")
 high_assort_nodes.to_csv(outpath + filename + "_nodes" + filetags + ".csv", index = False)
+
+
+
+####################
+# Output example of medium, increasing assortativity
+####################
+# Find high assortativity graph
+mid_assort = assort_data[assort_data.gamma == 0.6] #grab gammas of interest
+mean_mid_assort = np.mean(mid_assort.assort_final)
+mid_assort = mid_assort[(mid_assort.assort_final > mean_mid_assort - 0.01) & (mid_assort.assort_final < mean_mid_assort + 0.01)]
+
+mid_assort_ind = mid_assort.index[0] #manual override
+
+
+# Grab corresponding graph 
+mid_assort_value = mid_assort.assort_final[mid_assort_ind]
+mid_assort_gamma = assort_data.gamma[mid_assort_ind] #get gamma value
+begin_this_gamma = min(assort_data.index[assort_data.gamma == mid_assort_gamma]) #find where this gamma starts
+mid_assort_replicate = mid_assort_ind - begin_this_gamma + 1 #determine replicate number of that gamma value
+sn_path = sn_dir + 'gamma' + str(mid_assort_gamma) + '/'
+sn_name = 'sn_final_rep' + str(mid_assort_replicate).zfill(2) + '.npy'
+mid_assort_graph = np.load(sn_path + sn_name) #load
+
+# Grab corresponding type data
+type_path = type_dir + 'gamma' + str(mid_assort_gamma) + '/'
+type_name = 'type_rep' + str(mid_assort_replicate).zfill(2) + '.npy'
+mid_assort_types = np.load(type_path + type_name) #load
+
+# Grab corresponding threshold data  
+thresh_path = thresh_dir + 'gamma' + str(mid_assort_gamma) + '/'
+thresh_name = 'thresh_rep' + str(mid_assort_replicate).zfill(2) + '.npy'
+mid_assort_thresh = np.load(thresh_path + thresh_name) #load
+
+# Prepre for gephi and save
+n_individuals = mid_assort_graph.shape[0]
+mid_assort_graph = pd.DataFrame(mid_assort_graph, 
+                                 columns = np.arange(0, n_individuals), 
+                                 index = np.arange(n_individuals))
+mid_assort_nodes = pd.DataFrame({"Id": np.arange(0, n_individuals), 
+                                  "Type": mid_assort_types[:,0],
+                                  "Threshold": mid_assort_thresh[:,0]})
+filename = "examplenet_midassort"
+mid_assort_graph.to_csv(outpath + filename + "_network" + filetags + ".csv")
+mid_assort_nodes.to_csv(outpath + filename + "_nodes" + filetags + ".csv", index = False)
 
 
 
