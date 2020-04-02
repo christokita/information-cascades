@@ -18,6 +18,7 @@ n = 200 #number of individuals
 k = 5 #mean degree on networks
 gamma = -0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
+p = 0.0005 # probability selected individual forms new connection **CHANGED**
 timesteps = 2*1000000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
 
@@ -40,7 +41,7 @@ np.seterr(divide='ignore', invalid='ignore')
 # Define simulation function
 ####################
 
-def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, network_type = "random") :
+def sim_adjusting_network(replicate, n, k, gamma, psi, p, timesteps, outpath, network_type = "random") :
     # Simulates a single replicate simulation of the network-breaking information cascade model. 
     #
     # INPUTS:
@@ -49,6 +50,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     # - k:              mean out-degree of initial social network (int). k > 0.
     # - gamma:          correlation between information sources (float). gamma = [-1, 1].
     # - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
+    # - p:              probability that randomly selected individual forms a new connection (float). p = [0, 1].
     # - timesteps:      length of simulation (int).
     # - outpath:        path to directory where output folders and files will be created (str). 
     # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
@@ -63,7 +65,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     type_mat = th.assign_type(n = n)
     # Set up social network
     adjacency = sn.seed_social_network(n, k, network_type = network_type)
-    # Cascade behavior data (correct/incorrect behavior)
     behavior_data = pd.DataFrame(np.zeros(shape = (n, 5)),
                                           columns = ['individual', 'true_positive', 'false_negative', 'true_negative', 'false_positive'])
     behavior_data['individual'] = np.arange(n)
@@ -77,26 +78,32 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     ########## Run simulation ##########
     for t in range(timesteps):
         # Initial information sampling
-        info_values, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
-                                                                                      gamma = gamma,
-                                                                                      psi = psi,
-                                                                                      types = type_mat,
-                                                                                      thresholds = thresh_mat)
+        stim_sources, state_mat, samplers, samplers_active = cs.simulate_stim_sampling(n = n,
+                                                                                       gamma = gamma,
+                                                                                       psi = psi,
+                                                                                       types = type_mat,
+                                                                                       thresholds = thresh_mat)
         # Simulate information cascade 
         state_mat = cs.simulate_cascade(network = adjacency, 
                                         states = state_mat, 
-                                        thresholds = thresh_mat,
-                                        samplers = samplers)
+                                        thresholds = thresh_mat)
         # Evaluate behavior of individuals relative to threshold and stimuli
         correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
                                                             thresholds = thresh_mat, 
-                                                            information = info_values, 
+                                                            stimuli = stim_sources, 
                                                             types = type_mat,
                                                             behavior_df = behavior_data)
-        # ALT model format: Adjust ties
-        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
-                                                       states = state_mat,
-                                                       correct_behavior = correct_state)
+        # Randomly select one individual and if incorrect, break tie with one incorrect neighbor
+        adjacency, broken_tie = break_tie(network = adjacency,
+                                          states = state_mat,
+                                          correct_behavior = correct_state)
+        # Randomly select one individual to form new tie
+        adjacency, formed_tie = make_tie(network = adjacency, 
+                                         connect_prob = p)
+#        # ALT model format: Adjust ties
+#        adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
+#                                                       states = state_mat,
+#                                                       correct_behavior = correct_state)
         
         # Sum up tie forms/breaks
         break_count += broken_tie
@@ -119,9 +126,51 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
 ####################
 # Define model-specific functions
 ####################
+def break_tie(network, states, correct_behavior):
+    # Randomly selects active individual and breaks tie with active neighbor iff selected invidual is incorrect.
+    #
+    # INPUTS:
+    # - network:      the network connecting individuals (numpy array).
+    # - states:       matrix listing the behavioral state of every individual (numpy array).
+    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    
+    actives = np.where(states == 1)[0]
+    tie_broken = 0
+    if sum(actives) > 0: #error catch when no individual are active
+        breaker_active = np.random.choice(actives, size = 1)
+        breaker_correct = correct_behavior[breaker_active]
+        if not breaker_correct:
+            breaker_neighbors = np.where(network[breaker_active,:] == 1)[1]
+            perceived_incorrect = [ind for ind in actives if ind in breaker_neighbors] #which neighbors are active
+            break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
+            network[breaker_active, break_tie] = 0
+            tie_broken += 1
+    return network, tie_broken
+    
+def make_tie(network, connect_prob):
+    # Randomly selects individual and makes new tie with constant probability.
+    #
+    # INPUTS:
+    # - network:      the network connecting individuals (numpy array).
+    # - states:       matrix listing the behavioral state of every individual (numpy array).
+    # - stims:         matrix of thresholds for each individual (numpy array).
+    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    
+    tie_formed = 0
+    n = network.shape[0] # Get number of individuals in system
+    former_individual = np.random.choice(range(0, n), size = 1)
+    form_connection = np.random.choice((True, False), p = (connect_prob, 1-connect_prob)) #determine if individual will form new tie
+    former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
+    potential_ties = np.where(former_connections == 0)[0]
+    potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
+    if form_connection == True and len(potential_ties) > 0: #form connection only if selected to form connection and isn't already connected to everyone
+        new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+        network[former_individual, new_tie] = 1
+        tie_formed += 1
+    return network, tie_formed
+
 def adjust_tie(network, states, correct_behavior):
-    # Randomly selects active individual and breaks tie if incorrect.
-    # Another individual randomly forms like iff a tie is broken in that round.
+    # Randomly selects active individual and breaks/forms tie depending on whether her cascade behavior was correct.
     #
     # INPUTS:
     # - network:      the network connecting individuals (numpy array).
@@ -135,32 +184,26 @@ def adjust_tie(network, states, correct_behavior):
         individual_active = np.random.choice(actives, size = 1)
         individual_correct = correct_behavior[individual_active]
         individual_neighbors = np.where(network[individual_active,:] == 1)[1]
-        
         if not individual_correct:
             
             # Break ties with one randomly-selected "incorrect" neighbor
             perceived_incorrect = [ind for ind in actives if ind in individual_neighbors] #which neighbors are active
             break_tie = np.random.choice(perceived_incorrect, size = 1, replace = False)
             network[individual_active, break_tie] = 0
-            network[break_tie, individual_active] = 0 #undirected network, symmetric edges
             tie_broken += 1
             
             # Randomly select another individual to form a new tie
-            max_connections = network.shape[0] - 1 #can't connect to self
-            candidate_individuals = np.where(np.sum(network, axis = 1) != max_connections)[0] #list individuals who are not already connected to everyone
-            former_individual = np.random.choice(candidate_individuals, size = 1)
+            n = network.shape[0] # Get number of individuals in system
+            former_individual = np.random.choice(range(0, n), size = 1)
             former_connections = np.squeeze(network[former_individual,:]) #get individual's neighbors
             potential_ties = np.where(former_connections == 0)[0]
             potential_ties = np.delete(potential_ties, np.where(potential_ties == former_individual)) # Prevent self-loop
-            new_tie = np.random.choice(potential_ties, size = 1, replace = False)
-            network[former_individual, new_tie] = 1
-            network[new_tie, former_individual] = 1 #undirected network, symmetric edges
-            tie_formed += 1
+            if len(potential_ties) > 0: #catch in case the individual is already attached to every other individual
+                new_tie = np.random.choice(potential_ties, size = 1, replace = False)
+                network[former_individual, new_tie] = 1
+                tie_formed += 1
                 
     return network, tie_formed, tie_broken
-
-
-
 
 
 ##########
@@ -171,6 +214,7 @@ assort_over_time, tiechanges_over_time = sim_adjusting_network(replicate = 0,
                                                                k = k, 
                                                                gamma = gamma, 
                                                                psi = psi, 
+                                                               p = p, 
                                                                timesteps = timesteps,
                                                                outpath = outpath)
 
