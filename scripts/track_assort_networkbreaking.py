@@ -11,6 +11,11 @@ Run the model once, in which we track assortativity and the breaking/forming of 
 **To run this script, make sure it is in the scripts/ directory.**
 """
 
+# Settings for simulation
+save_plot = True
+outpath = "/scratch/gpfs/ctokita/information-cascades/"
+
+
 ##########
 # Set parameters
 ##########
@@ -18,10 +23,8 @@ n = 200 #number of individuals
 k = 5 #mean degree on networks
 gamma = -0.9 #correlation between two information sources
 psi = 0.1 #proportion of samplers
-timesteps = 2*1000000 #number of rounds simulation will run
+timesteps = 5*1000000 #number of rounds simulation will run
 reps = 1 #number of replicate simulations
-
-outpath = ''
 
 ####################
 # Load libraries and packages
@@ -194,5 +197,9 @@ tiechanges = pd.melt(tiechanges_over_time, id_vars = "t", value_vars = ["breaks"
 sns.lineplot(x = "t", y = "value", hue = "variable", data = tiechanges, estimator = None, ax = axes[1], palette = ['#e74c3c', '#3498db'])
 plt.ylabel("Count")
 
+f.suptitle("Assortativity over time for $\gamma =$ " + str(gamma))
+
+if save_plot:
+    f.savefig(outpath + 'assorttime_gamma' + str(gamma) + '.png')
 
 
