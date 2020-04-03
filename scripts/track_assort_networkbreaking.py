@@ -191,11 +191,13 @@ sns.despine()
 # Assortativity over time
 sns.lineplot(x = "t", y = "assort_type", data = assort_over_time, ax = axes[0], color = '#34495e')
 plt.ylabel("Assortativity")
+plt.ticklabel_format(style ='sci', axis='x', scilimits=(0,0))
 
 # Breaks and new ties over time
 tiechanges = pd.melt(tiechanges_over_time, id_vars = "t", value_vars = ["breaks", "new_ties"])
 sns.lineplot(x = "t", y = "value", hue = "variable", data = tiechanges, estimator = None, ax = axes[1], palette = ['#e74c3c', '#3498db'])
 plt.ylabel("Count")
+plt.ticklabel_format(style ='sci', axis='x', scilimits=(0,0))
 
 f.suptitle("Assortativity over time for $\gamma =$ " + str(gamma))
 
