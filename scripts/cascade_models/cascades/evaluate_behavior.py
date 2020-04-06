@@ -33,5 +33,5 @@ def evaluate_behavior(states, thresholds, information, types):
 #    behavior_df['true_negative'] = behavior_df['true_negative'] + np.ndarray.flatten(true_negative)
 #    behavior_df['false_positive'] = behavior_df['false_positive'] + np.ndarray.flatten(false_positive)
 #    behavior_df['false_negative'] = behavior_df['false_negative'] + np.ndarray.flatten(false_negative)
-#    correct_behavior = np.ndarray.flatten(correct_behavior)
-    return correct_behavior, behavior_df
+    correct_behavior = np.ndarray.flatten(correct_behavior)
+    return correct_behavior
