@@ -15,7 +15,6 @@ Function to run network-breaking cascade model
 # Load libraries and packages
 ####################
 import numpy as np
-import pandas as pd
 import cascade_models.social_networks as sn
 import cascade_models.thresholds as th
 import cascade_models.cascades as cs
@@ -53,12 +52,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     # Set up social network
     adjacency = sn.seed_social_network(n, k, network_type = network_type)
     adjacency_initial = copy.deepcopy(adjacency)
-    # Cascade size data
-    cascade_size = pd.DataFrame(columns = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])
-    # Cascade behavior data (correct/incorrect behavior)
-    behavior_data = pd.DataFrame(np.zeros(shape = (n, 5)),
-                                          columns = ['individual', 'true_positive', 'false_negative', 'true_negative', 'false_positive'])
-    behavior_data['individual'] = np.arange(n)
     
     ########## Run simulation ##########
     for t in range(timesteps):
@@ -73,20 +66,11 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
                                         states = state_mat, 
                                         thresholds = thresh_mat,
                                         samplers = samplers)
-        # Get cascade data for beginning and end of simulation
-        if (t < 5000 or t >= timesteps - 5000):
-            cascade_size = cs.get_cascade_stats(t = t,
-                                                samplers = samplers,
-                                                active_samplers = samplers_active,
-                                                states = state_mat, 
-                                                types = type_mat, 
-                                                stats_df = cascade_size)
         # Evaluate behavior of individuals relative to threshold and stimuli
         correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
                                                             thresholds = thresh_mat, 
                                                             information = info_values, 
-                                                            types = type_mat,
-                                                            behavior_df = behavior_data)
+                                                            types = type_mat)
         # Adjust social network ties
         adjacency = adjust_tie(network = adjacency,
                                states = state_mat,
@@ -105,7 +89,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     ########## Save files ##########
     # Create output folder
     output_name = "gamma" + str(gamma)
-    data_dirs = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data', 'fitness_data']
+    data_dirs = ['social_network_data', 'thresh_data', 'type_data', 'fitness_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
     for x in np.arange(len(data_dirs)):
@@ -118,14 +102,12 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     # Save files
     rep_label = str(replicate)
     rep_label = rep_label.zfill(2)
-    cascade_size.to_pickle(output_dirs[0] + "cascade_rep" + rep_label + ".pkl")
-    np.save(output_dirs[1] + "sn_final_rep" + rep_label + ".npy", adjacency)
-    np.save(output_dirs[1] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
-    np.save(output_dirs[2] + "thresh_rep" + rep_label + ".npy", thresh_mat)
-    np.save(output_dirs[3] + "type_rep" + rep_label + ".npy", type_mat)
-    behavior_data.to_pickle(output_dirs[4] + "behavior_rep" + rep_label + ".pkl")
-    fitness_size.to_pickle(output_dirs[5] + "fitness_cascades_rep" + rep_label + ".pkl")
-    fitness_behavior.to_pickle(output_dirs[5] + "fitness_behavior_rep" + rep_label + ".pkl")
+    np.save(output_dirs[0] + "sn_final_rep" + rep_label + ".npy", adjacency)
+    np.save(output_dirs[0] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
+    np.save(output_dirs[1] + "thresh_rep" + rep_label + ".npy", thresh_mat)
+    np.save(output_dirs[2] + "type_rep" + rep_label + ".npy", type_mat)
+    fitness_size.to_pickle(output_dirs[3] + "fitness_cascades_rep" + rep_label + ".pkl")
+    fitness_behavior.to_pickle(output_dirs[3] + "fitness_behavior_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
