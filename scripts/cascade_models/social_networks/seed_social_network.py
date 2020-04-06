@@ -11,20 +11,34 @@ import igraph
 
  
 def seed_social_network(n, k, network_type, directed = False):
-    # This function generates a social network.
+    # This function generates a social network. 
+    # If the network is undirected, only even <k> allows for use of all network types.
+    # Otherwise, scale-free cannot handle creating an undirected graph with an odd mean degree <k>.
     #
     # INPUTS:
     # - n:   number of individuals in the social system (int).
     # - k:   average degree desired in social network (int).
     # - type:   type of network to generate: random, scale-free (str).    
     
+    # Set up appropriate number of edges or degree
+    if not directed:
+        if k%2 != 0:
+            raise Exception("WARNING: Cannot reliably generate undirected scale-free networks with odd mean degree <k> = 1, 3, 5, etc. Please select an even <k> to allow appropriate comparison between network types.")
+        n_edges = int((n*k)/2)
+        out_links = int(k/2)
+        avg_degree = k
+    elif directed:
+        n_edges = n*k
+        out_links = k
+        avg_degree = k
+    
     # Generate graph using Erdo-Renyi algorithm
     if network_type == "random":
-        g = igraph.Graph.Erdos_Renyi(n = n, m = n*k, directed = directed, loops = False)
+        g = igraph.Graph.Erdos_Renyi(n = n, m = n_edges, directed = directed, loops = False)
     elif network_type == "scalefree":
-        g = igraph.Graph.Barabasi(n = n, m = k, directed = directed, power = 1)
+        g = igraph.Graph.Barabasi(n = n, m = out_links, directed = directed, power = 1)
     elif network_type == "regular":
-        g = igraph.Graph.K_Regular(n = n, k = k, directed = directed, multiple = False)
+        g = igraph.Graph.K_Regular(n = n, k = avg_degree, directed = directed, multiple = False)
     elif network_type == "complete":
         g = igraph.Graph.Full(n = n, directed = directed, loops = False)
     # Make into adjacency matrix
@@ -32,7 +46,6 @@ def seed_social_network(n, k, network_type, directed = False):
     network = np.array(network.data)
     
 #    # Prevent loners
-#    # note: remember that if this is undirected, np.sum(network, axis = 1) will double count edges
 #    if sum( np.sum(network, axis = 1) == 0 ) > 0:
 #        
 #        # Find loners
