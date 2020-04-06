@@ -66,10 +66,6 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     type_mat = th.assign_type(n = n)
     # Set up social network
     adjacency = sn.seed_social_network(n, k, network_type = network_type)
-    # Cascade behavior data (correct/incorrect behavior)
-    behavior_data = pd.DataFrame(np.zeros(shape = (n, 5)),
-                                          columns = ['individual', 'true_positive', 'false_negative', 'true_negative', 'false_positive'])
-    behavior_data['individual'] = np.arange(n)
     
     #Capture assortativity and network breaks over time!
     assort_time = pd.DataFrame(columns = ['t', 'assort_type'])
@@ -91,11 +87,10 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
                                         thresholds = thresh_mat,
                                         samplers = samplers)
         # Evaluate behavior of individuals relative to threshold and stimuli
-        correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
-                                                            thresholds = thresh_mat, 
-                                                            information = info_values, 
-                                                            types = type_mat,
-                                                            behavior_df = behavior_data)
+        correct_state = cs.evaluate_behavior(states = state_mat, 
+                                             thresholds = thresh_mat, 
+                                             information = info_values, 
+                                             types = type_mat)
         # ALT model format: Adjust ties
         adjacency, formed_tie, broken_tie = adjust_tie(network = adjacency,
                                                        states = state_mat,

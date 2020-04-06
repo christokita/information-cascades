@@ -67,10 +67,10 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
                                         thresholds = thresh_mat,
                                         samplers = samplers)
         # Evaluate behavior of individuals relative to threshold and stimuli
-        correct_state, behavior_data = cs.evaluate_behavior(states = state_mat, 
-                                                            thresholds = thresh_mat, 
-                                                            information = info_values, 
-                                                            types = type_mat)
+        correct_state = cs.evaluate_behavior(states = state_mat, 
+                                             thresholds = thresh_mat, 
+                                             information = info_values, 
+                                             types = type_mat)
         # Adjust social network ties
         adjacency = adjust_tie(network = adjacency,
                                states = state_mat,
