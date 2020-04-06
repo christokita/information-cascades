@@ -24,7 +24,7 @@ import sys
 # Set parameters
 ##########
 n = 200 #number of individuals
-k = 5 #mean degree on networks
+k = 6 #mean degree on networks
 gamma = 0 #correlation between two information sources
 psi = 0.1 #proportion of samplers
 timesteps = 1000000 #number of rounds simulation will run
