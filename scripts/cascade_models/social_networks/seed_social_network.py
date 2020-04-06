@@ -32,6 +32,7 @@ def seed_social_network(n, k, network_type, directed = False):
     network = np.array(network.data)
     
 #    # Prevent loners
+#    # note: remember that if this is undirected, np.sum(network, axis = 1) will double count edges
 #    if sum( np.sum(network, axis = 1) == 0 ) > 0:
 #        
 #        # Find loners
