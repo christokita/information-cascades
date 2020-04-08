@@ -21,14 +21,7 @@ import re
 ####################
 # Parameters of files to be read
 ####################
-# Type of network to graph
-gammas = np.round(np.arange(-1, 0.1, 0.1), 1) #list of one or more gamma values desired
-#gammas = [-1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0] #list of one or more gamma values desired
-method = 'max' #'max' or 'average'
-index = 2 #index of which graph to select from filtered subset, DEFAULT = 0
-
 # For output
-filename = 'example_highassort'
 outpath = '../data_derived/network_break/social_networks/'
 filetags = '' #added info for save file
 if len(filetags) > 0:
@@ -95,7 +88,7 @@ def get_network_by_gamma(gamma, outpath, filename, filetags, method, manual_inde
                                     (filtered_data['assort_final'] < filtered_assort_mean + 0.01)]
     elif method == "max":
         filtered_data = filtered_data.sort_values(by = ['assort_final'], ascending = False)
-        print("Method 'max' selected. Showing the top 10 graphs in this gamma range.\n")
+        print("\nMethod 'max' selected. Showing the top 10 graphs in this gamma range:\n")
         print(filtered_data.iloc[0:10,:])
     selected_index = filtered_data.index[manual_index]
     
@@ -112,13 +105,21 @@ def get_network_by_gamma(gamma, outpath, filename, filetags, method, manual_inde
                                "Type": types[:,0],
                                "Threshold": thresholds[:,0]})
     graph_table.to_csv("%s%s_network%s.csv" % (outpath, filename, filetags))
-    node_table.to_csv("%s%s_nodes%s.csv" % (outpath, filename, filetags))
-    print("\nGraph selected\nGamma = %1.1f\nReplicate = %d\nAssortativity = %1.3f" % (gamma, replicate, assort_value))
+    node_table.to_csv("%s%s_nodes%s.csv" % (outpath, filename, filetags), index = False)
+    print("---\nGraph selected\nGamma = %1.1f\nReplicate = %d\nAssortativity = %1.3f" % (gamma, replicate, assort_value))
 
 
 ####################
-# Execute functions to select and save graph
+# High Assortativity example graph
 ####################
+    
+# Grab highest assortativity values
+gammas = np.round(np.arange(-1, 0.1, 0.1), 1) #list of one or more gamma values desired
+#gammas = [-1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0] #list of one or more gamma values desired
+method = 'max' #'max' or 'average'
+filename = 'example_highassort'
+index = 5 #index of which graph to select from filtered subset, DEFAULT = 0
+    
 get_network_by_gamma(gamma = gammas, 
                      outpath = outpath, 
                      filename = filename, 
@@ -127,6 +128,53 @@ get_network_by_gamma(gamma = gammas,
                      manual_index = index)
 
 
+# Grab average value for a high-assortativity gamma value
+gammas = [0.0] #list of one or more gamma values desired
+method = 'average' #'max' or 'average'
+filename = 'example_gamma0.0'
+index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
+    
+get_network_by_gamma(gamma = gammas, 
+                     outpath = outpath, 
+                     filename = filename, 
+                     filetags = filetags,
+                     method = method, 
+                     manual_index = index)
+
+
+
+####################
+# Lower Assortativity example graph
+####################
+
+gammas = [0.9] #list of one or more gamma values desired
+method = 'average' #'max' or 'average'
+filename = 'example_gamma0.9'
+index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
+    
+get_network_by_gamma(gamma = gammas, 
+                     outpath = outpath, 
+                     filename = filename, 
+                     filetags = filetags,
+                     method = method, 
+                     manual_index = index)
+
+
+####################
+# No Assortativity example graph
+####################
+
+gammas = [1.0] #list of one or more gamma values desired
+method = 'average' #'max' or 'average'
+filename = 'example_gamma1.0'
+index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
+    
+get_network_by_gamma(gamma = gammas, 
+                     outpath = outpath, 
+                     filename = filename, 
+                     filetags = filetags,
+                     method = method, 
+                     manual_index = index)
 
 
 
