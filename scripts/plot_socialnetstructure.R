@@ -125,17 +125,18 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
+              alpha = 0.2,
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
-             size = 1) +
+             size = 1, color = pal) +
   ylab(expression( paste(Delta, " social ties")) ) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_shape_manual(values = c(19, 21),
                      labels = c("Same ideology",
                                 "Diff. ideology"),
                      name = "Connetion type") +
-  scale_fill_manual(values = c("black", "white"),
+  scale_fill_manual(values = c(pal, "white"),
                     labels = c("Same ideology",
                                "Diff. ideology"),
                     name = "Connetion type") +
@@ -150,11 +151,12 @@ ties_data <- network_change_sum %>%
   filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
   mutate(metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
-  geom_line(size = 0.3) +
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error),
-              alpha = 0.4) +
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
+              alpha = 0.2,
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
-             size = 1) +
+             size = 1, color = pal) +
   ylab("Count") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   # scale_y_continuous(limits = c(0, 1.21), 
