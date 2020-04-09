@@ -132,6 +132,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
              size = 1, color = pal) +
   ylab(expression( paste(Delta, " social ties")) ) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_y_continuous(breaks = seq(-2, 2, 0.5)) +
   scale_shape_manual(values = c(19, 21),
                      labels = c("Same ideology",
                                 "Diff. ideology"),
