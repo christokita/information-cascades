@@ -86,6 +86,7 @@ def get_network_by_gamma(gamma, outpath, filename, filetags, method, manual_inde
         filtered_assort_mean = np.mean(filtered_data['assort_final'])
         filtered_data = filtered_data[(filtered_data['assort_final'] > filtered_assort_mean - 0.01) &\
                                     (filtered_data['assort_final'] < filtered_assort_mean + 0.01)]
+        filtered_data = filtered_data.sort_values(by = ['assort_final'], ascending = False)
     elif method == "max":
         filtered_data = filtered_data.sort_values(by = ['assort_final'], ascending = False)
         print("\nMethod 'max' selected. Showing the top 10 graphs in this gamma range:\n")
@@ -118,7 +119,7 @@ gammas = np.round(np.arange(-1, 0.1, 0.1), 1) #list of one or more gamma values 
 #gammas = [-1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0] #list of one or more gamma values desired
 method = 'max' #'max' or 'average'
 filename = 'example_highassort'
-index = 5 #index of which graph to select from filtered subset, DEFAULT = 0
+index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
     
 get_network_by_gamma(gamma = gammas, 
                      outpath = outpath, 
@@ -144,13 +145,13 @@ get_network_by_gamma(gamma = gammas,
 
 
 ####################
-# Lower Assortativity example graph
+# Lower Assortativity example graphs
 ####################
 
-gammas = [0.9] #list of one or more gamma values desired
+gammas = [0.8] #list of one or more gamma values desired
 method = 'average' #'max' or 'average'
-filename = 'example_gamma0.9'
-index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
+filename = 'example_gamma0.8'
+index = 1 #index of which graph to select from filtered subset, DEFAULT = 0
     
 get_network_by_gamma(gamma = gammas, 
                      outpath = outpath, 
