@@ -10,6 +10,20 @@ import numpy as np
 
 def assign_type(n):
     # Assigns a type randomly to each individual.
+    # Each individual has an equal change of getting a given type, but we split types equally.
+    #
+    # INPUTS:
+    # - n:       the number of individuals in the social system (int).
+
+    if n % 2 != 0:
+        raise Exception("ERROR: cannot split selected number of individuals into two even groups")
+    else:
+        types = np.random.choice(np.arange(n), size = n, replace = False)
+        return types
+
+
+def assign_type_probailistic(n):
+    # Assigns a type randomly to each individual.
     # Each individual has an equal change of getting a given type.
     #
     # INPUTS:
