@@ -18,7 +18,13 @@ def assign_type(n):
     if n % 2 != 0:
         raise Exception("ERROR: cannot split selected number of individuals into two even groups")
     else:
-        types = np.random.choice(np.arange(n), size = n, replace = False)
+        half = int(n/2)
+        type_choices = np.random.choice(np.arange(n), size = n, replace = False)
+        typeL = type_choices[:half]
+        typeR = type_choices[half:]
+        types = np.zeros((n, 2))
+        types[typeL, 0] = 1
+        types[typeR, 1] = 1
         return types
 
 
