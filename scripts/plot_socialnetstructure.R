@@ -61,9 +61,10 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   geom_point(size = 0.8, color = pal) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_y_continuous(limits = c(-0.04, 0.4)) + 
   theme_ctokita() 
 gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
 ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 # Change in assortativity
