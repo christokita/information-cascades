@@ -133,7 +133,7 @@ get_network_by_gamma(gamma = gammas,
 gammas = [0.0] #list of one or more gamma values desired
 method = 'average' #'max' or 'average'
 filename = 'example_gamma0.0'
-index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
+index = 1 #index of which graph to select from filtered subset, DEFAULT = 0
     
 get_network_by_gamma(gamma = gammas, 
                      outpath = outpath, 
