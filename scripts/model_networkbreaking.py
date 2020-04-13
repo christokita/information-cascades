@@ -22,7 +22,7 @@ import copy
 import os
 
 # Supress error warnings (not an issue for this script)
-np.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide ='ignore', invalid ='ignore')
 
 ####################
 # Define simulation function
