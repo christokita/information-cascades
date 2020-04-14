@@ -39,6 +39,8 @@ def seed_social_network(n, k, network_type, directed = False):
         g = igraph.Graph.Barabasi(n = n, m = out_links, directed = directed, power = 1)
     elif network_type == "regular":
         g = igraph.Graph.K_Regular(n = n, k = avg_degree, directed = directed, multiple = False)
+    elif network_type == "smallworld":
+        g = igraph.Graph.Watts_Strogatz(dim = 1, size = n, nei = out_links, p = 0.05, loops = False, multiple = False)
     elif network_type == "complete":
         g = igraph.Graph.Full(n = n, directed = directed, loops = False)
     # Make into adjacency matrix
