@@ -2,8 +2,8 @@ Gephi Color Palettes for Cascade Model
 _______________________________________
 
 ##### Currently in use #####
-Blue - #0070C0
-Red - #AE172A
+Blue - #26547C
+Red - #d54c54
 
 
 ##### Options #####
@@ -16,3 +16,7 @@ Red - #AE172A
 # From Dem/Rep graphic
 Blue - #387ab7
 Red - #d54c54
+
+# From vox graphic
+Blue - #26547C
+Red - #EB4756
