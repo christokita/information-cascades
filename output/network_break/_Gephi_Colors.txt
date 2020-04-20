@@ -2,7 +2,7 @@ Gephi Color Palettes for Cascade Model
 _______________________________________
 
 ##### Currently in use #####
-Blue - #26547C
+Blue - #006195
 Red - #d54c54
 
 
@@ -18,5 +18,5 @@ Blue - #387ab7
 Red - #d54c54
 
 # From vox graphic
-Blue - #26547C
+Blue - #006195
 Red - #EB4756
