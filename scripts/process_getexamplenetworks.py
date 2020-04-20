@@ -161,9 +161,9 @@ get_network_by_gamma(gamma = gammas,
                      manual_index = index)
 
 
-gammas = [0.5] #list of one or more gamma values desired
+gammas = [0.6] #list of one or more gamma values desired
 method = 'average' #'max' or 'average'
-filename = 'example_gamma0.5'
+filename = 'example_gamma0.6'
 index = 0 #index of which graph to select from filtered subset, DEFAULT = 0
     
 get_network_by_gamma(gamma = gammas, 
