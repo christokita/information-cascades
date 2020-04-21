@@ -24,7 +24,7 @@ if (plot_tag != "") {
 }
 
 # Plot color
-plot_color <- "#225ea8"
+plot_color <- "#1B3B6F"
 
 
 
@@ -50,8 +50,8 @@ cascade_size <- cascade_data %>%
 
 # Plot
 gg_size <- ggplot(cascade_size, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95, 
-                  ymax = mean + ci95),
+  geom_ribbon(aes(ymin = mean - sd, 
+                  ymax = mean + sd),
               alpha = 0.4,
               fill = plot_color) +
   geom_line(size = 0.3, color = plot_color) +
@@ -77,8 +77,8 @@ cascade_active <- cascade_data %>%
 
 # Plot
 gg_activity <- ggplot(cascade_active, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95, 
-                  ymax = mean + ci95),
+  geom_ribbon(aes(ymin = mean - sd, 
+                  ymax = mean + sd),
               alpha = 0.4,
               fill = plot_color) +
   geom_line(size = 0.3, color = plot_color) +
@@ -87,8 +87,8 @@ gg_activity <- ggplot(cascade_active, aes(x = gamma, y = mean)) +
   xlab(expression(paste("Information correlation ", italic(gamma) ))) +
   theme_ctokita() 
 gg_activity #show plot before saving
-ggsave(plot = gg_size, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_size, filename = paste0(out_path, "cascadeactivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
 # Plot: Cascade bias
@@ -104,8 +104,8 @@ cascade_bias <- cascade_data %>%
 
 # Summarizing plot
 gg_bias <- ggplot(cascade_bias, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95, 
-                  ymax = mean + ci95),
+  geom_ribbon(aes(ymin = mean - sd, 
+                  ymax = mean + sd),
               alpha = 0.4,
               fill = plot_color) +
   geom_line(size = 0.3, color = plot_color) +
@@ -205,3 +205,13 @@ gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
 gg_fitness #show plot before saving
 ggsave(plot = gg_fitness, filename = paste0(out_path, "fitness", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
 
+
+filtered_data <- behav_sum %>% 
+  filter(metric == "false_positive")
+ggplot(data = filtered_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95,
+                  ymax =  mean + ci95),
+              alpha = 0.4) +
+  geom_point() +
+  geom_line() +
+  theme_ctokita()
