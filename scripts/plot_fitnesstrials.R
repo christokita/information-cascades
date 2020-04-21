@@ -143,11 +143,12 @@ behav_sum <- behav_data %>%
 sensitivity_data <- behav_sum %>% 
   filter(metric == "sensitivity")
 gg_sens <- ggplot(data = sensitivity_data, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95,
-                  ymax =  mean + ci95),
-                  alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = mean - ci95, 
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   ylab("Behavioral sensitivity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
@@ -160,11 +161,12 @@ ggsave(plot = gg_sens, filename = paste0(out_path, "sensitvity", plot_tag, ".svg
 specificity_data <- behav_sum %>% 
   filter(metric == "specificity")
 gg_specif <- ggplot(data = specificity_data, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95,
-                  ymax =  mean + ci95),
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = mean - ci95, 
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   ylab("Behavioral specificity") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
@@ -177,11 +179,12 @@ ggsave(plot = gg_specif, filename = paste0(out_path, "specificity", plot_tag, ".
 precision_data <- behav_sum %>% 
   filter(metric == "precision")
 gg_precis <- ggplot(data = precision_data, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95,
-                  ymax =  mean + ci95),
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = mean - ci95, 
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
   ylab("Behavioral precision") +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
@@ -205,13 +208,21 @@ gg_fitness <- ggplot(data = fitness_data, aes(x = gamma, y = mean)) +
 gg_fitness #show plot before saving
 ggsave(plot = gg_fitness, filename = paste0(out_path, "fitness", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
 
-
+# Testing other metrics
 filtered_data <- behav_sum %>% 
-  filter(metric == "false_positive")
-ggplot(data = filtered_data, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymin = mean - ci95,
-                  ymax =  mean + ci95),
-              alpha = 0.4) +
-  geom_point() +
-  geom_line() +
+  filter(metric == "false_positive") %>% 
+  mutate(mean = mean / 10000,
+         sd = sd / 10000,
+         ci95 = ci95 / 10000)
+gg_test <- ggplot(data = filtered_data, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymin = mean - ci95, 
+                  ymax = mean + ci95),
+              alpha = 0.4,
+              fill = plot_color) +
+  geom_line(size = 0.3, color = plot_color) +
+  geom_point(size = 0.8, color = plot_color) +
+  ylab("False positive rate") +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita()
+gg_test
+ggsave(plot = gg_test, filename = paste0(out_path, "test_metric", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
