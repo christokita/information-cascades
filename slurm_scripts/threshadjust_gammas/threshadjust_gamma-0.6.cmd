@@ -10,4 +10,4 @@
 ##Load anaconda python packages
 module load anaconda3 
 ##Run script with (1) gamma variable, and (2) replicate number
-python3 scripts/3_hpc-threshadjusting.py -0.6 $SLURM_ARRAY_TASK_ID 
+python3 scripts/run_TAmodel_hpc.py -0.6 $SLURM_ARRAY_TASK_ID 

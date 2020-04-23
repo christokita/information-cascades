@@ -10,4 +10,4 @@
 ##Load anaconda python packages
 module load anaconda3 
 ##Run script with (1) gamma variable, and (2) replicate number
-srun python3 scripts/3_hpc-networkbreaking.py 0.0 $SLURM_ARRAY_TASK_ID 
+srun python3 scripts/run_NBmodel_hpc.py 0.0 $SLURM_ARRAY_TASK_ID 
