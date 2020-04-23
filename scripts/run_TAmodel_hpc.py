@@ -31,7 +31,7 @@ gamma = float(sys.argv[1]) #correlation between two information sources
 psi = 0.1 #proportion of samplers
 phi = 0.01 #amount threhsold decreases if individual is correct in behavior
 omega = 0.01 #amount threhsold increases if individual is incorrect in behavior
-timesteps = 1000000 #number of rounds simulation will run
+timesteps = 3 * 1000000 #number of rounds simulation will run
 rep = int(sys.argv[2]) #replicate ID number
 
 outpath = '/scratch/gpfs/ctokita/information-cascades/thresh_adjust/'
