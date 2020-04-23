@@ -6,7 +6,7 @@ Created on Sat Dec  9 12:42:29 2017
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to run threshold-adjusting cascade model on local machine in parallel
+Script to run threshold-adjusting (TA) cascade model on local machine in parallel.
 (single parameter combo, numerous replicates) 
 """
 

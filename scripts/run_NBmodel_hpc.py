@@ -6,11 +6,12 @@ Created on Sat Dec  9 12:42:29 2017
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to run network-breaking cascade model on HPC cluster
+Script to run network-breaking (NB) cascade model on a high-performance computing cluster.
 (can be swept across parameter, numerous replicates) 
 
 This script depends on a slurm script to call this script and provide certain parameter values,
-namely the replicate number (taken from a slurm array) and possibly the gamma value.
+namely the replicate number (taken from a slurm array) and possibly the gamma value. 
+See: directory slurm_scripts/ for the specific scripts used to call this python script.
 """
 
 ####################

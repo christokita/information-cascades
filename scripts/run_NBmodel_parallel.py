@@ -6,7 +6,7 @@ Created on Sat Dec  9 12:42:29 2017
 @author: ChrisTokita
 
 DESCRIPTION:
-Script to run network-breaking cascade model on local machine in parallel
+Script to run network-breaking (NB) cascade model on local machine in parallel.
 (single parameter combo, numerous replicates) 
 """
 
