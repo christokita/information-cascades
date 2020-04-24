@@ -10,11 +10,10 @@ import numpy as np
 import pandas as pd 
 import cascade_models.cascades as cs
 
-def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
+def assess_fitness(gamma, psi, trial_count, network, thresholds, types):
     # Runs X many cascades with final network to assess information spread and individual fitness
     #
     # INPUTS:
-    # - n:             number of individuals in the social system (int).
     # - gamma:         correlation between information sources (float). Inherited from main sim.
     # - psi:           fraction of group that directly sample stimuli each round (float).
     # - trial_count:   number of cascades to run as assessment of fitness (int).
@@ -23,6 +22,7 @@ def assess_fitness(n, gamma, psi, trial_count, network, thresholds, types):
     # - types:         array of type assignments for each individual (numpy array).
     
     # Dataframes to collect fitness trial data
+    n = thresholds.shape[0]
     cascade_stats = pd.DataFrame(columns = ['t', 'samplers', 'samplers_active', 'sampler_A', 'sampler_B', 'total_active', 'active_A', 'active_B'])
     behavior_stats = pd.DataFrame(np.zeros(shape = (n, 5)),
                                     columns = ['individual', 'true_positive', 'false_negative', 'true_negative', 'false_positive'])
