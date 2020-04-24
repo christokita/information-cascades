@@ -76,20 +76,10 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
                                states = state_mat,
                                correct_behavior = correct_state)
     
-    ########## Assess fitness ##########
-    # Get fitness of individuals (based on behavior) and size of cascades
-    fitness_behavior, fitness_size = cs.assess_fitness(n = n, 
-                                                      gamma = gamma, 
-                                                      psi = psi, 
-                                                      trial_count = 10000, 
-                                                      network = adjacency, 
-                                                      thresholds = thresh_mat, 
-                                                      types = type_mat)
-    
     ########## Save files ##########
     # Create output folder
     output_name = "gamma" + str(gamma)
-    data_dirs = ['social_network_data', 'thresh_data', 'type_data', 'fitness_data']
+    data_dirs = ['social_network_data', 'thresh_data', 'type_data']
     data_dirs = [outpath + d + "/" for d in data_dirs]
     output_dirs = [d + output_name +  "/" for d in data_dirs]
     for x in np.arange(len(data_dirs)):
@@ -100,14 +90,11 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
         if not os.path.exists(output_dirs[x]):
             os.makedirs(output_dirs[x])
     # Save files
-    rep_label = str(replicate)
-    rep_label = rep_label.zfill(2)
+    rep_label = str(replicate).zfill(2)
     np.save(output_dirs[0] + "sn_final_rep" + rep_label + ".npy", adjacency)
     np.save(output_dirs[0] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[1] + "thresh_rep" + rep_label + ".npy", thresh_mat)
     np.save(output_dirs[2] + "type_rep" + rep_label + ".npy", type_mat)
-    fitness_size.to_pickle(output_dirs[3] + "fitness_cascades_rep" + rep_label + ".pkl")
-    fitness_behavior.to_pickle(output_dirs[3] + "fitness_behavior_rep" + rep_label + ".pkl")
     
 ####################
 # Define model-specific functions
