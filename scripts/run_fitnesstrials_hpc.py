@@ -28,7 +28,7 @@ import os
 # Set parameters
 ##########
 # Set path to directory containing simulation data of interest (and where fitness data will be saved)
-directory = '../data_sim/network_break/'
+directory = '/scratch/gpfs/ctokita/information-cascades/'
 
 # Set parameters for fitness trials
 fit_trial_length = 10000
