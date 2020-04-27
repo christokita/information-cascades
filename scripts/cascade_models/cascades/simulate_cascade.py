@@ -31,9 +31,9 @@ def simulate_cascade(network, states, thresholds, samplers):
     while cascade_happening: 
         
         # Individual assess social information relative to thresholds
-        neighbor_state = np.dot(network, states)
+        active_neighbors = np.dot(network, states)
         degree = np.sum(network, axis = 1, keepdims = True)
-        social_stim = np.divide(neighbor_state, degree, out = np.zeros_like(neighbor_state), where = degree!=0) #returns zero where divide-by-zero would otherwise happen
+        social_stim = np.divide(active_neighbors, degree, out = np.zeros_like(active_neighbors), where = degree!=0) #returns zero where divide-by-zero would otherwise happen
         turn_on = social_stim > thresholds
         
         # Update behavior, making sure samplers remain in original state (i.e., 0 remains 0)
