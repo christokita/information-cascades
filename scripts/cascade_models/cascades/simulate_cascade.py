@@ -9,6 +9,8 @@ Created on Mon Nov 25 11:44:29 2019
 import numpy as np
 import copy
 
+np.seterr(divide='ignore', invalid='ignore') # for the social_stim = neighbor_state/degree step
+
 def simulate_cascade(network, states, thresholds, samplers):
     # Simulates a cascade given a network and a intial set of active nodes.
     # We assume original info samplers who did not become active will not participate in the subsequent cascade.
@@ -31,8 +33,7 @@ def simulate_cascade(network, states, thresholds, samplers):
         # Individual assess social information relative to thresholds
         neighbor_state = np.dot(network, states)
         degree = np.sum(network, axis = 1, keepdims = True)
-        social_stim = neighbor_state / degree
-        social_stim[np.isnan(social_stim)] = 0 #replace nan values (individuals with no links) with zero social stim
+        social_stim = np.divide(neighbor_state, degree, out = np.zeros_like(neighbor_state), where = degree!=0) #returns zero where divide-by-zero would otherwise happen
         turn_on = social_stim > thresholds
         
         # Update behavior, making sure samplers remain in original state (i.e., 0 remains 0)
