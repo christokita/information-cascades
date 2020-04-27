@@ -26,7 +26,7 @@ import sys
 # Set parameters
 ##########
 n = 200 #number of individuals
-k = 6 #mean degree on networks
+k = 8 #mean degree on networks
 gamma = float(sys.argv[1]) #correlation between two information sources
 psi = 0.1 #proportion of samplers
 phi = 0.01 #amount threhsold decreases if individual is correct in behavior
