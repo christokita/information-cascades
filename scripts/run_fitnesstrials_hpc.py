@@ -41,16 +41,16 @@ rep = int(sys.argv[2]) #replicate ID number
 ##########
 # Run fitness trial
 ##########
-# Create fitness data directory
-if not os.path.exists(directory + "fitness_data/"):
-            os.makedirs(directory + "fitness_data/")
-
 # Check if this gamma exists in the data (some runs will not use as many gamma values)
 sn_dir_exists = os.path.exists(directory + 'social_network_data/gamma' + str(gamma))
 thresh_dir_exists = os.path.exists(directory + 'thresh_data/gamma' + str(gamma))
 type_dir_exists = os.path.exists(directory + 'type_data/gamma' + str(gamma))
 if sn_dir_exists + thresh_dir_exists + type_dir_exists != 3:
     sys.exit(0)
+    
+# Create fitness data directory
+if not os.path.exists(directory + "fitness_data/"):
+            os.makedirs(directory + "fitness_data/")
 
 # Get social network, thresholds, and type data.
 initial_sn = np.load(directory + 'social_network_data/gamma' + str(gamma) + '/sn_initial_rep' + str(rep).zfill(2) + '.npy')
