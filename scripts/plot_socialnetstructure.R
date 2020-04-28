@@ -23,8 +23,8 @@ if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
 
-pal <- "#1B3B6F"
-# pal <- "#225ea8"
+pal <- "#495867"
+# pal <- "#16425B"
 
 ############################## Assortatiity ##############################
 
@@ -51,9 +51,6 @@ gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  # geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), 
-  #               width = 0,
-  #               size = 0.3, color = "#225ea8") +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal) +
@@ -74,10 +71,11 @@ gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(size = 0.8) +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
+              alpha = 0.4,
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
+  geom_point(size = 0.8, color = pal) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
@@ -190,10 +188,12 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.4) +
-  geom_line(size = 0.3) +
-  geom_point(aes(fill = metric),
-             size = 0.8) +
+              alpha = 0.4,
+              fill = pal) +
+  geom_line(size = 0.3,
+            color = pal) +
+  geom_point(size = 0.8,
+             color = pal) +
   ylab(expression( paste(Delta, " out-degree"))) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.5, 1.5), 
