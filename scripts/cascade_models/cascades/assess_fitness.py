@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd 
 import cascade_models.cascades as cs
 
-def assess_fitness(gamma, psi, trial_count, network, thresholds, types):
+def assess_fitness(gamma, psi, trial_count, network, thresholds, types, trial):
     # Runs X many cascades with final network to assess information spread and individual fitness
     #
     # INPUTS:
@@ -20,6 +20,7 @@ def assess_fitness(gamma, psi, trial_count, network, thresholds, types):
     # - network:       the network connecting individuals (numpy array).
     # - thresholds:    matrix of thresholds for each individual (numpy array).
     # - types:         array of type assignments for each individual (numpy array).
+    # - trial:         label for trial type. Typically "pre" or "post" (string).
     
     # Dataframes to collect fitness trial data
     n = thresholds.shape[0]
@@ -54,8 +55,11 @@ def assess_fitness(gamma, psi, trial_count, network, thresholds, types):
                                                                         information = info_values, 
                                                                         types = types,
                                                                         behavior_df = behavior_stats)
-        
-    # Return
+    # Prep dataframes and return
+    behavior_stats = behavior_stats.astype(float)
+    cascade_stats = cascade_stats.astype(float)
+    behavior_stats['trial'] = trial
+    cascade_stats['trial'] = trial
     return behavior_stats, cascade_stats
 
 

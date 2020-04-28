@@ -64,7 +64,8 @@ pre_behavior, pre_cascades = cs.assess_fitness(gamma = gamma,
                                                trial_count = fit_trial_length, 
                                                network = initial_sn, 
                                                thresholds = thresholds, 
-                                               types = types)
+                                               types = types,
+                                               trial = "pre")
 
 # Post-casacde transformation fitness assessment
 post_behavior, post_cascades = cs.assess_fitness(gamma = gamma, 
@@ -72,7 +73,8 @@ post_behavior, post_cascades = cs.assess_fitness(gamma = gamma,
                                                  trial_count = fit_trial_length, 
                                                  network = final_sn, 
                                                  thresholds = thresholds, 
-                                                 types = types)
+                                                 types = types,
+                                                 trial = "post")
 
 # Create directory for this gamma
 if not os.path.exists(directory + "fitness_data/gamma" + str(gamma) + "/"): 
