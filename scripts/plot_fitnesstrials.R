@@ -15,10 +15,10 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-fit_cascade_path <- 'data_derived/network_break/fitness_trials/fitness_cascadestats_gammasweep.csv' #path to fitness cascade data
-fit_behavior_path <- "data_derived/network_break/fitness_trials/fitness_behavior_gammasweep.csv" #path to fitness behavior data
+fit_cascade_path <- 'data_derived/network_break/fitness_trials/fitness_cascadestats.csv' #path to fitness cascade data
+fit_behavior_path <- "data_derived/network_break/fitness_trials/fitness_behavior.csv" #path to fitness behavior data
 out_path <- "output/network_break/fitness_trials/" #directory you wish to save plots
-plot_tag <- "gammasweep" #extra info to add onto end of plot name
+plot_tag <- "" #extra info to add onto end of plot name (if supplemental analysis)
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
