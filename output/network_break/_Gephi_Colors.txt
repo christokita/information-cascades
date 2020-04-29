@@ -20,3 +20,7 @@ Red - #d54c54
 # From vox graphic
 Blue - #006195
 Red - #EB4756
+
+# From eduardo's figure
+Blue - #317fca
+Red - #e00203
