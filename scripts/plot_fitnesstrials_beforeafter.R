@@ -50,7 +50,7 @@ cascade_sum <- cascade_data %>%
 ####################
 
 ####################
-# Plot: Cascade activity before and after model simulation
+# Plot: Total cascade activity
 ####################
 # Filter
 activity <- cascade_sum %>% 
@@ -60,73 +60,59 @@ activity <- cascade_sum %>%
 # Plot
 pal <- brewer.pal(6, "PuOr")
 gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
-  # geom_ribbon(aes(ymin = mean - sd,
-  #                 ymax = mean + sd,
-  #                 fill = gamma),
-  #                 alpha = 0.1,
-  #             color = NA) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal) +
+  scale_x_discrete(labels = c("Pre", "Post")) +
   ylab("Total cascade activity") +
   xlab("Fitness trial") +
-  theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme_ctokita()
 gg_activity #show plot before saving
 
 
 ####################
-# Plot: Avg.cascade size before and after model simulation
+# Plot: Avg.cascade size 
 ####################
 # Filter
-cascade_size <- cascade_sum %>% 
+avgsize <- cascade_sum %>% 
   filter(metric == "avg_cascade_size") %>% 
   mutate(time = factor(metric))
 
 # Plot
 pal <- brewer.pal(6, "PuOr")
-gg_size <- ggplot(cascade_size, aes(x = trial, y = mean, color = gamma, group = gamma)) +
-  # geom_ribbon(aes(ymin = mean - sd,
-  #                 ymax = mean + sd,
-  #                 fill = gamma),
-  #                 alpha = 0.1,
-  #             color = NA) +
+gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal) +
+  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_y_continuous(limits = c(0, 6)) +
   ylab("Avg. cascade size") +
   xlab("Fitness trial") +
   theme_ctokita()
 gg_size #show plot before saving
 
+
 ####################
-# Plot: Cascade bias at beginning and end of cascdae
+# Plot: Cascade bias
 ####################
 # Filter
-beginend_bias <- beginend_sum %>% 
-  filter(metric %in% c("bias_begin", "bias_end")) %>% 
+bias <- cascade_sum %>% 
+  filter(metric == "cascade_bias") %>% 
   mutate(time = factor(metric))
 
 # Plot
-pal <- brewer.pal(6, "PuOr")
-gg_beginend_bias <- ggplot(beginend_bias, aes(x = time, y = mean, color = gamma, group = gamma)) +
-  # geom_ribbon(aes(ymin = mean - sd,
-  #                 ymax = mean + sd,
-  #                 fill = gamma),
-  #                 alpha = 0.1,
-  #             color = NA) +
+pal <- brewer.pal(8, "PuOr")
+gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal) +
-  scale_x_discrete(labels = c("First 5,000", "Last 5,000")) +
-  scale_y_continuous(limits = c(0.2, 0.605), 
-                     breaks = seq(0, 1, 0.1),
-                     expand = c(0, 0)) +
+  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_y_continuous(limits = c(0.1, 0.7), 
+                     breaks = seq(0.1, 0.7, 0.1)) +
   ylab("Cascade bias") +
-  xlab("Time steps") +
-  theme_ctokita() 
-gg_beginend_bias #show plot before saving
-ggsave(plot = gg_beginend_bias, filename = paste0(out_path, "beginend_bias", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+  xlab("Fitness trial") +
+  theme_ctokita()
+gg_bias #show plot before saving
 
 
 
