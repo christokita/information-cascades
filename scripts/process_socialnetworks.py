@@ -100,7 +100,7 @@ for run in runs:
 # Save
 if not os.path.exists(outpath):
     os.makedirs(outpath)
-assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_type_final', 'assort__type_initial', 
+assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_type_final', 'assort_type_initial', 
                                                             'assort_thresh_final', 'assort_thresh_initial'])
 assort_data.to_csv(outpath + 'assortativity' + filetags + '.csv', index = False)
 
@@ -185,5 +185,5 @@ for run in runs:
             network_change_data = network_change_data.append(data_row, ignore_index = True)
             
     # Save
-    network_change_data.to_csv(outpath + 'network_change/networkchange' + filetags + str(gamma) + '.csv', index = False)
+    network_change_data.to_csv(outpath + 'network_change/networkchange_gamma' + str(gamma) + filetags '.csv', index = False)
     del(network_change_data)
