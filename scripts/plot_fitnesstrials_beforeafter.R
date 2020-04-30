@@ -51,8 +51,7 @@ cascade_sum <- cascade_data %>%
 ####################
 # Filter
 activity <- cascade_sum %>% 
-  filter(metric == "total_active") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "total_active")
 
 # Plot
 gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -72,8 +71,7 @@ ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_t
 ####################
 # Filter
 avgsize <- cascade_sum %>% 
-  filter(metric == "avg_cascade_size") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "avg_cascade_size")
 
 # Plot
 gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -93,8 +91,7 @@ ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".pn
 ####################
 # Filter
 bias <- cascade_sum %>% 
-  filter(metric == "cascade_bias") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "cascade_bias")
 
 # Plot
 gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -128,12 +125,33 @@ behav_sum <- behav_data %>%
             ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
 ####################
+# Plot: Base behavior rates
+####################
+# Filter
+behavrates <- behav_sum %>% 
+  filter(metric %in% c("true_positive", "true_negative", "false_positive", "false_negative"))
+
+# Plot
+gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, group = gamma)) +
+  geom_line(size = 0.3, alpha = 0.8) +
+  geom_point(size = 0.8) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_x_discrete(labels = c("Pre", "Post")) +
+  ylab("Precision") +
+  xlab("Fitness trial") +
+  theme_ctokita() +
+  facet_wrap(~metric, scales = "free_y")
+gg_behavrates #show plot before saving
+ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".png"), width = 110, height = 90, units = "mm", dpi = 400)
+
+
+
+####################
 # Plot: Sensitivity
 ####################
 # Filter
 sensitivity <- behav_sum %>% 
-  filter(metric == "sensitivity") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "sensitivity") 
 
 # Plot
 gg_sens <- ggplot(sensitivity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -153,8 +171,7 @@ ggsave(plot = gg_sens, filename = paste0(out_path, "sensitivity", plot_tag ,".pn
 ####################
 # Filter
 specificity <- behav_sum %>% 
-  filter(metric == "specificity") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "specificity") 
 
 # Plot
 gg_spec <- ggplot(specificity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -174,8 +191,7 @@ ggsave(plot = gg_spec, filename = paste0(out_path, "specificity", plot_tag ,".pn
 ####################
 # Filter
 precision <- behav_sum %>% 
-  filter(metric == "precision") %>% 
-  mutate(time = factor(metric))
+  filter(metric == "precision")
 
 # Plot
 gg_prec <- ggplot(precision, aes(x = trial, y = mean, color = gamma, group = gamma)) +
