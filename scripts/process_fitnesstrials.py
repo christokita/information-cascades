@@ -96,6 +96,8 @@ for run in runs:
 
         # Calculate additional statistics: Behavior
         behavior = behavior.drop(columns = 'individual')
+        behavio[['true_positive']] = behavior.true_positive / trial_length
+        behavio['true_positive'] = behavior.true_positive / trial_length
         behavior['threshold'] = np.tile(thresholds, (2, 1)) #repeat entire array twice since pre and post are bound together
         behavior['sensitivity'] = behavior.true_positive / (behavior.true_positive + behavior.false_negative)
         behavior['specificity'] = behavior.true_negative / (behavior.true_negative + behavior.false_positive)
