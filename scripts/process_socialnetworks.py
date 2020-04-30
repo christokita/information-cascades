@@ -25,11 +25,12 @@ import igraph
 # Directory where simulation data is found
 sn_dir = '../data_sim/network_break/social_network_data/' #social network data
 type_dir = '../data_sim/network_break/type_data/' #type data
+thresh_dir = '../data_sim/network_break/thresh_data/' #threshold data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/social_networks/'
-filetags = 'gammasweep' #added info after 'assortativity'
+filetags = '' #added info after 'assortativity'
 if len(filetags) > 0:
     filetags = '_' + filetags
 
@@ -43,7 +44,7 @@ runs.sort()
 # Measure assortativity
 ####################
 # Set array for data collection
-assort_values = np.empty((0,4))
+assort_values = np.empty((0,6))
 
 # Loop through runs
 for run in runs:
@@ -56,14 +57,12 @@ for run in runs:
     
     # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
-    sn_final = [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] 
-    sn_initial = [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] 
-    sn_final.sort()
-    sn_initial.sort()
+    sn_final = sorted( [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] )
+    sn_initial = sorted( [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] )
     
-    # List type data files in that run's data folder
-    type_files = os.listdir(type_dir + run +'/')
-    type_files.sort()
+    # List type and threshold data files in that run's data folder
+    type_files = sorted( os.listdir(type_dir + run +'/') )
+    thresh_files = sorted( os.listdir(thresh_dir + run +'/') )
     
     # Warning and error catch
     if len(sn_final) != len(type_files):
@@ -77,24 +76,32 @@ for run in runs:
         adjacency = np.load(sn_dir + run + '/' + sn_final[i])
         adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[i])
         type_mat = np.load(type_dir +  run + '/' + type_files[i])
+        thresh_mat = np.load(thresh_dir + run + '/' + thresh_files[i])
         rep = int(re.search('([0-9]+)', sn_final[i]).group(1))
         
-        # Calculate assortativity
+        # Calculate assortativity by type
         g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency), mode = 'undirected')
         g_final.vs['Type'] = type_mat[:,0]
-        final_assort = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = False) #type categories are nominal, despite being numbers
-        g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirect')
+        final_assort_type = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = False) #type categories are nominal, despite being numbers
+        g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirected')
         g_initial.vs['Type'] = type_mat[:,0]
-        initial_assort = g_initial.assortativity(types1 = g_initial.vs['Type'], directed = False)
+        initial_assort_type = g_initial.assortativity_nominal(types = g_initial.vs['Type'], directed = False)
+        
+        # Calculate assortativity by threshold
+        g_final.vs['Threshold'] = thresh_mat.flatten()
+        final_assort_thresh = g_final.assortativity(types1 = g_final.vs['Threshold'], directed = False)
+        g_initial.vs['Threshold'] = thresh_mat.flatten()
+        initial_assort_thresh = g_initial.assortativity(types1 = g_initial.vs['Threshold'], directed = False)
         
         # Return
-        to_return = np.array([[gamma, rep, final_assort, initial_assort]])
+        to_return = np.array([gamma, rep, final_assort_type, initial_assort_type, final_assort_thresh, initial_assort_thresh])
         assort_values = np.vstack([assort_values, to_return])
 
 # Save
 if not os.path.exists(outpath):
     os.makedirs(outpath)
-assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_final', 'assort_initial'])
+assort_data = pd.DataFrame(data = assort_values, columns = ['gamma', 'replicate', 'assort_type_final', 'assort__type_initial', 
+                                                            'assort_thresh_final', 'assort_thresh_initial'])
 assort_data.to_csv(outpath + 'assortativity' + filetags + '.csv', index = False)
 
 
