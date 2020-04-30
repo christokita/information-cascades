@@ -21,6 +21,9 @@ import copy
 ####################
 # List files to be read
 ####################
+# Set length of fitness trials (should be 10,000 rounds normally)
+trial_length = 10000
+
 # Set if you want to output raw cascade data (each time step of each trial))
 raw_data = False
 
@@ -37,8 +40,7 @@ if len(filetags) > 0:
 
 # List runs
 runs = os.listdir(fit_dir)
-runs = [run for run in runs if re.findall(tags + '[-.0-9]+', run)]
-runs.sort()
+runs = sorted( [run for run in runs if re.findall(tags + '[-.0-9]+', run)] )
 
 
 ####################
@@ -64,9 +66,8 @@ for run in runs:
     
     # List cascade and and behavior files
     all_files = os.listdir(fit_dir + run +'/')
-    replicates = [re.search('(rep[0-9]+)', file).group(1) for file in all_files]
+    replicates = sorted( [re.search('(rep[0-9]+)', file).group(1) for file in all_files] )
     replicates = list(set(replicates)) #get unique values
-    replicates.sort()
     
     # Loop through replciate simulations within that parameter run
     for replicate in replicates:
@@ -96,8 +97,7 @@ for run in runs:
 
         # Calculate additional statistics: Behavior
         behavior = behavior.drop(columns = 'individual')
-        behavio[['true_positive']] = behavior.true_positive / trial_length
-        behavio['true_positive'] = behavior.true_positive / trial_length
+        behavior[['true_positive', 'true_negative', 'false_positive', 'false_negative']] = behavior[['true_positive', 'true_negative', 'false_positive', 'false_negative']].div(trial_length)
         behavior['threshold'] = np.tile(thresholds, (2, 1)) #repeat entire array twice since pre and post are bound together
         behavior['sensitivity'] = behavior.true_positive / (behavior.true_positive + behavior.false_negative)
         behavior['specificity'] = behavior.true_negative / (behavior.true_negative + behavior.false_positive)
