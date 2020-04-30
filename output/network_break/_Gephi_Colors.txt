@@ -10,9 +10,6 @@ Red - #d54c54
 Blue from Colorbrewer - #4575b4
 Red from colorbrewer - #d73027
 
-Blue - #0070C0
-Red - #AE172A
-
 # From Dem/Rep graphic
 Blue - #387ab7
 Red - #d54c54
