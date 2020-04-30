@@ -129,7 +129,11 @@ behav_sum <- behav_data %>%
 ####################
 # Filter
 behavrates <- behav_sum %>% 
-  filter(metric %in% c("true_positive", "true_negative", "false_positive", "false_negative"))
+  filter(metric %in% c("true_positive", "true_negative", "false_positive", "false_negative")) %>% 
+  mutate(metric = factor(metric, levels = c("true_positive", "false_positive", "false_negative", "true_negative"))) %>% 
+  mutate(news = NA, 
+         reaction = NA)
+levels(behavrates$metric) <- c("True positive", "False positive", "False negative", "True negative")
 
 # Plot
 gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, group = gamma)) +
@@ -137,12 +141,15 @@ gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, grou
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
-  ylab("Precision") +
+  ylab("Behavior frequency") +
   xlab("Fitness trial") +
   theme_ctokita() +
-  facet_wrap(~metric, scales = "free_y")
+  theme(strip.background = element_rect(color = NA, fill = "grey90"),
+        axis.line = element_line()) +
+  facet_wrap(~metric, scales = "free_x")
 gg_behavrates #show plot before saving
-ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".png"), width = 110, height = 90, units = "mm", dpi = 400)
+ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".png"), width = 120, height = 90, units = "mm", dpi = 400)
+ggsave(plot = gg_behavrates + facet_wrap(~metric, scales = "free"), filename = paste0(out_path, "behaviorrates_rescaled", plot_tag ,".png"), width = 120, height = 90, units = "mm", dpi = 400)
 
 
 
