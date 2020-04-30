@@ -26,6 +26,7 @@ if (plot_tag != "") {
 
 # Plot color
 plot_color <- "#1B3B6F"
+pal <- brewer.pal(4, "PuOr")
 
 
 ############################## Ftiness trials: Cascade dynamics ##############################
@@ -46,10 +47,6 @@ cascade_sum <- cascade_data %>%
             ci95 = qnorm(0.975) * sd(value, na.rm = TRUE) / sqrt( sum(!is.na(value)) )) #denominator removes NA values from count
 
 ####################
-# Raw plot
-####################
-
-####################
 # Plot: Total cascade activity
 ####################
 # Filter
@@ -58,16 +55,17 @@ activity <- cascade_sum %>%
   mutate(time = factor(metric))
 
 # Plot
-pal <- brewer.pal(6, "PuOr")
 gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_y_continuous(breaks = seq(0, 100, 10), limits = c(10, 60)) +
   ylab("Total cascade activity") +
   xlab("Fitness trial") +
   theme_ctokita()
 gg_activity #show plot before saving
+ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 70, height = 45, units = "mm", dpi = 400)
 
 
 ####################
@@ -79,17 +77,17 @@ avgsize <- cascade_sum %>%
   mutate(time = factor(metric))
 
 # Plot
-pal <- brewer.pal(6, "PuOr")
 gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
-  scale_y_continuous(limits = c(0, 6)) +
+  scale_y_continuous(breaks = seq(0, 6, 1), limits = c(0, 6)) +
   ylab("Avg. cascade size") +
   xlab("Fitness trial") +
   theme_ctokita()
 gg_size #show plot before saving
+ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 70, height = 45, units = "mm", dpi = 400)
 
 
 ####################
@@ -101,40 +99,16 @@ bias <- cascade_sum %>%
   mutate(time = factor(metric))
 
 # Plot
-pal <- brewer.pal(8, "PuOr")
 gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
-  scale_y_continuous(limits = c(0.1, 0.7), 
-                     breaks = seq(0.1, 0.7, 0.1)) +
+  scale_y_continuous(limits = c(0.1, 0.7), breaks = seq(0.1, 0.7, 0.1)) +
   ylab("Cascade bias") +
   xlab("Fitness trial") +
   theme_ctokita()
 gg_bias #show plot before saving
+ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag ,".png"), width = 70, height = 45, units = "mm", dpi = 400)
 
 
-
-############################## Cascades: Average cascade over course of simulation for each gamma value ##############################
-
-####################
-# Load data and summarize
-####################
-# Read in data
-avgcasc_data <- read.csv(cascadesum_path, header = TRUE) %>% 
-  tidyr::gather("metric", "value", -gamma, -t)
-avgcasc_sum <- avgcasc_data %>% 
-  group_by(t, gamma, metric) %>% 
-  summarise(mean = mean(value),
-            sd = sd(value),
-            ci95 = qnorm(0.975)*sd(value)/sqrt( sum(!is.na(value)) ))
-
-####################
-# Plot: Cascade size over course of simulation
-####################
-test <- avgcasc_data %>% 
-  filter(gamma == 0.5, metric == "cascade_bias")
-gg_sim_size <- ggplot(data = test, aes(x = t, y = value)) +
-  geom_line()
-gg_sim_size
