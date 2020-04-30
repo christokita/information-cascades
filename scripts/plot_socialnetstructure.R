@@ -15,15 +15,16 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-assort_file <- "data_derived/network_break/social_networks/assortativity_gammasweep.csv" #path to file containing assortativity data
+assort_file <- "data_derived/network_break/social_networks/assortativity.csv" #path to file containing assortativity data
 network_data_dir <- "data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
 out_path <- "output/network_break/social_networks/" #directory you wish to save plots
-plot_tag <- "gamma" #extra info to add onto end of plot name
+plot_tag <- "" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
 }
 
-pal <- "#495867"
+pal_type <- "#495867"
+pal_thresh <- "#9EACB3"
 # pal <- "#16425B"
 
 ############################## Assortatiity ##############################
@@ -33,8 +34,9 @@ pal <- "#495867"
 ####################
 assort_data <- read.csv(assort_file, header = TRUE)
 assort_sum <- assort_data %>% 
-  mutate(delta_assort = assort_final - assort_initial) %>% 
-  select(gamma, delta_assort, assort_final) %>% 
+  mutate(assort_type_delta = assort_type_final - assort_type_initial,
+         assort_thresh_delta = assort_thresh_final - assort_thresh_initial) %>% 
+  select(-replicate) %>% 
   gather(metric, value, -gamma) %>% 
   group_by(gamma, metric) %>% 
   summarise(mean = mean(value),
@@ -42,46 +44,93 @@ assort_sum <- assort_data %>%
             ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) ))
 
 ####################
-# Plot
+# Plot: assortativity by type
 ####################
 # Raw final assortativity values
-assort_raw <- assort_sum %>% 
-  filter(metric == "assort_final")
-gg_assort <- ggplot(data = assort_raw, aes(x = gamma, y = mean)) +
+assort_type <- assort_sum %>% 
+  filter(metric == "assort_type_final")
+gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
-              fill = pal) +
-  geom_line(size = 0.3, color = pal) +
-  geom_point(size = 0.8, color = pal) +
+              fill = pal_type) +
+  geom_line(size = 0.3, color = pal_type_type) +
+  geom_point(size = 0.8, color = pal_type_type) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
-gg_assort #show plot before saving
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
-ggsave(plot = gg_assort, filename = paste0(out_path, "assortativity", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+gg_assorttype #show plot before saving
+ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
 
 # Change in assortativity
-assort_change <- assort_sum %>% 
-  filter(metric == "delta_assort")
-gg_assortchange <- ggplot(data = assort_change, aes(x = gamma, y = mean)) +
+assort_type_change <- assort_sum %>% 
+  filter(metric == "assort_type_delta")
+gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
              linetype = "dotted") +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
-              fill = pal) +
-  geom_line(size = 0.3, color = pal) +
-  geom_point(size = 0.8, color = pal) +
+              fill = pal_type) +
+  geom_line(size = 0.3, color = pal_type) +
+  geom_point(size = 0.8, color = pal_type) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
   xlab(expression( paste("Information correlation ", italic(gamma)) )) +
   theme_ctokita() 
-gg_assortchange #show plot before saving
-ggsave(plot = gg_assortchange, filename = paste0(out_path, "assortchange", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_assortchange, filename = paste0(out_path, "assortchange", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+gg_assorttypeD #show plot before saving
+ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+
+####################
+# Plot: assortativity by threshold
+####################
+# Raw final assortativity values
+assort_thresh <- assort_sum %>% 
+  filter(metric == "assort_thresh_final")
+gg_assortthresh <- ggplot(data = assort_thresh, aes(x = gamma, y = mean)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
+              alpha = 0.4,
+              fill = pal_thresh) +
+  geom_line(size = 0.3, color = pal_thresh) +
+  geom_point(size = 0.8, color = pal_thresh, shape = 21, fill = "white") +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  # scale_y_continuous(limits = c(-0.04, 0.43)) + 
+  theme_ctokita() 
+gg_assortthresh #show plot before saving
+ggsave(plot = gg_assortthresh, filename = paste0(out_path, "assortativity_threshold", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+
+# Plot against assortativity by type
+assort_comp <- rbind(assort_thresh, assort_type)
+pal_comp <- c(pal_thresh, pal_type)
+labs <- c("threshold", "political type")
+gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = metric)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd, fill = metric),
+              alpha = 0.4) +
+  geom_line(aes(color = metric), 
+            size = 0.3) +
+  geom_point(aes(shape = metric, color = metric), size = 0.8, fill = "white") +
+  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  scale_color_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
+  scale_fill_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
+  scale_shape_manual(values = c(21, 19), name = "Assortativity by", labels = labs) +
+  scale_y_continuous(limits = c(-0.31, 0.42),
+                     breaks = seq(-0.4, 0.4, 0.1),
+                     expand = c(0, 0)) +
+  theme_ctokita() 
+gg_assortcomp #show plot before saving
+ggsave(plot = gg_assortcomp, filename = paste0(out_path, "assortativity_comparison", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 600)
 
 
 
