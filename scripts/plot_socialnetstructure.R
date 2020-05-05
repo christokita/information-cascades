@@ -24,6 +24,7 @@ if (plot_tag != "") {
 }
 
 pal_type <- "#495867"
+pal <- pal_type
 pal_thresh <- "#9EACB3"
 # pal <- "#16425B"
 
@@ -56,10 +57,10 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal_type) +
-  geom_line(size = 0.3, color = pal_type_type) +
-  geom_point(size = 0.8, color = pal_type_type) +
+  geom_line(size = 0.3, color = pal_type) +
+  geom_point(size = 0.8, color = pal_type) +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
 gg_assorttype #show plot before saving
@@ -79,7 +80,7 @@ gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
   geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
   ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assorttypeD #show plot before saving
 ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
@@ -101,7 +102,7 @@ gg_assortthresh <- ggplot(data = assort_thresh, aes(x = gamma, y = mean)) +
   geom_line(size = 0.3, color = pal_thresh) +
   geom_point(size = 0.8, color = pal_thresh, shape = 21, fill = "white") +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   # scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
 gg_assortthresh #show plot before saving
@@ -121,7 +122,7 @@ gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = met
             size = 0.3) +
   geom_point(aes(shape = metric, color = metric), size = 0.8, fill = "white") +
   ylab(expression( paste("Assortativity ", italic(r[global])) )) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_color_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
   scale_fill_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
   scale_shape_manual(values = c(21, 19), name = "Assortativity by", labels = labs) +
@@ -179,7 +180,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab(expression( paste(Delta, " social ties")) ) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(breaks = seq(-2, 2, 0.5)) +
   scale_shape_manual(values = c(19, 21),
                      labels = c("Same ideology",
@@ -207,7 +208,7 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab("Count") +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   # scale_y_continuous(limits = c(0, 1.21), 
   #                    breaks = seq(0, 2, 0.2),
   #                    expand = c(0, 0)) +
@@ -244,7 +245,7 @@ gg_degree_change <- ggplot(net_degree_data, aes(x = gamma, y = mean)) +
   geom_point(size = 0.8,
              color = pal) +
   ylab(expression( paste(Delta, " out-degree"))) +
-  xlab(expression( paste("Information correlation ", italic(gamma)) )) +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.5, 1.5), 
                      expand = c(0, 0)) +
   theme_ctokita() +

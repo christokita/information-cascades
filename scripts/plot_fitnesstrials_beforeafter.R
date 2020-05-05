@@ -57,7 +57,7 @@ activity <- cascade_sum %>%
 gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(breaks = seq(0, 100, 10), limits = c(10, 60)) +
   ylab("Total cascade activity") +
@@ -77,7 +77,7 @@ avgsize <- cascade_sum %>%
 gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(breaks = seq(0, 6, 1), limits = c(0, 6)) +
   ylab("Avg. cascade size") +
@@ -97,7 +97,7 @@ bias <- cascade_sum %>%
 gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(limits = c(0.1, 0.7), breaks = seq(0.1, 0.7, 0.1)) +
   ylab("Cascade bias") +
@@ -139,7 +139,7 @@ levels(behavrates$metric) <- c("True positive", "False positive", "False negativ
 gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   ylab("Behavior frequency") +
   xlab("Fitness trial") +
@@ -164,7 +164,7 @@ sensitivity <- behav_sum %>%
 gg_sens <- ggplot(sensitivity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.1, 0.4)) +
   ylab("Sensitivity") +
@@ -184,7 +184,7 @@ specificity <- behav_sum %>%
 gg_spec <- ggplot(specificity, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.75, 1), expand = c(0, 0.005)) +
   ylab("Specificity") +
@@ -204,7 +204,7 @@ precision <- behav_sum %>%
 gg_prec <- ggplot(precision, aes(x = trial, y = mean, color = gamma, group = gamma)) +
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\ncorrelation", gamma))) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_discrete(labels = c("Pre", "Post")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.85, 1), expand = c(0, 0.005)) +
   ylab("Precision") +
