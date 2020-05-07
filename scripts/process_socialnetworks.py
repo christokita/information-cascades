@@ -185,5 +185,5 @@ for run in runs:
             network_change_data = network_change_data.append(data_row, ignore_index = True)
             
     # Save
-    network_change_data.to_csv(outpath + 'network_change/networkchange_gamma' + str(gamma) + filetags '.csv', index = False)
+    network_change_data.to_csv(outpath + 'network_change/networkchange_gamma' + str(gamma) + filetags + '.csv', index = False)
     del(network_change_data)
