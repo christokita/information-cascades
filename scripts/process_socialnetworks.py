@@ -132,7 +132,7 @@ for run in runs:
     
     # Dataframe to hold data
     network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
-                                                  'type', 'theshold',
+                                                  'type', 'threshold',
                                                   'degree', 'degree_initial',
                                                   'centrality', 'centrality_initial',
                                                   'same_type_adds', 'same_type_breaks', 
