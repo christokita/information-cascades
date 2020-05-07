@@ -50,7 +50,7 @@ assort_values = np.empty((0,6))
 for run in runs:
     
     # Load statement
-    print("Starting on \'" + run + "\'...")
+    print("Assortativity: Starting on \'" + run + "\'...")
     
     # Get gamma value
     gamma = float(re.search('gamma([-\.0-9]+)', run).group(1))
@@ -75,22 +75,22 @@ for run in runs:
         # Load network and threshold matrices
         adjacency = np.load(sn_dir + run + '/' + sn_final[i])
         adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[i])
-        type_mat = np.load(type_dir +  run + '/' + type_files[i])
-        thresh_mat = np.load(thresh_dir + run + '/' + thresh_files[i])
+        types = np.load(type_dir +  run + '/' + type_files[i])
+        thresholds = np.load(thresh_dir + run + '/' + thresh_files[i])
         rep = int(re.search('([0-9]+)', sn_final[i]).group(1))
         
         # Calculate assortativity by type
         g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency), mode = 'undirected')
-        g_final.vs['Type'] = type_mat[:,0]
+        g_final.vs['Type'] = types[:,1] #second column is equivalent to saying type 0 or type 1
         final_assort_type = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = False) #type categories are nominal, despite being numbers
         g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirected')
-        g_initial.vs['Type'] = type_mat[:,0]
+        g_initial.vs['Type'] = types[:,1] #second column is equivalent to saying type 0 or type 1
         initial_assort_type = g_initial.assortativity_nominal(types = g_initial.vs['Type'], directed = False)
         
         # Calculate assortativity by threshold
-        g_final.vs['Threshold'] = thresh_mat.flatten()
+        g_final.vs['Threshold'] = thresholds.flatten()
         final_assort_thresh = g_final.assortativity(types1 = g_final.vs['Threshold'], directed = False)
-        g_initial.vs['Threshold'] = thresh_mat.flatten()
+        g_initial.vs['Threshold'] = thresholds.flatten()
         initial_assort_thresh = g_initial.assortativity(types1 = g_initial.vs['Threshold'], directed = False)
         
         # Return
@@ -116,26 +116,25 @@ if not os.path.exists(outpath + 'network_change/'):
 for run in runs:
     
     # Load statement
-    print("Starting on \'" + run + "\'...")
+    print("Network structural change: Starting on \'" + run + "\'...")
     
     # Get gamma value
     gamma = float(re.search('gamma([-\.0-9]+)', run).group(1))
     
      # List social network files in that run's data folder
     sn_files = os.listdir(sn_dir + run +'/')
-    sn_final = [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] 
-    sn_initial = [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] 
-    sn_final.sort()
-    sn_initial.sort()
+    sn_final = sorted( [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] )
+    sn_initial =  sorted( [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] )
     
-    # List type data files in that run's data folder
-    type_files = os.listdir(type_dir + run +'/')
-    type_files.sort()
+    # List type and threshold data files in that run's data folder
+    type_files = sorted( os.listdir(type_dir + run +'/') )
+    thresh_files = sorted( os.listdir(thresh_dir + run +'/') )
     
     # Dataframe to hold data
-    network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual',
-                                                  'out_degree', 'out_degree_initial',
-                                                  'in_degree', 'in_degree_initial',
+    network_change_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
+                                                  'type', 'theshold',
+                                                  'degree', 'degree_initial',
+                                                  'centrality', 'centrality_initial',
                                                   'same_type_adds', 'same_type_breaks', 
                                                   'diff_type_adds', 'diff_type_breaks'])
 
@@ -151,39 +150,56 @@ for run in runs:
         # Load network and threshold matrices
         adjacency = np.load(sn_dir + run + '/' + sn_final[replicate])
         adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[replicate])
-        type_mat = np.load(type_dir +  run + '/' + type_files[replicate])
+        thresholds = np.load(thresh_dir + run + '/' + thresh_files[replicate]).flatten() #make 1d
+        types = np.load(type_dir +  run + '/' + type_files[replicate])
+        types = types[:, 1] #second column is equivalent to saying type 0/L or type 1/R
         
         # Determine changes in network connections
-        out_degree_initial = np.sum(adjacency_initial, axis = 1)
-        in_degree_initial = np.sum(adjacency_initial, axis = 0)
-        out_degree = np.sum(adjacency, axis = 1)
-        in_degree = np.sum(adjacency, axis = 0)
+        degree_initial = np.sum(adjacency_initial, axis = 1)
+        degree = np.sum(adjacency, axis = 1)
         adjacency_diff = adjacency - adjacency_initial
         
+        # Determine centrality 
+        g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency), mode = 'undirected')
+        g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirected')
+        centrality = g_final.evcent(directed = False)
+        centrality_initial = g_initial.evcent(directed = False)
+        
         # Determine frequency of new social ties and social tie breaks by individual type
-        individual_type = type_mat[:, 1] #second column is equivalent to saying type 0 or type 1
-        for i in np.arange(len(individual_type)):
+        same_type_adds = np.array([])
+        same_type_breaks = np.array([])
+        diff_type_adds = np.array([])
+        diff_type_breaks = np.array([])
+        for i in np.arange(len(types)):
             # Classify neighbors by type (in relation to selected individual's type)
-            same_type_individuals = np.where(individual_type == individual_type[i])[0]
-            diff_type_individuals = np.where(individual_type != individual_type[i])[0]
+            same_type_individuals = np.where(types == types[i])[0]
+            diff_type_individuals = np.where(types != types[i])[0]
             # Classify new ties and breaks by the type of individual
             all_adds, all_breaks = np.where(adjacency_diff[i, :] == 1)[0], np.where(adjacency_diff[i, :] == -1)[0]
-            same_type_adds = [x for x in all_adds if x in same_type_individuals]
-            same_type_breaks = [x for x in all_breaks if x in same_type_individuals]
-            diff_type_adds = [x for x in all_adds if x in diff_type_individuals]
-            diff_type_breaks = [x for x in all_breaks if x in diff_type_individuals]
+            same_adds = [x for x in all_adds if x in same_type_individuals]
+            same_breaks = [x for x in all_breaks if x in same_type_individuals]
+            diff_adds = [x for x in all_adds if x in diff_type_individuals]
+            diff_breaks = [x for x in all_breaks if x in diff_type_individuals]
             # Count
-            same_type_adds, same_type_breaks = len(same_type_adds), len(same_type_breaks)
-            diff_type_adds, diff_type_breaks = len(diff_type_adds), len(diff_type_breaks)
-            # Compile into dataframe row
-            data_row = pd.DataFrame(data = [[gamma, replicate, i, 
-                                             out_degree[i], out_degree_initial[i],
-                                             in_degree[i], in_degree_initial[i],
-                                             same_type_adds, same_type_breaks, 
-                                             diff_type_adds, diff_type_breaks]],
+            same_type_adds = np.append(same_type_adds, len(same_adds))
+            same_type_breaks = np.append(same_type_breaks, len(same_breaks))
+            diff_type_adds = np.append(diff_type_adds, len(diff_adds))
+            diff_type_breaks = np.append(diff_type_breaks, len(diff_breaks))
+            
+        # Compile into dataframe and append to master dataframe
+        n = len(thresholds)
+        replicate_data = pd.DataFrame(np.column_stack((np.repeat(gamma, n), np.repeat(replicate, n), np.arange(0, n), 
+                                                       types, thresholds,
+                                                       degree, degree_initial,
+                                                       centrality, centrality_initial,
+                                                       same_type_adds, same_type_breaks, 
+                                                       diff_type_adds, diff_type_breaks)),
                                     columns = network_change_data.columns)
-            network_change_data = network_change_data.append(data_row, ignore_index = True)
+        network_change_data = network_change_data.append(replicate_data, ignore_index = True)
+        del replicate_data
             
     # Save
     network_change_data.to_csv(outpath + 'network_change/networkchange_gamma' + str(gamma) + filetags + '.csv', index = False)
-    del(network_change_data)
+    del network_change_data
+
+    
