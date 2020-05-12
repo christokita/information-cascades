@@ -52,37 +52,6 @@ network_change_sum <- network_change_data %>%
             sd = sd(value),
             error = qnorm(0.975)*sd(value)/sqrt(length(value)))
 
-####################
-# Function to do bayesian regression over gamma values
-####################
-bayes_regression <- function(gammas, data) {
-  # Loop over gamma values, fitting a bayesian regression to each subset of data
-  regression <- lapply(gammas, function(gamma) {
-    # Filter to just data of interest
-    gamma_data <- data %>% 
-      filter(gamma == gamma)
-    # Fit bayesian model
-    model <- brm(data = gamma_data,
-                 formula = value ~ 1 + threshold,
-                 prior = c(prior(uniform(-10, 10), class = Intercept),
-                           prior(normal(0, 10), class = b),
-                           prior(normal(0, 50), class = sigma)),
-                 iter = 3000,
-                 warmup = 1000,
-                 chains = 2,
-                 seed = 323)
-    # Get model predictions for plotting as line
-    x_values <- data.frame(threshold = seq(0, 1, 0.01))
-    fitted_values <- fitted(model, newdata = x_values) %>% 
-      as.data.frame() %>% 
-      mutate(gamma = gamma,
-             threshold = seq(0, 1, 0.01))
-    return(fitted_values)
-  })
-  # Bind together and return
-  regression <- do.call("rbind", regression)
-  return(regression)
-} 
 
 
 ############################## Centrality ##############################
