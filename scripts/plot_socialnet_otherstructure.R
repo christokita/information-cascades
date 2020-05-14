@@ -64,11 +64,11 @@ centrality_data <- network_change_data %>%
   split(.$gamma)
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
-centrality_fit_file <- paste0(out_path, "regression_fits/centrality-threshold_cubic_fit.rds")
+centrality_fit_file <- paste0(out_path, "regression_fits/centrality-threshold_cubicfit.rds")
+gamma_values <- as.numeric(names(centrality_data))
 if (file.exists(centrality_fit_file)) { 
   regression_cent <- readRDS(centrality_fit_file)
 } else {
-  gamma_values <- as.numeric(names(centrality_data))
   regression_cent <- brm_multiple(data = centrality_data,
                                   formula = value ~ 1 + threshold + I(threshold^2) + I(threshold^3),
                                   prior = c(prior(uniform(-10, 10), class = Intercept),
@@ -98,23 +98,24 @@ fit_cent <- do.call("rbind", fit_cent)
 ####################
 gg_centrality <- ggplot(fit_cent, aes(x = threshold, y = Estimate, color = gamma, group = gamma)) +
   # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
-  geom_line(alpha = 0.8) +
+  geom_line(size = 0.3, alpha = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   ylab("Centrality") +
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_centrality
+ggsave(gg_centrality, filename = paste0(out_path, "centrality-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
 
-
-gg_cent <- ggplot(network_change_data %>% filter(metric == "centrality", gamma == 1), aes(x = threshold, y = value, color = gamma, group = gamma)) +
-  # geom_bin2d() +
-  geom_point(size = 0.1, alpha = 0.2) +
-  stat_smooth(geom = 'line', size = 0.3, alpha = 0.8, se = FALSE) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  theme_ctokita()
-gg_cent
+# # Plot of raw data points
+# gg_cent <- ggplot(network_change_data %>% filter(metric == "centrality", gamma == -0.5), aes(x = threshold, y = value, color = gamma, group = gamma)) +
+#   # geom_bin2d() +
+#   geom_point(size = 0.5, alpha = 0.2) +
+#   stat_smooth(geom = 'line', size = 0.3, alpha = 0.8) +
+#   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+#   theme_ctokita()
+# gg_cent
 
 ############################## Degree ##############################
 
@@ -126,8 +127,8 @@ degree_data <- network_change_data %>%
   split(.$gamma)
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
-degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_cubic_fit.rds")
-if (file.exists(centrality_fit_file)) { 
+degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_cubicfit.rds")
+if (file.exists(degree_fit_file)) { 
   regression_deg <- readRDS(degree_fit_file)
 } else {
   gamma_values <- as.numeric(names(centrality_data))
@@ -161,23 +162,40 @@ fit_deg <- do.call("rbind", fit_deg)
 ####################
 gg_degree <- ggplot(fit_deg, aes(x = threshold, y = Estimate, color = gamma, group = gamma)) +
   # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
-  geom_line(alpha = 0.8) +
+  geom_line(size = 0.3, alpha = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   ylab("Degree") +
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_degree
+ggsave(gg_degree, filename = paste0(out_path, "degree-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
 
-# Degree 
-degree_data <- network_change_data %>% 
-  filter(metric == "degree") %>% 
-  filter(gamma == 0.9)
-gg_degree <- ggplot(degree_data, aes(x = threshold, y = value, color = gamma, group = gamma)) +
-  # geom_bin2d() +
-  geom_point(size = 0.1, alpha = 0.2) +
-  stat_smooth(geom = 'line', size = 0.3, alpha = 0.8, se = FALSE) +
-  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  theme_ctokita() 
-gg_degree
+####################
+# Plot degree distribution for each info ecosystem (gamma)
+####################
+degree_dist_data <- network_change_data %>% 
+  filter(metric %in% c("degree", "degree_initial")) %>% 
+  filter(gamma %in% seq(-1, 1, 0.5)) 
+# %>% 
+#   cut(x =.$value, breaks = seq(0, 30, 1), labels =  seq(0, 29, 1), include.lowest = TRUE, right = F)
+
+gg_degree_dist <- ggplot(degree_dist_data, aes(x = value, fill = metric)) +
+  geom_histogram(binwidth = 1, alpha = 0.5, position = "identity") +
+  theme_ctokita() +
+  theme(aspect.ratio = 0.3) +
+  facet_grid(gamma~.)
+gg_degree_dist
+
+# # Plot of raw data points
+# degree_data <- network_change_data %>% 
+#   filter(metric == "degree") %>% 
+#   filter(gamma == 0.9)
+# gg_degree <- ggplot(network_change_data %>% filter(metric == "degree", gamma == 0.9), aes(x = threshold, y = value, color = gamma, group = gamma)) +
+#   # geom_bin2d() +
+#   geom_point(size = 0.1, alpha = 0.2) +
+#   stat_smooth(geom = 'line', size = 0.3, alpha = 0.8, se = FALSE) +
+#   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+#   theme_ctokita() 
+# gg_degree
