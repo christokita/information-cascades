@@ -33,7 +33,7 @@ def simulate_cascade(network, states, thresholds, samplers):
         # Individual assess social information relative to thresholds
         active_neighbors = np.dot(network, states)
         degree = np.sum(network, axis = 1, keepdims = True)
-        social_stim = np.divide(active_neighbors, degree, out = np.zeros_like(active_neighbors), where = degree!=0) #returns zero where divide-by-zero would otherwise happen
+        social_stim = np.divide(active_neighbors, degree, out = np.zeros_like(active_neighbors), where = degree!=0) #returns zero where divide-by-zero would otherwise happen. (Only replaces zeros in 'out' at specified 'where' locations)
         turn_on = social_stim > thresholds
         
         # Update behavior, making sure samplers remain in original state (i.e., 0 remains 0)
@@ -47,34 +47,3 @@ def simulate_cascade(network, states, thresholds, samplers):
             
     # Return post-cascade behavioral states
     return states
-        
-def simulate_cascade_old(network, states, thresholds):
-    # Simulates a cascade given a network and a intial set of active nodes.
-    # Former method in which samplers can later become active
-    #
-    # INPUTS:
-    # - network:      the network connecting individuals (numpy array).
-    # - states:       array listing the behavioral state of every individual (numpy array).
-    # - thresholds:   matrix of thresholds for each individual (numpy array).
-    
-    for step in range(1000000): # High number of steps to allow casacde to reach equilibrium
-        
-        # Weight neighbor info
-        neighbor_state = np.dot(network, states)
-        degree = np.sum(network, axis = 1, keepdims = True)
-        social_stim = neighbor_state / degree
-        
-        # Threshold calculation
-        turn_on = social_stim > thresholds
-        
-        # Update
-        states_last = copy.deepcopy(states)
-        states[turn_on] = 1
-        
-        # Break if it reaches stable state
-        if np.array_equal(states, states_last):
-            
-            # Stop cascade
-            return states
-            break
-    
