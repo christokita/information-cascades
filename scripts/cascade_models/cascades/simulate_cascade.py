@@ -9,8 +9,6 @@ Created on Mon Nov 25 11:44:29 2019
 import numpy as np
 import copy
 
-np.seterr(divide='ignore', invalid='ignore') # for the social_stim = neighbor_state/degree step
-
 def simulate_cascade(network, states, thresholds, samplers):
     # Simulates a cascade given a network and a intial set of active nodes.
     # We assume original info samplers who did not become active will not participate in the subsequent cascade.
