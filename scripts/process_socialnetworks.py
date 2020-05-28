@@ -17,6 +17,7 @@ import pandas as pd
 import os
 import re
 import igraph
+from cascade_models.social_networks.local_assortativity import local_assortativity
 
 
 ####################
@@ -81,10 +82,10 @@ for run in runs:
         
         # Calculate assortativity by type
         g_final = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency), mode = 'undirected')
-        g_final.vs['Type'] = types[:,1] #second column is equivalent to saying type 0 or type 1
+        g_final.vs['Type'] = np.argmax(types == 1, axis = 1) #get categorical types of focal individual, type 0 or type 1
         final_assort_type = g_final.assortativity_nominal(types = g_final.vs['Type'], directed = False) #type categories are nominal, despite being numbers
         g_initial = igraph.Graph.Adjacency(np.ndarray.tolist(adjacency_initial), mode = 'undirected')
-        g_initial.vs['Type'] = types[:,1] #second column is equivalent to saying type 0 or type 1
+        g_initial.vs['Type'] = np.argmax(types == 1, axis = 1)
         initial_assort_type = g_initial.assortativity_nominal(types = g_initial.vs['Type'], directed = False)
         
         # Calculate assortativity by threshold
@@ -135,6 +136,7 @@ for run in runs:
                                                   'type', 'threshold',
                                                   'degree', 'degree_initial',
                                                   'centrality', 'centrality_initial',
+                                                  'local_assortativity', 'local_assortativity_initial',
                                                   'same_type_adds', 'same_type_breaks', 
                                                   'diff_type_adds', 'diff_type_breaks'])
 
@@ -165,6 +167,10 @@ for run in runs:
         centrality = g_final.evcent(directed = False)
         centrality_initial = g_initial.evcent(directed = False)
         
+        # Determine local assortativity
+        local_assort = local_assortativity(network = adjacency, types = types, alpha = 0.5)
+        local_assort_initial = local_assortativity(network = adjacency_initial, types = types, alpha = 0.5)
+        
         # Determine frequency of new social ties and social tie breaks by individual type
         same_type_adds = np.array([])
         same_type_breaks = np.array([])
@@ -192,6 +198,7 @@ for run in runs:
                                                        types, thresholds,
                                                        degree, degree_initial,
                                                        centrality, centrality_initial,
+                                                       local_assort, local_assort_initial,
                                                        same_type_adds, same_type_breaks, 
                                                        diff_type_adds, diff_type_breaks)),
                                     columns = network_change_data.columns)
