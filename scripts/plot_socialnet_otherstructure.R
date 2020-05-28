@@ -94,7 +94,7 @@ fit_cent <- lapply(seq(1:length(gamma_values)), function(i) {
 fit_cent <- do.call("rbind", fit_cent)
 
 ####################
-# Plot thresold vs eigenvector centrality value for each info ecosystem (gamma)
+# Plot fitted regressions for thresold vs eigenvector centrality value in each info ecosystem (gamma)
 ####################
 gg_centrality <- ggplot(fit_cent, aes(x = threshold, y = Estimate, color = gamma, group = gamma)) +
   # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
@@ -142,7 +142,7 @@ if (file.exists(degree_fit_file)) {
                                   chains = 4,
                                   seed = 323,
                                   combine = FALSE)
-  saveRDS(regression_deg, file = centrality_data)
+  saveRDS(regression_deg, file = degree_fit_file)
 }
 
 # Get fitted values from model to data range/space
@@ -158,7 +158,7 @@ fit_deg <- do.call("rbind", fit_deg)
 
 
 ####################
-# Plot thresold value vs degree for each info ecosystem (gamma)
+# Plot fitted regressions for thresold value vs degree in each info ecosystem (gamma)
 ####################
 gg_degree <- ggplot(fit_deg, aes(x = threshold, y = Estimate, color = gamma, group = gamma)) +
   # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
@@ -199,3 +199,81 @@ gg_degree_dist
 #   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
 #   theme_ctokita() 
 # gg_degree
+
+
+
+############################## Local Assortativity ##############################
+
+####################
+# Filter to data of interest, fit regression
+####################
+localassort_data <- network_change_data %>% 
+  filter(metric == "local_assortativity") %>% 
+  split(.$gamma)
+
+# Check if regression fit already exists, otherwise conduct bayesian regression
+localassort_fit_file <- paste0(out_path, "regression_fits/localassort-threshold_cubicfit.rds")
+if (file.exists(localassort_fit_file)) { 
+  regression_la <- readRDS(localassort_fit_file)
+} else {
+  gamma_values <- as.numeric(names(localassort_data))
+  regression_la <- brm_multiple(data = localassort_data,
+                                 formula = value ~ 1 + threshold + I(threshold^2) + I(threshold^3),
+                                 prior = c(prior(uniform(-10, 10), class = Intercept),
+                                           prior(normal(0, 10), class = b),
+                                           prior(normal(0, 50), class = sigma)),
+                                 iter = 3000,
+                                 warmup = 1000,
+                                 chains = 4,
+                                 seed = 323,
+                                 combine = FALSE)
+  saveRDS(regression_la, file = localassort_fit_file)
+}
+
+# Get fitted values from model to data range/space
+x_values <- data.frame(threshold = seq(0, 1, 0.01))
+fit_la <- lapply(seq(1:length(gamma_values)), function(i) {
+  gamma <- gamma_values[i]
+  fit_line <- fitted(regression_la[[i]], newdata = x_values) %>% 
+    as.data.frame() %>% 
+    mutate(gamma = gamma,
+           threshold = seq(0, 1, 0.01))
+})
+fit_la <- do.call("rbind", fit_la)
+
+####################
+# Plot fitted regressions for thresold value vs local assortativity in each info ecosystem (gamma)
+####################
+gg_localassort <- ggplot(fit_la, aes(x = threshold, y = Estimate, color = gamma, group = gamma)) +
+  geom_hline(aes(yintercept = 0), 
+             size = 0.3, 
+             linetype = "dotted") +
+  # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
+  geom_line(size = 0.3, alpha = 0.8) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+  scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+  ylab(expression(paste("Local assortativity, ", r[l]))) +
+  xlab(expression(paste("Threshold, ", theta[i]))) +
+  theme_ctokita() 
+gg_localassort
+ggsave(gg_localassort, filename = paste0(out_path, "localassort-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+
+####################
+# Plot thresold value vs local assortativity (raw values)
+####################
+gamma_of_interest <- 0.5
+
+localassort_raw <- network_change_data %>% 
+  filter(metric == "local_assortativity",
+         gamma == gamma_of_interest)
+
+fit_example <- fit_la %>% 
+  filter(gamma == gamma_of_interest)
+
+gg_localassort_raw <- ggplot(localassort_raw, aes(x = threshold, y = value)) +
+  geom_point(size = 0.1, alpha = 0.2) +
+  geom_line(data = fit_example, aes(x = threshold, y = Estimate)) +
+  ylab("Local assortativity") +
+  xlab(expression(paste("Threshold, ", theta[i]))) +
+  theme_ctokita()
+gg_localassort_raw
