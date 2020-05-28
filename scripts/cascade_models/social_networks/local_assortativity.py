@@ -18,7 +18,7 @@ def local_assortativity(network, types, alpha):
     #
     # INPUTS:
     # - network:   the network connecting individuals (numpy array).
-    # - types:     the political types of each individual. Of shape N x T, where T is the number of types (numpy array).
+    # - types:     the categorical type of each individual (numpy array).
     # - alpha:     the size of the neighborhood when calculating assortativity. 0 is entirely local, 1 is entirely global (float).
     
     # Get degree and probability transition matrix (adjacency matrix normalized by degree)
@@ -29,12 +29,11 @@ def local_assortativity(network, types, alpha):
     normalized_network[nonzero_entries] = normalized_network[nonzero_entries] / degree[nonzero_entries] #divide row by degree to get proportion of edges for each individual
     
     # Calculate global assortativity measures
-    type_list = np.argmax(types == 1 , axis = 1) #get categorical types of individuals
-    a_g, Q_max = global_assort_values(network, type_list)
+    a_g, Q_max = global_assort_values(network, types)
     
     # Calculate local assortativity
-    categorized_connections = connections_by_type(normalized_network, type_list)
-    proportion_same_type = categorized_connections[np.arange(network.shape[0]), type_list] #for each individual, the proportion of connections that are to same-type individuals
+    categorized_connections = connections_by_type(normalized_network, types)
+    proportion_same_type = categorized_connections[np.arange(network.shape[0]), types] #for each individual, the proportion of connections that are to same-type individuals
     weights = personanlized_page_rank(network, alpha)
     local_assort = np.array([])
     for i in range(network.shape[0]): #loop over individuals
@@ -44,8 +43,8 @@ def local_assortativity(network, types, alpha):
         else:
             # Otherwise calculate local assortativity
             deviation_from_global = 0 #portion in the sum of equation [6] in paper
-            for t in np.unique(type_list):
-                this_type = type_list == t
+            for t in np.unique(types):
+                this_type = types == t
                 e_gg = weights[i, this_type] @ categorized_connections[this_type, t] #e_gg(l) value
                 deviation_from_global += e_gg - a_g[t]**2
             # Normalize by Q_max per equation [6] in paper
@@ -56,17 +55,17 @@ def local_assortativity(network, types, alpha):
     return local_assort
     
 
-def global_assort_values(network, type_list):
+def global_assort_values(network, types):
     # Function that will calculate Qmax and a_g for use in calculating assortativity
     #
     # INPUTS:
-    # - network:     the network connecting individuals (numpy array).
-    # - type_list:   the categorical types of each individual. One entry per individual. (numpy array).
+    # - network:   the network connecting individuals (numpy array).
+    # - types:     the categorical type of each individual (numpy array).
     
     m = np.sum(network) / 2 #total number of unique edges
     a_g = np.array([])
-    for t in np.unique(type_list):
-        this_type = np.where(type_list == t)[0]
+    for t in np.unique(types):
+        this_type = np.where(types == t)[0]
         type_subnetwork = network[this_type,:]
         normalized_degree = np.sum(type_subnetwork, axis = 1) / (2*m)
         a_g = np.append(a_g, np.sum(normalized_degree))
@@ -74,17 +73,17 @@ def global_assort_values(network, type_list):
     return a_g, Q_max
 
 
-def connections_by_type(normalized_network, type_list):
+def connections_by_type(normalized_network, types):
     # Function that determines how many connections each individual has to individuals of a particular type.
     # Returns an array where each row is an individual and each column is a type (e.g., type 0 and type 1).
     #
     # INPUTS:
     # - normalized_network:   the network connecting individuals, with each row normalized by degree. (numpy array).
-    # - type_list:            the categorical types of each individual. One entry per individual. (numpy array).
+    # - types:                the categorical type of each individual (numpy array).
     
-    categorized_connections = np.zeros((normalized_network.shape[0], len(np.unique(type_list))))
-    for t in np.unique(type_list):
-        this_type = np.where(type_list == t)[0]
+    categorized_connections = np.zeros((normalized_network.shape[0], len(np.unique(types))))
+    for t in np.unique(types):
+        this_type = np.where(types == t)[0]
         type_connections = normalized_network[:,this_type] #only look at connections to individuals to type t
         categorized_connections[:,t] = np.sum(type_connections, axis = 1)
     return categorized_connections
