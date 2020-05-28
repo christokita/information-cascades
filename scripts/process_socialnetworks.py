@@ -136,7 +136,7 @@ for run in runs:
                                                   'type', 'threshold',
                                                   'degree', 'degree_initial',
                                                   'centrality', 'centrality_initial',
-                                                  'local_assortativity', 'local_assortativity_initial',
+                                                  'local_assortativity',
                                                   'same_type_adds', 'same_type_breaks', 
                                                   'diff_type_adds', 'diff_type_breaks'])
 
@@ -154,7 +154,7 @@ for run in runs:
         adjacency_initial = np.load(sn_dir + run + '/' + sn_initial[replicate])
         thresholds = np.load(thresh_dir + run + '/' + thresh_files[replicate]).flatten() #make 1d
         types = np.load(type_dir +  run + '/' + type_files[replicate])
-        types = types[:, 1] #second column is equivalent to saying type 0/L or type 1/R
+        types = np.argmax(types == 1 , axis = 1) #get categorical types of individuals
         
         # Determine changes in network connections
         degree_initial = np.sum(adjacency_initial, axis = 1)
@@ -168,8 +168,8 @@ for run in runs:
         centrality_initial = g_initial.evcent(directed = False)
         
         # Determine local assortativity
-        local_assort = local_assortativity(network = adjacency, types = types, alpha = 0.5)
-        local_assort_initial = local_assortativity(network = adjacency_initial, types = types, alpha = 0.5)
+        alpha = 0.5 #scope of node's neighborhood (0 for extreme local to 1 for fully global)
+        local_assort = local_assortativity(network = adjacency, types = types, alpha = alpha)
         
         # Determine frequency of new social ties and social tie breaks by individual type
         same_type_adds = np.array([])
@@ -198,7 +198,7 @@ for run in runs:
                                                        types, thresholds,
                                                        degree, degree_initial,
                                                        centrality, centrality_initial,
-                                                       local_assort, local_assort_initial,
+                                                       local_assort,
                                                        same_type_adds, same_type_breaks, 
                                                        diff_type_adds, diff_type_breaks)),
                                     columns = network_change_data.columns)
