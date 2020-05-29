@@ -131,7 +131,7 @@ degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_cubicfit.r
 if (file.exists(degree_fit_file)) { 
   regression_deg <- readRDS(degree_fit_file)
 } else {
-  gamma_values <- as.numeric(names(centrality_data))
+  gamma_values <- as.numeric(names(degree_data))
   regression_deg <- brm_multiple(data = degree_data,
                                   formula = value ~ 1 + threshold + I(threshold^2) + I(threshold^3),
                                   prior = c(prior(uniform(-10, 10), class = Intercept),
@@ -252,7 +252,7 @@ gg_localassort <- ggplot(fit_la, aes(x = threshold, y = Estimate, color = gamma,
   geom_line(size = 0.3, alpha = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  ylab(expression(paste("Local assortativity, ", r[l]))) +
+  ylab(expression(paste("Local assortativity, ", r[L]))) +
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_localassort
@@ -261,7 +261,7 @@ ggsave(gg_localassort, filename = paste0(out_path, "localassort-thresholds", plo
 ####################
 # Plot thresold value vs local assortativity (raw values)
 ####################
-gamma_of_interest <- 0.5
+gamma_of_interest <- -0.5
 
 localassort_raw <- network_change_data %>% 
   filter(metric == "local_assortativity",
