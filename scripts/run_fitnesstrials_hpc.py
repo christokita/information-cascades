@@ -33,10 +33,20 @@ directory = '/scratch/gpfs/ctokita/information-cascades/network_break/'
 # Set parameters for fitness trials
 fit_trial_length = 10000
 psi = 0.1
+gamma_trial_value = 0.9 #if we want to test all networks under same gamma value (instead of gamma of model simulation)
+trial_tags = "highcorr" #leave empty unless you are manually setting gamma_trial_value to a 'highcorr' or 'lowcorr' info ecosystem
+
+# Prep trial tags
+if len(trial_tags) > 0:
+    trial_tags = trial_tags + "_"
 
 # Get gamma value and replicate number for this core to test from slurm script
 gamma = float(sys.argv[1]) #correlation between two information sources
 rep = int(sys.argv[2]) #replicate ID number
+
+# If we don't have a preset gamma value, let the fitness trial gamma be the same as the model simulation.
+if gamma_trial_value is None:
+    gamma_trial_value = gamma
 
 ##########
 # Run fitness trial
@@ -59,7 +69,7 @@ thresholds = np.load(directory + 'thresh_data/gamma' + str(gamma) + '/thresh_rep
 types = np.load(directory + 'type_data/gamma' + str(gamma) + '/type_rep' + str(rep).zfill(2) + '.npy') 
 
 # Pre-casacde transformation fitness assessment
-pre_behavior, pre_cascades = cs.assess_fitness(gamma = gamma, 
+pre_behavior, pre_cascades = cs.assess_fitness(gamma = gamma_trial_value, 
                                                psi = psi, 
                                                trial_count = fit_trial_length, 
                                                network = initial_sn, 
@@ -68,7 +78,7 @@ pre_behavior, pre_cascades = cs.assess_fitness(gamma = gamma,
                                                trial = "pre")
 
 # Post-casacde transformation fitness assessment
-post_behavior, post_cascades = cs.assess_fitness(gamma = gamma, 
+post_behavior, post_cascades = cs.assess_fitness(gamma = gamma_trial_value, 
                                                  psi = psi, 
                                                  trial_count = fit_trial_length, 
                                                  network = final_sn, 
@@ -77,11 +87,11 @@ post_behavior, post_cascades = cs.assess_fitness(gamma = gamma,
                                                  trial = "post")
 
 # Create directory for this gamma
-if not os.path.exists(directory + "fitness_data/gamma" + str(gamma) + "/"): 
-        os.makedirs(directory + "fitness_data/gamma" + str(gamma) + "/")
+if not os.path.exists(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/"): 
+        os.makedirs(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/")
         
 # Save
-pre_behavior.to_pickle(directory + "fitness_data/gamma" + str(gamma) + "/pre_behavior_rep" + str(rep).zfill(2) + ".pkl")
-pre_cascades.to_pickle(directory + "fitness_data/gamma" + str(gamma) + "/pre_cascades_rep" + str(rep).zfill(2) + ".pkl")
-post_behavior.to_pickle(directory + "fitness_data/gamma" + str(gamma) + "/post_behavior_rep" + str(rep).zfill(2) + ".pkl")
-post_cascades.to_pickle(directory + "fitness_data/gamma" + str(gamma) + "/post_cascades_rep" + str(rep).zfill(2) + ".pkl")
+pre_behavior.to_pickle(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/pre_behavior_rep" + str(rep).zfill(2) + ".pkl")
+pre_cascades.to_pickle(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/pre_cascades_rep" + str(rep).zfill(2) + ".pkl")
+post_behavior.to_pickle(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/post_behavior_rep" + str(rep).zfill(2) + ".pkl")
+post_cascades.to_pickle(directory + "fitness_data/" + trial_tags + "gamma" + str(gamma) + "/post_cascades_rep" + str(rep).zfill(2) + ".pkl")
