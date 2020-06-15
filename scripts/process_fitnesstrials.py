@@ -30,17 +30,17 @@ raw_data = False
 # Directory where simulation data is found
 fit_dir = '../data_sim/network_break/fitness_data/'  
 thresh_dir = '../data_sim/network_break/thresh_data/'
-tags = 'gamma' #file tags that designate runs from a particular simulation
+tags = 'highcorr' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/fitness_trials/'
-filetags = '' #added info, particularly for suppl simulations e.g., 'fitness_<filetag>_
+filetags = 'highcorr' #added info, particularly for suppl simulations e.g., 'fitness_<filetag>_
 if len(filetags) > 0:
     filetags = '_' + filetags
 
 # List runs
 runs = os.listdir(fit_dir)
-runs = sorted( [run for run in runs if re.findall(tags + '[-.0-9]+', run)] )
+runs = sorted( [run for run in runs if re.findall('^' + tags + '.*[-.0-9]+', run)] )
 
 
 ####################
@@ -75,6 +75,9 @@ for run in runs:
         # Get replicate number 
         rep = int(re.search('([0-9]+)', replicate).group(1))
         
+        # Get proper run info for thresholds (additional fitness trials use the thresholds/networks from main simulation)
+        thresh_run = re.search('(gamma[-.0-9]+)', run).group(1)
+        
         ##### Cascade data #####
         # Read in data, both pre- and post- main model simulation
         pre_cascade = pd.read_pickle(fit_dir + run +'/pre_cascades_' + replicate + '.pkl')
@@ -92,7 +95,7 @@ for run in runs:
         # Read in data, both pre- and post- main model simulation
         pre_behavior = pd.read_pickle(fit_dir + run +'/pre_behavior_' + replicate + '.pkl')
         post_behavior = pd.read_pickle(fit_dir + run +'/post_behavior_' + replicate + '.pkl')
-        thresholds = np.load(thresh_dir + run + '/thresh_' + replicate + '.npy')
+        thresholds = np.load(thresh_dir + thresh_run + '/thresh_' + replicate + '.npy')
         behavior = pre_behavior.append(post_behavior, ignore_index = True)
 
         # Calculate additional statistics: Behavior
