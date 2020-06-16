@@ -106,7 +106,7 @@ gg_centrality <- ggplot(fit_cent, aes(x = threshold, y = Estimate, color = gamma
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_centrality
-ggsave(gg_centrality, filename = paste0(out_path, "centrality-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_centrality, filename = paste0(out_path, "threshold-centrality", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -183,7 +183,7 @@ gg_degree <- ggplot(fit_deg, aes(x = threshold, y = Estimate, color = gamma, gro
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_degree
-ggsave(gg_degree, filename = paste0(out_path, "degree-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_degree, filename = paste0(out_path, "threshold-degree", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -283,7 +283,7 @@ gg_localassort <- ggplot(fit_la, aes(x = threshold, y = Estimate, color = gamma,
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_localassort
-ggsave(gg_localassort, filename = paste0(out_path, "localassort-thresholds", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_localassort, filename = paste0(out_path, "threshold-localassort", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -375,12 +375,13 @@ gg_localnetmetrics <- fits %>%
              labeller = label_bquote(cols = gamma == .(gamma))) +
   theme_ctokita() +
   theme(strip.background = element_blank(),
-        legend.margin = margin(c(0, 0, 0, 0)),
-        legend.box.margin=margin(-5,-5,-5,-5),
+        # legend.margin = margin(c(0, 0, 0, 0)),
+        # legend.box.margin=margin(-5,-5,-5,-5),
+        legend.position = "none",
         strip.placement = "outside",
         aspect.ratio = NULL, 
         axis.title.y = element_blank(),
         strip.text.y = element_text(size = 6))
 gg_localnetmetrics
-ggsave(gg_localnetmetrics, filename = paste0(out_path, "individualnetworkmetrics-thresholds", plot_tag, ".png"), width = 90, height = 60, units = "mm", dpi = 400)
+ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".png"), width = 90, height = 60, units = "mm", dpi = 400)
 
