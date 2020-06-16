@@ -19,7 +19,8 @@ theme_ctokita <- function() {
           legend.text     = element_text(size = 6, color = "black"),
           legend.text.align = 0,
           strip.text      = element_text(size = 7, color = "black"),
-          strip.background = element_rect(fill = "grey95", color = NA),
+          # strip.background = element_rect(fill = "grey95", color = NA),
+          strip.background = element_blank(),
           legend.key.size = unit(3, "mm"),
           legend.key.width = unit(2, "mm"),
           aspect.ratio    = 1)
