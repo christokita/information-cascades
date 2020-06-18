@@ -120,7 +120,7 @@ gg_centrality_select <- fit_cent %>%
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_continuous(breaks = seq(0, 1, 1)) +
   ylab("Centrality") +
-  xlab(expression(paste("Threshold, ", theta[i]))) +
+  xlab(expression(paste("Threshold ", theta[i]))) +
   facet_grid(.~gamma) +
   theme_ctokita() +
   theme(aspect.ratio = 3,
@@ -141,6 +141,7 @@ degree_data <- network_change_data %>%
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
 degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_quadraticfit.rds")
+gamma_values <- as.numeric(names(degree_data))
 if (file.exists(degree_fit_file)) { 
   regression_deg <- readRDS(degree_fit_file)
 } else {
@@ -201,7 +202,7 @@ gg_degree_select <- fit_deg %>%
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_continuous(breaks = seq(0, 1, 1)) +
   ylab("Degree") +
-  xlab(expression(paste("Threshold, ", theta[i]))) +
+  xlab(expression(paste("Threshold ", theta[i]))) +
   facet_grid(.~gamma) +
   theme_ctokita() +
   theme(aspect.ratio = 3,
@@ -239,8 +240,9 @@ localassort_data <- network_change_data %>%
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
 localassort_fit_file <- paste0(out_path, "regression_fits/localassort-threshold_quadraticfit.rds")
+gamma_values <- as.numeric(names(localassort_data))
 if (file.exists(localassort_fit_file)) { 
-  regression_la <- readRDS(localassort_fit_file)
+  regression_la <- readRDS(localassort_fit_file) 
 } else {
   gamma_values <- as.numeric(names(localassort_data))
   regression_la <- brm_multiple(data = localassort_data,
@@ -279,7 +281,7 @@ gg_localassort <- ggplot(fit_la, aes(x = threshold, y = Estimate, color = gamma,
   geom_line(size = 0.3, alpha = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  ylab(expression(paste("Local assortativity, ", r[L]))) +
+  ylab(expression(paste("Local assortativity, ", r[local]))) +
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_localassort
@@ -299,8 +301,8 @@ gg_localassort_select <- fit_la %>%
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_continuous(breaks = seq(0, 1, 1)) +
-  ylab(expression(paste("Local assortativity, ", r[L]))) +
-  xlab(expression(paste("Threshold, ", theta[i]))) +
+  ylab(expression(paste("Local assortativity ", r[local]))) +
+  xlab(expression(paste("Threshold ", theta[i]))) +
   facet_grid(.~gamma) +
   theme_ctokita() +
   theme(aspect.ratio = 3,
