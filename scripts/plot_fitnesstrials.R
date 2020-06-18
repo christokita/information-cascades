@@ -58,13 +58,14 @@ gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = 
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(breaks = seq(0, 100, 10), limits = c(10, 60)) +
   ylab("Total cascade activity") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_activity #show plot before saving
 ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_activity + theme(legend.position = "none"), filename = paste0(out_path, "cascadeactivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Avg.cascade size 
@@ -78,13 +79,15 @@ gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(breaks = seq(0, 6, 1), limits = c(0, 6)) +
   ylab("Avg. cascade size") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_size #show plot before saving
 ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_size + theme(legend.position = "none"), filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
+
 
 ####################
 # Plot: Cascade bias
@@ -98,13 +101,14 @@ gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) 
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(limits = c(0.1, 0.7), breaks = seq(0.1, 0.7, 0.1)) +
   ylab("Cascade bias") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_bias #show plot before saving
 ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_bias + theme(legend.position = "none"), filename = paste0(out_path, "cascadebias", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
 
 
 ############################## Ftiness trials: Behavior ##############################
@@ -140,12 +144,12 @@ gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, grou
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   ylab("Behavior frequency") +
-  xlab("Fitness trial") +
   theme_ctokita() +
   theme(strip.background = element_rect(color = NA, fill = "grey90"),
-        axis.line = element_line()) +
+        axis.line = element_line(),
+        axis.title.x = element_blank()) +
   facet_wrap(~metric, scales = "free_x")
 gg_behavrates #show plot before saving
 ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".png"), width = 120, height = 90, units = "mm", dpi = 400)
@@ -165,11 +169,11 @@ gg_sens <- ggplot(sensitivity, aes(x = trial, y = mean, color = gamma, group = g
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.1, 0.4)) +
   ylab("Sensitivity") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_sens #show plot before saving
 ggsave(plot = gg_sens, filename = paste0(out_path, "sensitivity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
@@ -185,11 +189,11 @@ gg_spec <- ggplot(specificity, aes(x = trial, y = mean, color = gamma, group = g
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.75, 1), expand = c(0, 0.005)) +
   ylab("Specificity") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_spec #show plot before saving
 ggsave(plot = gg_spec, filename = paste0(out_path, "specificity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
 
@@ -205,10 +209,10 @@ gg_prec <- ggplot(precision, aes(x = trial, y = mean, color = gamma, group = gam
   geom_line(size = 0.3, alpha = 0.8) +
   geom_point(size = 0.8) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
-  scale_x_discrete(labels = c("Pre", "Post")) +
+  scale_x_discrete(labels = c("Initial network", "Final network")) +
   scale_y_continuous(breaks = seq(0, 1, 0.05), limits = c(0.85, 1), expand = c(0, 0.005)) +
   ylab("Precision") +
-  xlab("Fitness trial") +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(axis.title.x = element_blank())
 gg_prec #show plot before saving
 ggsave(plot = gg_prec, filename = paste0(out_path, "precision", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
