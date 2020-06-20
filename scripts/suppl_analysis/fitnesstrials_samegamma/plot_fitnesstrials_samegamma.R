@@ -164,7 +164,7 @@ gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, grou
   theme_ctokita() +
   theme(strip.background = element_rect(color = NA, fill = "grey90"),
         axis.line = element_line()) +
-  facet_grid(info~metric, scales = "free_y")
+  facet_wrap(info~metric, ncol = 4, scales = "free")
 gg_behavrates #show plot before saving
 ggsave(gg_behavrates, filename = paste0(out_path, "behaviorrates_samegamma.png"), width = 180, height = 90, units = "mm")
 
