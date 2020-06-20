@@ -28,7 +28,7 @@ norm_data <- read.csv('data_derived/network_break/cascades/n200_cascadestats_gam
   mutate(run_time = "10^5")
 
 # Long sim data (10^6)
-long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/n200_cascadestats_10^6steps.csv', header = TRUE) %>% 
+long_data <- read.csv('data_derived/network_break/__suppl_sims/sim_length/n200_cascadestats_10^6steps.csv', header = TRUE) %>% 
   mutate(run_time = "10^6")
 
 # Bind
@@ -72,7 +72,7 @@ gg_size <- ggplot(cascade_size, aes(x = gamma, y = size_mean, color = run_time))
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_size
-ggsave(plot = gg_size, filename = "output/network_break/suppl_analysis/CasacadeSize_simlength.png", width = 65, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_size, filename = "output/network_break/__suppl_analysis/CasacadeSize_simlength.png", width = 65, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Cascade bias
@@ -111,5 +111,5 @@ gg_diff <- ggplot(cascade_bias, aes(x = gamma, y = bias_mean, color = run_time))
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_diff
-ggsave(plot = gg_diff, filename = "output/network_break/suppl_analysis/CasacadeBias_simlength.png", width = 65, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_diff, filename = "output/network_break/__suppl_analysis/CasacadeBias_simlength.png", width = 65, height = 45, units = "mm", dpi = 400)
 

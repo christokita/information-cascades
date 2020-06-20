@@ -25,11 +25,11 @@ norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_
   mutate(threshold_dist = "Uniform (default)")
 
 # Identical thresholds
-iden_data <- read.csv('data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/assortativity_identicalthresh.csv', header = TRUE) %>% 
+iden_data <- read.csv('data_derived/network_break/__suppl_sims/identical_thresholds/social_networks/assortativity_identicalthresh.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Identical")
 
 # Narrow thresholds
-narrow_dist_data <- read.csv('data_derived/network_break/__suppl_analysis/narrow_threshdist_0.5/social_networks/assortativity_narrowthresh0.5.csv', header = TRUE) %>% 
+narrow_dist_data <- read.csv('data_derived/network_break/__suppl_sims/narrow_threshdist_0.5/social_networks/assortativity_narrowthresh0.5.csv', header = TRUE) %>% 
   mutate(threshold_dist = "Narrow")
 
 # Bind
@@ -110,7 +110,7 @@ uniform_data <- lapply(uniform_files, function(x) {
 uniform_data <- do.call("rbind", uniform_data)
 
 # Identical thresholds
-identical_files <- list.files("data_derived/network_break/__suppl_analysis/identical_thresholds/social_networks/network_change/", full.names = TRUE)
+identical_files <- list.files("data_derived/network_break/__suppl_sims/identical_thresholds/social_networks/network_change/", full.names = TRUE)
 identical_data <- lapply(identical_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)

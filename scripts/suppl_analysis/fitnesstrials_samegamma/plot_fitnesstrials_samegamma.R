@@ -17,11 +17,11 @@ source("scripts/_plot_themes/theme_ctokita.R")
 # Paramters for analysis: paths to data, paths for output, and filename
 ###################
 # Path to data and for output
-highcorr_fit_cascade_path <- 'data_derived/network_break/fitness_trials/fitness_cascadestats_highcorr.csv' #path to fitness cascade data
-highcorr_fit_behavior_path <- "data_derived/network_break/fitness_trials/fitness_behavior_highcorr.csv" #path to fitness behavior data
-lowcorr_fit_cascade_path <- 'data_derived/network_break/fitness_trials/fitness_cascadestats_lowcorr.csv' #path to fitness cascade data
-lowcorr_fit_behavior_path <- "data_derived/network_break/fitness_trials/fitness_behavior_lowcorr.csv" #path to fitness behavior data
-out_path <- "output/network_break/fitness_trials/same_gamma_trials/" #directory you wish to save plots
+highcorr_fit_cascade_path <- 'data_derived/network_break/__suppl_sims/same_gamma_fitnesstrials/fitness_trials/fitness_cascadestats_highcorr.csv' #path to fitness cascade data
+highcorr_fit_behavior_path <- "data_derived/network_break/__suppl_sims/same_gamma_fitnesstrials/fitness_trials/fitness_behavior_highcorr.csv" #path to fitness behavior data
+lowcorr_fit_cascade_path <- 'data_derived/network_break/__suppl_sims/same_gamma_fitnesstrials/fitness_trials/fitness_cascadestats_lowcorr.csv' #path to fitness cascade data
+lowcorr_fit_behavior_path <- "data_derived/network_break/__suppl_sims/same_gamma_fitnesstrials/fitness_trials/fitness_behavior_lowcorr.csv" #path to fitness behavior data
+out_path <- "output/network_break/__suppl_analysis/same_gamma_fitnesstrials/" #directory you wish to save plots
 
 # Plot color
 plot_color <- "#1B3B6F"

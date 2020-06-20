@@ -36,7 +36,7 @@ rand_sum <- rand_data %>%
          fitness_95ci = qnorm(0.975) * fitness_sd/sqrt(100 * 200),
          network_type = "Random (default)")
 # Scale-free network
-sf_data <- read.csv('data_derived/network_break/other_network_types/n200_fitness_allbehavior_scalefree.csv', header = TRUE)
+sf_data <- read.csv('data_derived/network_break/__suppl_sims/other_network_types/n200_fitness_allbehavior_scalefree.csv', header = TRUE)
 sf_sum <- sf_data %>% 
   select(-replicate) %>% 
   mutate(fitness = correct_message - incorrect_message ) %>% 
@@ -49,7 +49,7 @@ sf_sum <- sf_data %>%
          network_type = "Scale-free")
 
 # Regular network
-reg_data <- read.csv('data_derived/network_break/other_network_types/n200_fitness_allbehavior_regular.csv', header = TRUE)
+reg_data <- read.csv('data_derived/network_break/__suppl_sims/other_network_types/n200_fitness_allbehavior_regular.csv', header = TRUE)
 reg_sum <- reg_data %>% 
   select(-replicate) %>% 
   mutate(fitness = correct_message - incorrect_message ) %>% 
@@ -91,7 +91,7 @@ gg_correct <- ggplot(data = behav_sum, aes(x = gamma,
   theme_ctokita() 
 gg_correct
 ggsave(plot = gg_correct, 
-       filename = "output/network_break/suppl_analysis/MessageCorrect_networktype.png", 
+       filename = "output/network_break/__suppl_analysis/MessageCorrect_networktype.png", 
        width = 90, 
        height = 45, 
        units = "mm", 
@@ -114,7 +114,7 @@ gg_incorrect <- ggplot(data = behav_sum, aes(x = gamma,
   theme_ctokita() 
 gg_incorrect
 ggsave(plot = gg_incorrect, 
-       filename = "output/network_break/suppl_analysis/MessageInorrect_netowrktype.png", 
+       filename = "output/network_break/__suppl_analysis/MessageInorrect_netowrktype.png", 
        width = 90, 
        height = 45, 
        units = "mm", 

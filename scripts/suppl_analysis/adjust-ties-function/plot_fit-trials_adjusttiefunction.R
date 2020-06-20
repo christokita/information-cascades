@@ -15,9 +15,9 @@ source("scripts/_plot_themes/theme_ctokita.R")
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-casc_path <- "data_derived/network_break/__suppl_analysis/adjust-tie-function/fitness_cascadestats_adjusttie.csv" #path to data
-behav_path <- "data_derived/network_break/__suppl_analysis/adjust-tie-function/fitness_behavior_adjusttie.csv" #path to data
-out_path <- "output/network_break/suppl_analysis/" #directory you wish to save plots
+casc_path <- "data_derived/network_break/__suppl_sims/adjust-tie-function/fitness_cascadestats_adjusttie.csv" #path to data
+behav_path <- "data_derived/network_break/__suppl_sims/adjust-tie-function/fitness_behavior_adjusttie.csv" #path to data
+out_path <- "output/network_break/__suppl_analysis/" #directory you wish to save plots
 plot_tag <- "adjusttie" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)

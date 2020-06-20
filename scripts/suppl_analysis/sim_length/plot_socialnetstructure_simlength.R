@@ -29,7 +29,7 @@ norm_data <- read.csv('data_derived/network_break/social_networks/assortativity_
   mutate(run_time = "10^5")
 
 # Long sim (10^6)
-long_data <- read.csv('data_derived/network_break/__suppl_analysis/sim_length/social_networks/assortativity_10^6steps.csv', header = TRUE) %>% 
+long_data <- read.csv('data_derived/network_break/__suppl_sims/sim_length/social_networks/assortativity_10^6steps.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial) %>% 
   mutate(run_time = "10^6")
 
@@ -102,7 +102,7 @@ norm_data <- lapply(normal_files, function(x) {
 norm_data <- do.call("rbind", norm_data)
 
 # Long sim length (10^6)
-long_files <- list.files("data_derived/network_break/__suppl_analysis/sim_length/social_networks/network_change/", full.names = TRUE)
+long_files <- list.files("data_derived/network_break/__suppl_sims/sim_length/social_networks/network_change/", full.names = TRUE)
 long_data <- lapply(long_files, function(x) {
   # Read in file 
   run_file <- read.csv(x)

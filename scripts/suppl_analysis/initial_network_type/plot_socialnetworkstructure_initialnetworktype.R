@@ -29,17 +29,17 @@ rand_data <- read.csv('data_derived/network_break/social_networks/assortativity_
          network_type = "Random (default)") 
 
 # Scale-free network
-sf_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/social_networks/assortativity_scalefree.csv', header = TRUE) %>% 
+sf_data <- read.csv('data_derived/network_break/__suppl_sims/other_network_types/social_networks/assortativity_scalefree.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Scale-free") 
 
 # Complete network
-sw_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/social_networks/assortativity_smallworld.csv', header = TRUE) %>% 
+sw_data <- read.csv('data_derived/network_break/__suppl_sims/other_network_types/social_networks/assortativity_smallworld.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Small world")
 
 # Regular network
-reg_data <- read.csv('data_derived/network_break/__suppl_analysis/other_network_types/social_networks/assortativity_regular.csv', header = TRUE) %>% 
+reg_data <- read.csv('data_derived/network_break/__suppl_sims/other_network_types/social_networks/assortativity_regular.csv', header = TRUE) %>% 
   mutate(delta_assort = assort_final - assort_initial,
          network_type = "Regular")
 

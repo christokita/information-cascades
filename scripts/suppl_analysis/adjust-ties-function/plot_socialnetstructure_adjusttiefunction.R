@@ -21,15 +21,15 @@ pal <- c("#225ea8", "#41b6c4", "#9DDBDA")
 # Load data and summarise
 ####################
 # Adjust_tie_function
-adjust_tie_data <- read.csv('data_derived/network_break/__suppl_analysis/adjust_tie_function/social_networks/assortativity_adjusttie.csv', header = TRUE) %>% 
+adjust_tie_data <- read.csv('data_derived/network_break/__suppl_sims/adjust_tie_function/social_networks/assortativity_adjusttie.csv', header = TRUE) %>% 
   mutate(model = "Adjust tie")
 
 # No new ties formed, 10^6 steps
-p0_longdata <- read.csv('data_derived/network_break/__suppl_analysis/p0_longsim/social_networks/assortativity_p0_10^6steps.csv', header = TRUE) %>% 
+p0_longdata <- read.csv('data_derived/network_break/__suppl_sims/p0_longsim/social_networks/assortativity_p0_10^6steps.csv', header = TRUE) %>% 
   mutate(model = "p = 0")
 
 # No new ties formed, 10^6 steps
-psmall_data <- read.csv('data_derived/network_break/__suppl_analysis/psmall/social_networks/assortativity_psmall.csv', header = TRUE) %>% 
+psmall_data <- read.csv('data_derived/network_break/__suppl_sims/psmall/social_networks/assortativity_psmall.csv', header = TRUE) %>% 
   mutate(model = "p = 0.0005")
 
 # Bind
