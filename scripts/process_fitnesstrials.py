@@ -30,11 +30,11 @@ raw_data = False
 # Directory where simulation data is found
 fit_dir = '../data_sim/network_break/__suppl_sims/same_gamma_fitnesstrials/fitness_data/'  
 thresh_dir = '../data_sim/network_break/thresh_data/'
-tags = 'highcorr' #file tags that designate runs from a particular simulation
+tags = 'lowcorr' #file tags that designate runs from a particular simulation
 
 # For output
 outpath = '../data_derived/network_break/__suppl_analysis/same_gamma_fitnesstrials/fitness_trials/'
-filetags = 'highcorr' #added info, particularly for suppl simulations e.g., 'fitness_<filetag>_
+filetags = 'lowcorr' #added info, particularly for suppl simulations e.g., 'fitness_<filetag>_
 if len(filetags) > 0:
     filetags = '_' + filetags
 
