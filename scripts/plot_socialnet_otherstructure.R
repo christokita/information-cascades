@@ -355,7 +355,7 @@ raw_network_data <- network_change_data %>%
 # Plot gamma by metric
 ####################
 # Select gammas
-gamma_vals <- c(-1, -0.4, 0.0, 0.6, 0.8, 1)
+gamma_vals <- c(-1, -0.4, 0.0, 0.4, 0.9, 1)
 
 # Plot
 gg_localnetmetrics <- fits %>% 
