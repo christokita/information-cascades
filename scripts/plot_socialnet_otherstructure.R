@@ -64,13 +64,13 @@ centrality_data <- network_change_data %>%
   split(.$gamma)
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
-centrality_fit_file <- paste0(out_path, "regression_fits/centrality-threshold_quadraticfit.rds")
+centrality_fit_file <- paste0(out_path, "regression_fits/centrality-threshold_linearfit.rds")
 gamma_values <- as.numeric(names(centrality_data))
 if (file.exists(centrality_fit_file)) { 
   regression_cent <- readRDS(centrality_fit_file)
 } else {
   regression_cent <- brm_multiple(data = centrality_data,
-                                  formula = value ~ 1 + threshold + I(threshold^2),
+                                  formula = value ~ 1 + threshold,
                                   prior = c(prior(uniform(-10, 10), class = Intercept),
                                             prior(normal(0, 10), class = b),
                                             prior(normal(0, 50), class = sigma)),
@@ -140,14 +140,14 @@ degree_data <- network_change_data %>%
   split(.$gamma)
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
-degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_quadraticfit.rds")
+degree_fit_file <- paste0(out_path, "regression_fits/degree-threshold_linearfit.rds")
 gamma_values <- as.numeric(names(degree_data))
 if (file.exists(degree_fit_file)) { 
   regression_deg <- readRDS(degree_fit_file)
 } else {
   gamma_values <- as.numeric(names(degree_data))
   regression_deg <- brm_multiple(data = degree_data,
-                                  formula = value ~ 1 + threshold + I(threshold^2),
+                                  formula = value ~ 1 + threshold,
                                   prior = c(prior(uniform(-10, 10), class = Intercept),
                                             prior(normal(0, 10), class = b),
                                             prior(normal(0, 50), class = sigma)),
@@ -239,14 +239,14 @@ localassort_data <- network_change_data %>%
   split(.$gamma)
 
 # Check if regression fit already exists, otherwise conduct bayesian regression
-localassort_fit_file <- paste0(out_path, "regression_fits/localassort-threshold_quadraticfit.rds")
+localassort_fit_file <- paste0(out_path, "regression_fits/localassort-threshold_linearfit.rds")
 gamma_values <- as.numeric(names(localassort_data))
 if (file.exists(localassort_fit_file)) { 
   regression_la <- readRDS(localassort_fit_file) 
 } else {
   gamma_values <- as.numeric(names(localassort_data))
   regression_la <- brm_multiple(data = localassort_data,
-                                 formula = value ~ 1 + threshold + I(threshold^2),
+                                 formula = value ~ 1 + threshold,
                                  prior = c(prior(uniform(-10, 10), class = Intercept),
                                            prior(normal(0, 10), class = b),
                                            prior(normal(0, 50), class = sigma)),
@@ -386,6 +386,7 @@ gg_localnetmetrics <- fits %>%
         strip.text.y = element_text(size = 6))
 gg_localnetmetrics
 ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".png"), width = 90, height = 60, units = "mm", dpi = 400)
+# ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".svg"), width = 90, height = 60, units = "mm")
 
 
 ####################
@@ -422,7 +423,7 @@ gg_coeffs <- ggplot(coeffs_all, aes(x = gamma, y = slope, color = gamma)) +
              ncol = 1,
              strip.position = "right") +
   ylab("Thresholds regression coefficient") +
-  xlab(expression(paste("Infromation ecosystem ", gamma))) +
+  xlab(expression(paste("Information ecosystem ", gamma))) +
   theme_ctokita() +
   theme(strip.background = element_blank(),
         # strip.placement = "inside",
@@ -433,4 +434,5 @@ gg_coeffs <- ggplot(coeffs_all, aes(x = gamma, y = slope, color = gamma)) +
         strip.text.y = element_text(size = 6))
 gg_coeffs
 ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".png"), width = 35, height = 54, units = "mm", dpi = 400)
+# ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".svg"), width = 35, height = 54, units = "mm")
 
