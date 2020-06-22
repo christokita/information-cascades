@@ -387,3 +387,50 @@ gg_localnetmetrics <- fits %>%
 gg_localnetmetrics
 ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".png"), width = 90, height = 60, units = "mm", dpi = 400)
 
+
+####################
+# Plot linear component of fit by gamma (for each metric)
+####################
+# Function to extract linear coefficient from our quadratic regressions
+extract_coeffs <- function(regressions, gamma_values, metric) {
+  coeffs <- data.frame(gamma = NULL, slope = NULL, metric = NULL)
+  for (i in 1:length(regressions)) {
+    fixed_effects <- fixef(regressions[[i]])
+    new_row <- data.frame(gamma = gamma_values[i], slope = fixed_effects[2], metric = metric) #intercept is 1st, then linear slope, then quadratic coeff
+    coeffs <- rbind(coeffs, new_row)
+  }
+  return(coeffs)
+}
+
+# Get coeffs
+coeffs_cent <- extract_coeffs(regressions = regression_cent, gamma_values = gamma_values, metric = "Centrality")
+coeffs_deg <- extract_coeffs(regressions = regression_deg, gamma_values = gamma_values, metric = "Degree")
+ceoffs_localassort <- extract_coeffs(regressions = regression_la, gamma_values = gamma_values, metric = "Local assort.")
+coeffs_all <- rbind(coeffs_cent, coeffs_deg, ceoffs_localassort)
+rm(coeffs_cent, coeffs_deg, ceoffs_localassort)
+
+# Plot
+gg_coeffs <- ggplot(coeffs_all, aes(x = gamma, y = slope, color = gamma)) +
+  # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
+  geom_line(size = 0.3) +
+  geom_point(stroke = 0) +
+  scale_x_continuous(breaks = seq(-1, 1, 1)) +
+  scale_y_continuous(expand = c(0.3, 0)) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+  facet_wrap(~metric, 
+             scales = "free_y", 
+             ncol = 1,
+             strip.position = "right") +
+  ylab("Thresholds regression coefficient") +
+  xlab(expression(paste("Infromation ecosystem ", gamma))) +
+  theme_ctokita() +
+  theme(strip.background = element_blank(),
+        # strip.placement = "inside",
+        legend.margin = margin(c(0, 0, 0, 0)),
+        legend.box.margin=margin(-2,-2,-2,-2),
+        legend.position = "none",
+        aspect.ratio = NULL, 
+        strip.text.y = element_text(size = 6))
+gg_coeffs
+ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".png"), width = 35, height = 54, units = "mm", dpi = 400)
+
