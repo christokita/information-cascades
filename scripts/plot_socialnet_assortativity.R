@@ -175,7 +175,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
-  ylab(expression( paste(Delta, " social ties")) ) +
+  ylab(expression( paste("Net", Delta, " social ties")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(breaks = seq(-2, 2, 0.5)) +
   scale_shape_manual(values = c(19, 21),
