@@ -178,6 +178,7 @@ gg_sens <- ggplot(sensitivity, aes(x = trial, y = mean, color = gamma, group = g
   theme(axis.title.x = element_blank())
 gg_sens #show plot before saving
 ggsave(plot = gg_sens, filename = paste0(out_path, "sensitivity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_sens + theme(legend.position = "none"), filename = paste0(out_path, "sensitivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
 # Plot: Specificity
@@ -198,6 +199,7 @@ gg_spec <- ggplot(specificity, aes(x = trial, y = mean, color = gamma, group = g
   theme(axis.title.x = element_blank())
 gg_spec #show plot before saving
 ggsave(plot = gg_spec, filename = paste0(out_path, "specificity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_spec + theme(legend.position = "none"), filename = paste0(out_path, "specificity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 ####################
 # Plot: Precision
@@ -218,6 +220,7 @@ gg_prec <- ggplot(precision, aes(x = trial, y = mean, color = gamma, group = gam
   theme(axis.title.x = element_blank())
 gg_prec #show plot before saving
 ggsave(plot = gg_prec, filename = paste0(out_path, "precision", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_prec + theme(legend.position = "none"), filename = paste0(out_path, "precision", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
 
 
 

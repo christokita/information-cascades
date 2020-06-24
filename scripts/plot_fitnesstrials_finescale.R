@@ -94,7 +94,7 @@ behav_data <- read.csv(fit_behavior_path, header = TRUE) %>%
   mutate(trial = recode(trial,"pre" = "Initial network", "post" = "Final network"))
 
 # Select gammas
-gamma_vals <- c(-1, -0.4, 0.0, 0.6, 0.8, 1)
+gamma_vals <- c(-1, -0.4, 0.0, 0.4, 0.9, 1)
 
 
 ####################
