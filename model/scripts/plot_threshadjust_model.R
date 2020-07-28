@@ -9,13 +9,13 @@
 ####################
 library(ggplot2)
 library(dplyr)
-source("scripts/_plot_themes/theme_ctokita.R")
+source("_plot_themes/theme_ctokita.R")
 
 ####################
 # Plot parameters
 ####################
 # Plot out
-out_path <- "output/thresh_adjust/"
+out_path <- "model/output/thresh_adjust/"
 
 # Plot variables
 dodge_width = 0.05
@@ -29,7 +29,7 @@ key_name <- "Threshold\ndynamics"
 # Load and process data
 ####################
 # Cascade data
-cascade_files <- list.files("data_derived/thresh_adjust/cascades/", full.names = TRUE)
+cascade_files <- list.files("model/data_derived/thresh_adjust/cascades/", full.names = TRUE)
 cascade_data <- lapply(cascade_files, function(file) {
   run_data <-  read.csv(file, header = TRUE)
   parameters <- gsub(".*_([a-z]+)\\.csv", "\\1", file, perl = TRUE)

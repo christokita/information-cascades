@@ -13,13 +13,13 @@ library(tidyr)
 library(RColorBrewer)
 library(brms)
 library(rstantools)
-source("scripts/_plot_themes/theme_ctokita.R")
+source("_plot_themes/theme_ctokita.R")
 
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-network_data_dir <- "data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
-out_path <- "output/network_break/social_networks/" #directory you wish to save plots
+network_data_dir <- "model/data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
+out_path <- "model/output/network_break/social_networks/" #directory you wish to save plots
 plot_tag <- "" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)

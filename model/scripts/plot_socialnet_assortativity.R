@@ -10,14 +10,14 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-source("scripts/_plot_themes/theme_ctokita.R")
+source("_plot_themes/theme_ctokita.R")
 
 ####################
 # Paramters for analysis: paths to data, paths for output, and filename
 ####################
-assort_file <- "data_derived/network_break/social_networks/assortativity.csv" #path to file containing assortativity data
-network_data_dir <- "data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
-out_path <- "output/network_break/social_networks/" #directory you wish to save plots
+assort_file <- "model/data_derived/network_break/social_networks/assortativity.csv" #path to file containing assortativity data
+network_data_dir <- "model/data_derived/network_break/social_networks/network_change/" #path to directory containing network change data
+out_path <- "model/output/network_break/social_networks/" #directory you wish to save plots
 plot_tag <- "" #extra info to add onto end of plot name
 if (plot_tag != "") {
   plot_tag <- paste0("_", plot_tag)
