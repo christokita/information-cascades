@@ -13,4 +13,5 @@ All packages for this model can be installed by running script [*forthecoming fe
 * **R**: dplyr, ggplot2
 
 ## Components of this repository
-forthecoming
+* **model**: this folder containt all the scripts, data, and output of the cascade model.
+* **empirical**: this folder contains all the scirpts, data, and output of the analysis of Twitter data.
