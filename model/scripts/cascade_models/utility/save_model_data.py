@@ -10,14 +10,16 @@ import numpy as np
 import pandas as pd
 
 def save_model_data(output_directories, output_tags, data_list, replicate):
-    # Saves simulation from model
-    # ** Not currently in use **
-    #
-    # INPUTS:
-    # - output_directories:   list of full paths to output directores (list of str)
-    # - output_tags:          
-    # - data_list: 
-    # - replicate:
+    """
+    Saves simulation from model
+    ** Not currently in use **
+    
+    INPUTS:
+    - output_directories:   list of full paths to output directores (list of str)
+    - output_tags:          
+    - data_list: 
+    - replicate:
+    """
 
     # Create replicate label for saving the data
     replicate_label = str(replicate)

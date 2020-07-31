@@ -10,14 +10,16 @@ import numpy as np
 import copy
 
 def simulate_cascade(network, states, thresholds, samplers):
-    # Simulates a cascade given a network and a intial set of active nodes.
-    # We assume original info samplers who did not become active will not participate in the subsequent cascade.
-    #
-    # INPUTS:
-    # - network:      the network connecting individuals (numpy array).
-    # - states:       array listing the behavioral state of every individual (numpy array).
-    # - thresholds:   matrix of thresholds for each individual (numpy array).
-    # - samplers:     list of samplers that originally tuned into information sources (numpy array).
+    """
+    Simulates a cascade given a network and a intial set of active nodes.
+    We assume original info samplers who did not become active will not participate in the subsequent cascade.
+    
+    INPUTS:
+    - network:      the network connecting individuals (numpy array).
+    - states:       array listing the behavioral state of every individual (numpy array).
+    - thresholds:   matrix of thresholds for each individual (numpy array).
+    - samplers:     list of samplers that originally tuned into information sources (numpy array).
+    """
     
     # Determine activity state of information samplers.
     # This prevents samplers from later being swept up in a cascade.

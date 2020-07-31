@@ -13,13 +13,15 @@ import copy
 
 
 def local_assortativity(network, types, alpha):
-    # This function measures local assortativity according to recent methods (based on Peel, Delvenne, Lambiotte 2018).
-    # It will return a local assortativity value for each individual int he network.
-    #
-    # INPUTS:
-    # - network:   the network connecting individuals (numpy array).
-    # - types:     the categorical type of each individual (numpy array).
-    # - alpha:     the size of the neighborhood when calculating assortativity. 0 is entirely local, 1 is entirely global (float).
+    """
+    This function measures local assortativity according to recent methods (based on Peel, Delvenne, Lambiotte 2018).
+    It will return a local assortativity value for each individual int he network.
+    
+    INPUTS:
+    - network:   the network connecting individuals (numpy array).
+    - types:     the categorical type of each individual (numpy array).
+    - alpha:     the size of the neighborhood when calculating assortativity. 0 is entirely local, 1 is entirely global (float).
+    """
     
     # Get degree and probability transition matrix (adjacency matrix normalized by degree)
     # The latter will get used in random walk algorithm to determine graph kernel for each node.
@@ -56,11 +58,13 @@ def local_assortativity(network, types, alpha):
     
 
 def global_assort_values(network, types):
-    # Function that will calculate Qmax and a_g for use in calculating assortativity
-    #
-    # INPUTS:
-    # - network:   the network connecting individuals (numpy array).
-    # - types:     the categorical type of each individual (numpy array).
+    """
+    Function that will calculate Qmax and a_g for use in calculating assortativity
+    
+    INPUTS:
+    - network:   the network connecting individuals (numpy array).
+    - types:     the categorical type of each individual (numpy array).
+    """
     
     m = np.sum(network) / 2 #total number of unique edges
     a_g = np.array([])

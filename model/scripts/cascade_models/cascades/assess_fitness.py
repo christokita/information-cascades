@@ -11,16 +11,18 @@ import pandas as pd
 import cascade_models.cascades as cs
 
 def assess_fitness(gamma, psi, trial_count, network, thresholds, types, trial):
-    # Runs X many cascades with final network to assess information spread and individual fitness
-    #
-    # INPUTS:
-    # - gamma:         correlation between information sources (float). Inherited from main sim.
-    # - psi:           fraction of group that directly sample stimuli each round (float).
-    # - trial_count:   number of cascades to run as assessment of fitness (int).
-    # - network:       the network connecting individuals (numpy array).
-    # - thresholds:    matrix of thresholds for each individual (numpy array).
-    # - types:         array of type assignments for each individual (numpy array).
-    # - trial:         label for trial type. Typically "pre" or "post" (string).
+    """
+    Runs X many cascades with final network to assess information spread and individual fitness
+    
+    INPUTS:
+    - gamma:         correlation between information sources (float). Inherited from main sim.
+    - psi:           fraction of group that directly sample stimuli each round (float).
+    - trial_count:   number of cascades to run as assessment of fitness (int).
+    - network:       the network connecting individuals (numpy array).
+    - thresholds:    matrix of thresholds for each individual (numpy array).
+    - types:         array of type assignments for each individual (numpy array).
+    - trial:         label for trial type. Typically "pre" or "post" (string).
+    """
     
     # Dataframes to collect fitness trial data
     n = thresholds.shape[0]
@@ -64,14 +66,16 @@ def assess_fitness(gamma, psi, trial_count, network, thresholds, types, trial):
 
 
 def evaluate_fitness_trial_behavior(states, thresholds, information, types, behavior_df):
-    # Evaluates the behavior of active individuals in the fitness trial cascade and updates data on correct/incorrect behavior.
-    #
-    # INPUTS:
-    # - states:           array listing the behavioral state of every individual (numpy array).
-    # - thresholds:       array of thresholds for each individual (numpy array).
-    # - information:      array of stimuli/infromation values (numpy array).
-    # - types:            array of type assignments for each individual (numpy array).
-    # - behavior_df:      dataframe to store the behavioral performance of individuals (pandas dataframe).
+    """
+    Evaluates the behavior of active individuals in the fitness trial cascade and updates data on correct/incorrect behavior.
+    
+    INPUTS:
+    - states:           array listing the behavioral state of every individual (numpy array).
+    - thresholds:       array of thresholds for each individual (numpy array).
+    - information:      array of stimuli/infromation values (numpy array).
+    - types:            array of type assignments for each individual (numpy array).
+    - behavior_df:      dataframe to store the behavioral performance of individuals (pandas dataframe).
+    """
     
     # Assess what all individuals would have done if they had sampled info directly
     correct_behavior = cs.evaluate_behavior(states = states, 

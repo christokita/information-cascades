@@ -9,15 +9,17 @@ import numpy as np
 import os
 
 def create_output_directories(outpath, directory_names, n, gamma):
-    # Creates the output directories where simulation data will be stored. 
-    #
-    # INPUTS:
-    # - outpath:       path to where simulation data directories will be created (string).
-    # - n:             number of individuals in that simulation (float).
-    # - gamma:         gamma value for that simulation (float).
-    #
-    # OUTPUTS:
-    # - output_dirs:   list of full paths to the output directories that were created.
+    """
+    Creates the output directories where simulation data will be stored. 
+    
+    INPUTS:
+    - outpath:       path to where simulation data directories will be created (string).
+    - n:             number of individuals in that simulation (float).
+    - gamma:         gamma value for that simulation (float).
+    
+    OUTPUTS:
+    - output_dirs:   list of full paths to the output directories that were created.
+    """
     
     output_name = "n" + str(n) + "_gamma" + str(gamma)
     directory_names = ['cascade_data', 'social_network_data', 'thresh_data', 'type_data', 'behavior_data', 'fitness_data']

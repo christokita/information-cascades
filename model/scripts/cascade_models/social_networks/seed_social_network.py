@@ -11,14 +11,16 @@ import igraph
 
  
 def seed_social_network(n, k, network_type, directed = False):
-    # This function generates a social network. 
-    # If the network is undirected, only even <k> allows for use of all network types.
-    # Otherwise, scale-free cannot handle creating an undirected graph with an odd mean degree <k>.
-    #
-    # INPUTS:
-    # - n:   number of individuals in the social system (int).
-    # - k:   average degree desired in social network (int).
-    # - type:   type of network to generate: random, scale-free (str).    
+    """
+    This function generates a social network. 
+    If the network is undirected, only even <k> allows for use of all network types.
+    Otherwise, scale-free cannot handle creating an undirected graph with an odd mean degree <k>.
+    
+    INPUTS:
+    - n:   number of individuals in the social system (int).
+    - k:   average degree desired in social network (int).
+    - type:   type of network to generate: random, scale-free (str).    
+    """
     
     # Set up appropriate number of edges or degree
     if not directed:

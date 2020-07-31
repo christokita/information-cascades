@@ -9,12 +9,14 @@ Created on Mon Nov 25 11:53:09 2019
 import numpy as np
 
 def seed_thresholds(n, lower, upper):
-    # Generates thresholds for each individual.
-    #
-    # INPUTS:
-    # - n:       the number of individuals in the social system (int).
-    # - lower:   lower bound for threshold values (float).
-    # - upper:   upper bound for threshold values (float).
+    """
+    Generates thresholds for each individual.
+    
+    INPUTS:
+    - n:       the number of individuals in the social system (int).
+    - lower:   lower bound for threshold values (float).
+    - upper:   upper bound for threshold values (float).
+    """
     
     thresholds = np.random.uniform(size = n, low = lower, high = upper)
     while sum(thresholds == 0) > 0:  # Python uses a open-close range so make sure no values equal 0

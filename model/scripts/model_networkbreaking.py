@@ -27,18 +27,20 @@ import os
 ####################
 
 def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, network_type = "random") :
-    # Simulates a single replicate simulation of the network-breaking information cascade model. 
-    #
-    # INPUTS:
-    # - replicate:      id number of replicate (int or float).
-    # - n:              number of individuals in social system (int). n > 0.
-    # - k:              mean out-degree of initial social network (int). k > 0.
-    # - gamma:          correlation between information sources (float). gamma = [-1, 1].
-    # - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
-    # - timesteps:      length of simulation (int).
-    # - outpath:        path to directory where output folders and files will be created (str). 
-    # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
-        
+    """
+    Simulates a single replicate simulation of the network-breaking information cascade model. 
+    
+    INPUTS:
+    - replicate:      id number of replicate (int or float).
+    - n:              number of individuals in social system (int). n > 0.
+    - k:              mean out-degree of initial social network (int). k > 0.
+    - gamma:          correlation between information sources (float). gamma = [-1, 1].
+    - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
+    - timesteps:      length of simulation (int).
+    - outpath:        path to directory where output folders and files will be created (str). 
+    - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
+    """    
+    
     ########## Seed initial conditions ##########
     # Set overall seed
     seed = int( (replicate + 1 + gamma) * 323 )
@@ -98,13 +100,15 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
 # Define model-specific functions
 ####################
 def adjust_tie(network, states, correct_behavior):
-    # Randomly selects active individual and breaks tie if incorrect.
-    # Another individual randomly forms like iff a tie is broken in that round.
-    #
-    # INPUTS:
-    # - network:      the network connecting individuals (numpy array).
-    # - states:       matrix listing the behavioral state of every individual (numpy array).
-    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    """
+    Randomly selects active individual and breaks tie if incorrect.
+    Another individual randomly forms like iff a tie is broken in that round.
+
+    INPUTS:
+    - network:      the network connecting individuals (numpy array).
+    - states:       matrix listing the behavioral state of every individual (numpy array).
+    - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    """
     
     actives = np.where(states == 1)[0]
     if sum(actives) > 0: #error catch when no individual are active

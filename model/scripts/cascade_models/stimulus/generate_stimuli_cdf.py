@@ -10,12 +10,14 @@ import numpy as np
 import scipy.stats as stats
 
 def generate_stimuli_cdf(correlation, mean):
-    # Generates a single pair of stimuli/infromation values for the two news sources.
-    # Values are rescaled to the range [0, 1] according to the percentile value of each stim.
-    #
-    # INPUTS:
-    # - correlation:   the correlation between the two information sources during random samples (float).
-    # - mean:          average out-degree desired in social network (foat or int).
+    """
+    Generates a single pair of stimuli/infromation values for the two news sources.
+    Values are rescaled to the range [0, 1] according to the percentile value of each stim.
+    
+    INPUTS:
+    - correlation:   the correlation between the two information sources during random samples (float).
+    - mean:          average out-degree desired in social network (foat or int).
+    """
     
     covar = [[1, correlation ], [correlation, 1]]
     stims = np.random.multivariate_normal(mean = [mean, mean], cov = covar, size = 1)

@@ -10,14 +10,16 @@ import numpy as np
 import cascade_models.stimulus as st
 
 def simulate_stim_sampling(n, gamma, psi, types, thresholds):
-    # Simulates initial sampling of information sources.
-    #
-    # INPUTS:
-    # - n:            number of individuals in the social system (int).
-    # - gamma:        correlation between information sources (float). 
-    # - psi:          fraction of group that directly sample stimuli each round (float).
-    # - types:        array of type assignments for each individual (numpy array).
-    # - thresholds:   matrix of thresholds for each individual (numpy array).
+    """
+    Simulates initial sampling of information sources.
+    
+    INPUTS:
+    - n:            number of individuals in the social system (int).
+    - gamma:        correlation between information sources (float). 
+    - psi:          fraction of group that directly sample stimuli each round (float).
+    - types:        array of type assignments for each individual (numpy array).
+    - thresholds:   matrix of thresholds for each individual (numpy array).
+    """
     
     # Generate stimuli for the round and have randomly-chosen samplers react
     stims = st.generate_stimuli(correlation = gamma, mean = 0)

@@ -74,10 +74,12 @@ def grab_node_properties(gamma, replicate):
 
 # Function to select a graph based on a desired gamma value
 def get_network_by_gamma(gamma, outpath, filename, filetags, method, manual_index = 0):
-    # This function can take a single gamma value or a list of gamma values and then select and save an example network.
-    # User can specify the method desired:
-    # - "max": Select the highest assortativity value (works with one or multiple gamma values)
-    # - "average": Select a value representative of the average assortativity (works best with a single gamma value)
+    """
+    This function can take a single gamma value or a list of gamma values and then select and save an example network.
+    User can specify the method desired:
+    - "max": Select the highest assortativity value (works with one or multiple gamma values)
+    - "average": Select a value representative of the average assortativity (works best with a single gamma value)
+    """
     
     # find graph from specified gamma
     filtered_data = assort_data[assort_data['gamma'].isin (gamma)] # accepts single or list of valuess

@@ -28,21 +28,23 @@ import os
 ####################
 
 def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps, outpath, sim_tag, network_type = "random") :
-    # Simulates a single replicate simulation of the network-breaking information cascade model. 
-    #
-    # INPUTS:
-    # - replicate:      id number of replicate (int or float).
-    # - n:              number of individuals in social system (int). n > 0.
-    # - k:              mean out-degree of initial social network (int). k > 0.
-    # - gamma:          correlation between information sources (float). gamma = [-1, 1].
-    # - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
-    # - phi:            amount threhsold changes if individual is correct in behavior (float).
-    # - omega:          amount threhsold changes if individual is incorrect in behavior (float).
-    # - timesteps:      length of simulation (int).
-    # - outpath:        path to directory where output folders and files will be created (str). 
-    # - sim_tag:        added infomation to add to file names when saving model output (str).
-    # - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
-        
+    """
+    Simulates a single replicate simulation of the network-breaking information cascade model. 
+    
+    INPUTS:
+    - replicate:      id number of replicate (int or float).
+    - n:              number of individuals in social system (int). n > 0.
+    - k:              mean out-degree of initial social network (int). k > 0.
+    - gamma:          correlation between information sources (float). gamma = [-1, 1].
+    - psi:            prop. of individuals sampling info source every time step (float). psi = (0, 1].
+    - phi:            amount threhsold changes if individual is correct in behavior (float).
+    - omega:          amount threhsold changes if individual is incorrect in behavior (float).
+    - timesteps:      length of simulation (int).
+    - outpath:        path to directory where output folders and files will be created (str). 
+    - sim_tag:        added infomation to add to file names when saving model output (str).
+    - network_type:   type of network to intially generate. Default is random but accepts ["random", "scalefree"] (str).
+    """
+     
     ########## Seed initial conditions ##########
     # Set overall seed
     seed = int( (replicate + 1 + gamma) * 323 )
@@ -110,12 +112,14 @@ def sim_adjusting_thresholds(replicate, n, k, gamma, psi, phi, omega, timesteps,
 # Define model-specific functions
 ####################
 def adjust_thresh(thresholds, states, correct_behavior, phi, omega):
-    # Randomly selects active individual and adjusts threshold depending on whether their behavior was correct/incorrect.
-    #
-    # INPUTS:
-    # - thresholds:         matrix of thresholds for each individual (numpy array).
-    # - states:             matrix listing the behavioral state of every individual (numpy array).
-    # - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    """
+    Randomly selects active individual and adjusts threshold depending on whether their behavior was correct/incorrect.
+    
+    INPUTS:
+    - thresholds:         matrix of thresholds for each individual (numpy array).
+    - states:             matrix listing the behavioral state of every individual (numpy array).
+    - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
+    """
     
     actives = np.where(states == 1)[0]
     if sum(actives) > 0: #error catch when no individual are active

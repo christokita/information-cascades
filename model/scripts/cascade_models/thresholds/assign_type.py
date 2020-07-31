@@ -9,11 +9,13 @@ Created on Mon Nov 25 11:53:42 2019
 import numpy as np
 
 def assign_type(n):
-    # Assigns a type randomly to each individual.
-    # Each individual has an equal change of getting a given type, but we split types equally.
-    #
-    # INPUTS:
-    # - n:       the number of individuals in the social system (int).
+    """
+    Assigns a type randomly to each individual.
+    Each individual has an equal change of getting a given type, but we split types equally.
+    
+    INPUTS:
+    - n:       the number of individuals in the social system (int).
+    """
 
     if n % 2 != 0:
         raise Exception("ERROR: cannot split selected number of individuals into two even groups")
@@ -29,11 +31,13 @@ def assign_type(n):
 
 
 def assign_type_probailistic(n):
-    # Assigns a type randomly to each individual.
-    # Each individual has an equal change of getting a given type.
-    #
-    # INPUTS:
-    # - n:       the number of individuals in the social system (int).
+    """
+    Assigns a type randomly to each individual.
+    Each individual has an equal change of getting a given type.
+    
+    INPUTS:
+    - n:       the number of individuals in the social system (int).
+    """
 
     types = []
     for i in range(n):
