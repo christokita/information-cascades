@@ -26,13 +26,13 @@ import json
 # Set important paths and parameters
 ####################
 # Path to tokens
-token_file = '../data/api_tokens/ag_tokens1.json'
+token_file = '../api_keys/twitter_tokens/ag_tokens3.json'
 
 # New source to get followers from. Use Twitter formatting, i.e., "@xyz"
-news_outlet_name = "usatoday"
+news_outlet_name = "voxdotcom"
 
 # Set s3 keys (these can be found in '../data/s3_keys/s3_key.json')
-with open('../data/s3_keys/s3_key.json') as f:
+with open('../api_keys/s3_keys/s3_key.json') as f:
     keys = json.load(f)
 s3_key = keys.get('access_key_id')
 s3_secret_key = keys.get('access_secret_key')
@@ -87,7 +87,7 @@ API = twee.set_api_keys(consumer_key = consumer_key,
 ####################
 # Get 200k follower IDs of news source
 ####################
-# Check if follower ID list already exists, if so skip this step
+# Check if follower ID list already exists, if so skip this step and load data
 file_name = news_outlet_name + "_followerIDs"
 file_exists = aws.check_if_file_on_s3(file = file_name + '.csv',
                                       bucket = bucket_name, 
@@ -106,6 +106,7 @@ if not file_exists:
         # Progress update
         page_number += 1
         if page_number%5 == 0:
+            print("...page %d/%d." % (page_number, page_limit))
             logger.info("...page %d/%d.", page_number, page_limit)
         
         # Get user IDs
@@ -117,19 +118,31 @@ if not file_exists:
             time.sleep(5 * 60) #sleep for 30 seconds
             
     # Write to s3
-    follower_ids_df = pd.DataFrame(follower_ids, columns = ['user_id'])
+    follower_ids_df = pd.DataFrame(follower_ids, columns = ['user_id'], dtype = str)
     aws.upload_df_to_s3(data = follower_ids_df, 
                          bucket = bucket_name, 
                          logger = logger, 
                          aws_key = s3_key, 
                          aws_secret_key = s3_secret_key, 
                          object_name = file_name)
+    
+# If follower ID list already exists load it   
+else:
+    follower_ids_df = aws.load_csv_from_s3(file = file_name + '.csv',
+                                           bucket = bucket_name, 
+                                           logger = logger, 
+                                           aws_key = s3_key, 
+                                           aws_secret_key = s3_secret_key)
+    follower_ids = list(follower_ids_df['user_id'])
+    
+# Remove Follower ID dataframe to free up space
+del follower_ids_df
 
 
 ####################
 # Get basic user info for each of these followers
 ####################
-logger.info("Now searching each individual follower of @{news_outlet_name}...")
+logger.info("Now searching each individual follower of @{news_outlet_name}...")  
     
 # When searching users, we can search 100 per search and do 900 searches per 15 min.
 # Therefore, we want to do 2,000 searches.
@@ -142,7 +155,7 @@ for i in range(num_blocks):
     
     # Check if we need to switch tokens
     switch_token = twee.rate_limit_check(API, all_tokens, logger)
-    if switch_token == True:
+    if (switch_token == True) or (i == 0): #switch to start
         logger.info("Trying to switch tokens to ensure we don't hit a rate limit.")
         print("Trying to switch tokens to ensure we don't hit a rate limit.")
         API = twee.switch_token(API, all_tokens, logger)
@@ -154,7 +167,8 @@ for i in range(num_blocks):
     # Progress update
     if start % 20000 == 0:
         total_followers = len(follower_ids)
-        logger.info("...looking up followers %d/%d.", start, total_followers)
+        print("...looking up followers %d/%d." % (start, total_followers))
+        logger.info("...looking up followers %d/%d." % (start, total_followers))
     
     # Search
     users = API.lookup_users(user_ids = follower_ids[start:end], include_entities = False)
