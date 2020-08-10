@@ -3,5 +3,6 @@ data_sim/
 .Rhistory
 s3_keys/
 aws_pem/
+twitter_tokens/
 **/__pycache__/
 *-checkpoint.ipynb
