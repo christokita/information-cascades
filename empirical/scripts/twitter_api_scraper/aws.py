@@ -18,6 +18,7 @@ import os
 import json
 import boto3
 from botocore.exceptions import ClientError
+import pandas as pd
 
 
 ####################
@@ -81,6 +82,33 @@ def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name=N
         os.remove(tmp_file)
         os.rmdir(tmp_dir)
         sys.exit("Script Manually Ended.")
+        
+
+def load_csv_from_s3(file, bucket, logger, aws_key, aws_secret_key):
+    """
+    Function that checks if a function already exists in our s3 bucket of interest.
+    
+    INPUTS
+    - object_name: S3 object name. If not specified then file_name is used
+    - bucket: Bucket to upload to
+    - logger: logger object
+    - aws_key, aws_secret_key: keys for AWS access
+    
+    OUTPUT
+    Returns True if file exists, otherwise False.
+    """
+    
+    logger.info(f"Checking if file <{file}> already exists in S3 bucket <{bucket}>...")
+    
+    # Connect
+    s3 = boto3.client('s3',
+                      aws_access_key_id = aws_key,
+                      aws_secret_access_key = aws_secret_key)
+    
+    # Load
+    obj = s3.get_object(Bucket = bucket, Key = file)
+    df = pd.read_csv(obj['Body'], dtype = str)
+    return df
 
 
 def check_if_file_on_s3(file, bucket, logger, aws_key, aws_secret_key):
