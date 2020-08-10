@@ -10,4 +10,4 @@ source ~/.bashrc
 conda install pip
 
 # Install needed packages for our scripts
-pip install -r requirements 
+pip install -r requirements.txt 
