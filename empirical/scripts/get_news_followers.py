@@ -32,8 +32,8 @@ news_outlet_name = "usatoday"
 
 # Set s3 keys (these can be found in '../data/s3_keys/s3_key.json')
 # Hard coding here for use on virtual machines
-s3_key = 'AKIA363GOONZESIYAVFF'
-s3_secret_key = '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'
+s3_key = 'XXXXXXXXX'
+s3_secret_key = 'XXXXXXXX'
 
 # s3 parameters
 bucket_name = "news-source-followers"
