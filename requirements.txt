@@ -2,4 +2,7 @@ numpy
 pandas
 scipy
 igraph
-dplython
+networkx
+tweepy
+boto3
+
