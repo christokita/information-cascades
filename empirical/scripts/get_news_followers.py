@@ -32,8 +32,8 @@ news_outlet_name = "usatoday"
 
 # Set s3 keys (these can be found in '../data/s3_keys/s3_key.json')
 # Hard coding here for use on virtual machines
-s3_key = 'AKIA363GOONZA67VM4N7'
-s3_secret_key = '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'
+s3_key = 'AKIA363GOONZESIYAVFF'
+s3_secret_key = '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'
 
 # s3 parameters
 bucket_name = "news-source-followers"
@@ -50,7 +50,7 @@ logger.setLevel(logging.INFO)
 
 # Define file handler and set logger formatter
 log_filename = f"../api_logs/getfollowers_" + news_outlet_name + ".log"
-file_handler = logging.FileHandler(log_filename)
+file_handler = logging.FileHandler(log_filename, mode = "w") #writes over old log
 formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
 file_handler.setFormatter(formatter)
 
@@ -84,48 +84,58 @@ API = twee.set_api_keys(consumer_key = consumer_key,
 ####################
 # Get 250k follower IDs of news source
 ####################
-# When requesting follower IDs, we get 5,000 per page.
-# Therefore, we want to do 50 pages worth.
-# Follower IDs get a rate limit of 15 requests per 15 minutes.
-page_limit = 50
-follower_ids = []
-for page in tweepy.Cursor(API.followers_ids, id = news_outlet_name).pages(2):
-    
-    # Check if we need to switch tokens
-    switch_token = twee.rate_limit_check(API, all_tokens, logger)
-    if switch_token == True:
-        logger.info("Trying to switch tokens to ensure we don't hit a rate limit.")
-        print("Trying to switch tokens to ensure we don't hit a rate limit.")
-        API = twee.switch_token(API, all_tokens, logger)
-
-    # Get user IDs
-    try: 
-        follower_ids.extend(page)
-        time.sleep(10) #sleep for 30 seconds
-    except: 
-        logger.exception("New token still hasn't cleared rate limit. Let's wait a few minutes.")
-        time.sleep(5 * 60) #sleep for 30 seconds
-        
-# Write to s3
-follower_ids_df = pd.DataFrame(follower_ids, columns = ['user_id'])
+# Check if follower ID list already exists, if so skip this step
 file_name = news_outlet_name + "_followerIDs"
-aws.upload_df_to_s3(data = follower_ids_df, 
-                     bucket = bucket_name, 
-                     logger = logger, 
-                     aws_key = s3_key, 
-                     aws_secret_key = s3_secret_key, 
-                     object_name = file_name)
+file_exists = aws.check_if_file_on_s3(file = file_name + '.csv',
+                                      bucket = bucket_name, 
+                                      logger = logger, 
+                                      aws_key = s3_key, 
+                                      aws_secret_key = s3_secret_key)
+if not file_exists:
+    # When requesting follower IDs, we get 5,000 per page.
+    # Therefore, we want to do 50 pages worth.
+    page_limit = 50
+    follower_ids = []
+    logger.info("Getting follower IDs for @%s...", news_outlet_name)
+    page_number = 0
+    for page in tweepy.Cursor(API.followers_ids, id = news_outlet_name).pages(page_limit):
+
+        # Progress update
+        page_number += 1
+        if page_number%5 == 0:
+            logger.info("...page %d/%d.", page_number, page_limit)
+        
+        # Get user IDs
+        try: 
+            follower_ids.extend(page)
+            time.sleep(60) #sleep for 60 seconds to meet rate limit
+        except: 
+            logger.exception("New token still hasn't cleared rate limit. Let's wait a few minutes.")
+            time.sleep(5 * 60) #sleep for 30 seconds
+            
+    # Write to s3
+    follower_ids_df = pd.DataFrame(follower_ids, columns = ['user_id'])
+    aws.upload_df_to_s3(data = follower_ids_df, 
+                         bucket = bucket_name, 
+                         logger = logger, 
+                         aws_key = s3_key, 
+                         aws_secret_key = s3_secret_key, 
+                         object_name = file_name)
 
 
 ####################
 # Get basic user info for each of these followers
 ####################
+logger.info("Now searching each individual follower of @{news_outlet_name}...")
+    
+# When searching users, we can search 100 per search and do 900 searches per 15 min.
+# Therefore, we want to do 2,000 searches.
 num_blocks = math.ceil(len(follower_ids) / 100)
 info_cols =['user_id', 'user_id_str', 'user_name', 'friends', 'followers', 'statuses',
             'created_at', 'protected', 'verified', 'location', 'description']
 follower_info = pd.DataFrame(columns = info_cols)
 
-for i in range(2):
+for i in range(num_blocks):
     
     # Check if we need to switch tokens
     switch_token = twee.rate_limit_check(API, all_tokens, logger)
@@ -137,6 +147,11 @@ for i in range(2):
     # Which follower IDs to look up
     start = i * 100
     end = (i+1) * 100
+    
+    # Progress update
+    if start % 50000 == 0:
+        total_followers = len(follower_ids)
+        logger.info("...looking up followers %d/%d.", start, total_followers)
     
     # Search
     users = API.lookup_users(user_ids = follower_ids[start:end], include_entities = False)
