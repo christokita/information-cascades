@@ -26,10 +26,10 @@ import json
 # Set important paths and parameters
 ####################
 # Path to tokens
-token_file = '../api_keys/twitter_tokens/ag_tokens3.json'
+token_file = '../api_keys/twitter_tokens/ag_tokens1.json'
 
 # New source to get followers from. Use Twitter formatting, i.e., "@xyz"
-news_outlet_name = "voxdotcom"
+news_outlet_name = "usatoday"
 
 # Set s3 keys (these can be found in '../data/s3_keys/s3_key.json')
 with open('../api_keys/s3_keys/s3_key.json') as f:
@@ -180,15 +180,26 @@ for i in range(num_blocks):
                                columns = info_cols)
         follower_info = follower_info.append(new_row, ignore_index = True)
     del new_row, users
+    
+    # Save in batches of 100k followers, to speed up data collection 
+    if (end % 100000) == 0:
+        
+        # Write to s3
+        chunk = int(end / 100000)
+        file_name = news_outlet_name + "_followerinfo_" + str((chunk - 1)*100) + "-" + str(chunk*100) + "k"
+        aws.upload_df_to_s3(data = follower_info, 
+                             bucket = bucket_name, 
+                             logger = logger, 
+                             aws_key = s3_key, 
+                             aws_secret_key = s3_secret_key, 
+                             object_name = file_name)
+        
+        # Create new dataframe
+        del follower_info
+        follower_info = pd.DataFrame(columns = info_cols)
+
 
 # Write to s3
-file_name = news_outlet_name + "_followerinfo"
-aws.upload_df_to_s3(data = follower_info, 
-                     bucket = bucket_name, 
-                     logger = logger, 
-                     aws_key = s3_key, 
-                     aws_secret_key = s3_secret_key, 
-                     object_name = file_name)
 
 
 
