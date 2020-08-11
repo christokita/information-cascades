@@ -198,8 +198,3 @@ for i in range(num_blocks):
         del follower_info
         follower_info = pd.DataFrame(columns = info_cols)
 
-
-# Write to s3
-
-
-
