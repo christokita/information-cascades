@@ -6,7 +6,8 @@ Created on Fri Aug  7 12:55:35 2020
 @author: ChrisTokita, modified from Matt R. Deverna
 
 SCRIPT
-Get subset of followers from news sources
+Get subset of followers from news sources.
+This script is intended to be run on an ec2 instance, but can also be done locally.
 """
 
 ####################
