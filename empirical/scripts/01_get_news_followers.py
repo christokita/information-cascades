@@ -26,10 +26,10 @@ import json
 # Set important paths and parameters
 ####################
 # Path to tokens
-token_file = '../api_keys/twitter_tokens/ag_tokens1.json'
+token_file = '../api_keys/twitter_tokens/ckt_tokens1.json'
 
 # New source to get followers from. Use Twitter formatting, i.e., "@xyz"
-news_outlet_name = "usatoday"
+news_outlet_name = "dcexaminer"
 
 # Set s3 keys (these can be found in '../data/s3_keys/s3_key.json')
 with open('../api_keys/s3_keys/s3_key.json') as f:
