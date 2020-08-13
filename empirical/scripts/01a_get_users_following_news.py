@@ -129,11 +129,12 @@ if not file_exists:
     
 # If follower ID list already exists load it   
 else:
-    follower_ids_df = aws.load_csv_from_s3(file = file_name + '.csv',
-                                           bucket = bucket_name, 
-                                           logger = logger, 
-                                           aws_key = s3_key, 
-                                           aws_secret_key = s3_secret_key)
+    follower_obj = aws.get_object_from_s3(file = file_name + '.csv',
+                                          bucket = bucket_name, 
+                                          logger = logger, 
+                                          aws_key = s3_key, 
+                                          aws_secret_key = s3_secret_key)
+    follower_ids_df = pd.read_csv(follower_obj['Body'], dtype = str)
     follower_ids = list(follower_ids_df['user_id'])
     
 # Remove Follower ID dataframe to free up space

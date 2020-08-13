@@ -84,7 +84,7 @@ def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name=N
         sys.exit("Script Manually Ended.")
         
 
-def load_csv_from_s3(file, bucket, logger, aws_key, aws_secret_key):
+def get_object_from_s3(file, bucket, logger, aws_key, aws_secret_key):
     """
     Function that checks if a function already exists in our s3 bucket of interest.
     
@@ -107,8 +107,7 @@ def load_csv_from_s3(file, bucket, logger, aws_key, aws_secret_key):
     
     # Load
     obj = s3.get_object(Bucket = bucket, Key = file)
-    df = pd.read_csv(obj['Body'], dtype = str)
-    return df
+    return obj
 
 
 def check_if_file_on_s3(file, bucket, logger, aws_key, aws_secret_key):
