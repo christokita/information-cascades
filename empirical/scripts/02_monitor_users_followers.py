@@ -24,6 +24,7 @@ import logging
 import pandas as pd
 import json
 import tweepy
+import time
 
 
 ####################
@@ -154,6 +155,7 @@ for user_id in selected_users['user_id_str'].iloc[0:50]:
                                  aws_secret_key = s3_secret_key, 
                                  object_name = file_name,
                                  verbose = False)
+        time.sleep(10)
         
     except tweepy.TweepError:
         print("Failed to get followers for user %s. Skipping..." % user_id)
