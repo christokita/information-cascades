@@ -42,7 +42,7 @@ def get_aws_keys(file):
 ####################
 # AWS s3 bucket functions
 ####################
-def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name=None):
+def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name = None, verbose = True):
     """
     Upload a file to an S3 bucket. We default to 'us-east-1' region, i.e., Virginia.
 
@@ -52,6 +52,7 @@ def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name=N
     - logger: logger object
     - aws_key, aws_secret_key: keys for AWS access
     - object_name: S3 object name. If not specified then file_name is used
+    - verbose: whether to print message to terminal when uploading
     
     OUTPUTS
     - Returns True if file was uploaded, else False
@@ -73,7 +74,8 @@ def upload_df_to_s3(data, bucket, logger, aws_key, aws_secret_key, object_name=N
 
     try:
         s3.meta.client.upload_file(tmp_file, bucket, object_name + '.csv')
-        print(f"Data <{object_name}> uploaded to the '{bucket}' bucket.\n")
+        if verbose:
+            print(f"Data <{object_name}> uploaded to the '{bucket}' bucket.\n")
         logger.info(f"Data <{object_name}> uploaded to the '{bucket}' bucket.\n")
         os.remove(tmp_file)
         os.rmdir(tmp_dir)
@@ -138,3 +140,31 @@ def check_if_file_on_s3(file, bucket, logger, aws_key, aws_secret_key):
         return True
     else:
         return False
+
+
+def list_files_in_s3_bucket(bucket, logger, aws_key, aws_secret_key):
+    """
+    Function that checks if a function already exists in our s3 bucket of interest.
+    
+    INPUTS
+    - bucket: Bucket to upload to
+    - logger: logger object
+    - aws_key, aws_secret_key: keys for AWS access
+    
+    OUTPUT
+    Returns list of files in that s3 bucket
+    """
+    
+    logger.info(f"Getting list of items in S3 bucket <{bucket}>...")
+    
+    # Connect
+    s3 = boto3.resource('s3',
+                        aws_access_key_id = aws_key,
+                        aws_secret_access_key = aws_secret_key)
+    s3_bucket = s3.Bucket(bucket)
+    
+    # Get list of items in bucket
+    items = []
+    for x in s3_bucket.objects.all():
+        items.append(x.key)
+    return items
