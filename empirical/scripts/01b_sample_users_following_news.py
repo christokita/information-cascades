@@ -7,6 +7,8 @@ Created on Fri Aug  7 12:55:35 2020
 
 SCRIPT
 Get 1,000 followers of each of our four news sources of interest.
+We will start with a broader 3,000 per news source and narrow this down with machine learning
+so that we get 1k liberals from CBS & Vox and 1k conservatives from USA Today & Washington Examiner.
 """
 
 ####################
@@ -120,7 +122,7 @@ filtered_followers = filtered_followers[filtered_followers['location'].str.match
 
     
 ####################
-# Sample 3k per news source
+# Sample an initial 3k per news source
 ####################
 selected_followers = filtered_followers.groupby(['news_source']).sample(n = 3000, random_state = 323)
 
