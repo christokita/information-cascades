@@ -149,7 +149,8 @@ def set_api_keys(consumer_key, consumer_secret, access_token, access_token_secre
                          wait_on_rate_limit=True,
                          wait_on_rate_limit_notify=True,
                          retry_count = 1, 
-                         retry_delay = 5)
+                         retry_delay = 5,
+                         timeout = 20)
         
         # Initialize the api before returning it
         _ = api.user_timeline(id = "@ChrisTokita", count = 1)
