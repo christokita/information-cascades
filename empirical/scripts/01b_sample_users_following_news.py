@@ -7,8 +7,8 @@ Created on Fri Aug  7 12:55:35 2020
 
 SCRIPT
 Get 1,000 followers of each of our four news sources of interest.
-We will start with a broader 3,000 per news source and narrow this down with machine learning
-so that we get 1k liberals from CBS & Vox and 1k conservatives from USA Today & Washington Examiner.
+We will start with a broader 2,500 per news source and narrow this down with machine learning
+such that we get 1k liberals from CBS & Vox and 1k conservatives from USA Today & Washington Examiner.
 """
 
 ####################
@@ -120,11 +120,13 @@ top_200_cities = "|".join(top_200_cities)
 usa_pattern = states_abbr + "|" + states_full + "|" + top_200_cities #create giant matching pattern
 filtered_followers = filtered_followers[filtered_followers['location'].str.match(usa_pattern)] #filter here
 
+# Some users follow several of these sources. Let's drop them all.
+filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str'], keep = False)
     
 ####################
-# Sample an initial 3k per news source
+# Sample an initial 2,500 per news source
 ####################
-selected_followers = filtered_followers.groupby(['news_source']).sample(n = 3000, random_state = 323)
+selected_followers = filtered_followers.groupby(['news_source']).sample(n = 2500, random_state = 323)
 
 # Write out
-selected_followers.to_csv('../data_derived/news_source_followers/preliminary_selection.csv', index = False)
+selected_followers.to_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', index = False)
