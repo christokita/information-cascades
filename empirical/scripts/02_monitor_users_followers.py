@@ -122,7 +122,7 @@ del already_processed
 # Loop through users, get follower ID list, and upload to s3
 logger.info("Getting the follower IDs for the selected users who follower %s." % news_outlet_name)
 users_with_errors = []
-for user_id in selected_users['user_id_str'].iloc[0:50]:
+for user_id in selected_users['user_id_str']:
     
     # Check if we need to switch tokens
     # If we hit the rate limit (e.g., switch back to a token that hasn't passed the 15 min mark),
@@ -140,13 +140,11 @@ for user_id in selected_users['user_id_str'].iloc[0:50]:
         print("...%d%% done." % progress)
         logger.info("...%d%% done." % progress)
 
+    # Attempt to get follower IDs and upload to s3
     try:
-        # Get follower IDs
         follower_ids = API.followers_ids(id = user_id)
         follower_ids_df = pd.DataFrame(data = follower_ids, columns = ['user_id'], dtype = str)
         follower_ids_df['user_id_str'] = "\"" + follower_ids_df['user_id'] +  "\""
-        
-        # Upload to s3
         file_name = "followerIDs_" + user_id
         aws.upload_df_to_s3(data = follower_ids_df, 
                                  bucket = bucket_name, 
@@ -156,10 +154,14 @@ for user_id in selected_users['user_id_str'].iloc[0:50]:
                                  object_name = file_name,
                                  verbose = False)
         time.sleep(10)
-        
-    except tweepy.TweepError:
+       
+    # Handle error if it arises    
+    except tweepy.TweepError as error:
+        response = str(error.response)
+        reason = str(error.reason)
         print("Failed to get followers for user %s. Skipping..." % user_id)
-        logger.exception("Failed to get followers for user %s. Skipping..." % user_id)
+        logger.info("Failed to get followers for user %s. Skipping..." % user_id)
+        logger.info("ERROR CODE: %s; REASON: %s" % (response, reason))
         users_with_errors.append(user_id)
 
         
