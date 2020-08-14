@@ -122,11 +122,57 @@ filtered_followers = filtered_followers[filtered_followers['location'].str.match
 
 # Some users follow several of these sources. Let's drop them all.
 filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str'], keep = False)
-    
+ 
+   
 ####################
 # Sample an initial 2,500 per news source
 ####################
 selected_followers = filtered_followers.groupby(['news_source']).sample(n = 2500, random_state = 323)
 
 # Write out
+selected_followers.to_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', index = False)
+
+
+####################
+# In our selected list of users, replace those for whom we couldn't get full follower lists
+####################
+"""
+Some of the above users had since made their account protected or possibly deleted their account.
+Thus, we couldn't get all 2,500 follower ID lists for each pool of users. 
+For those we couldn't get their follower list, we will replace them with users from the remaining eligible pool.
+"""
+
+# Get the remaining pool of eligble users
+not_selected = filtered_followers[~filtered_followers['user_id_str'].isin(selected_followers['user_id_str'])]
+
+# Load in our users who returned errors when pulling their follower ID list
+error_files = os.listdir('../data_derived/users_initial_errors/')
+error_users = None
+for file in error_files:
+    data = pd.read_csv('../data_derived/users_initial_errors/' + file, dtype = {'user_id': object})
+    if error_users is None:
+        error_users = data
+    else:
+        error_users = error_users.append(data, ignore_index = True)
+    del data
+    
+# Filter out these users from our selected set of users, determine how many new users we need to sample
+selected_followers = selected_followers[~selected_followers['user_id_str'].isin(error_users['user_id_str'])]
+needed_new_users = 2500 - selected_followers['news_source'].value_counts()
+
+# Sample these new rows
+replacement_followers = None
+for news_source in news_sources:
+    eligible_outlet_followers = not_selected[not_selected.news_source == news_source]
+    n = needed_new_users.loc[news_source]
+    sampled_followers = eligible_outlet_followers.sample(n = n, random_state = 323)
+    if replacement_followers is None:
+        replacement_followers = sampled_followers
+    else:
+        replacement_followers = replacement_followers.append(sampled_followers, ignore_index = True)
+    del sampled_followers
+    
+# Append to our selected user group and write out to file
+selected_followers = selected_followers.append(replacement_followers, ignore_index = True)
+selected_followers = selected_followers.sort_values(by = 'news_source').reset_index(drop = True)
 selected_followers.to_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', index = False)
