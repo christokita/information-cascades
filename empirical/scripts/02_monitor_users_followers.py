@@ -25,6 +25,7 @@ import pandas as pd
 import json
 import tweepy
 import time
+import re
 
 
 ####################
@@ -119,9 +120,25 @@ already_processed = [item.replace(".csv", "") for item in already_processed]
 selected_users = selected_users[~selected_users['user_id_str'].isin(already_processed)]
 del already_processed
 
+# Load list of users who we know already had errors when trying to get their followers
+users_with_errors = []
+error_files = aws.list_files_in_s3_bucket(bucket = 'users-followers-errors', 
+                                          logger = logger, 
+                                          aws_key = s3_key, 
+                                          aws_secret_key = s3_secret_key)
+if "users_with_errors_" + news_outlet_name + ".csv" in error_files:
+    error_users = aws.get_object_from_s3(file = "users_with_errors_" + news_outlet_name + ".csv", 
+                                         bucket = 'users-followers-errors', 
+                                         logger = logger, 
+                                         aws_key = s3_key, 
+                                         aws_secret_key = s3_secret_key)
+    error_users = pd.read_csv(error_users['Body'], dtype = {'user_id': str})
+    error_users['user_id_str'] = error_users['user_id_str'].str.replace("\"", "")
+    users_with_errors = list(error_users['user_id_str'])
+del error_files
+
 # Loop through users, get follower ID list, and upload to s3
 logger.info("Getting the follower IDs for the selected users who follower %s." % news_outlet_name)
-users_with_errors = []
 for user_id in selected_users['user_id_str']:
     
     # Check if we need to switch tokens
@@ -162,7 +179,8 @@ for user_id in selected_users['user_id_str']:
         print("Failed to get followers for user %s. Skipping..." % user_id)
         logger.info("Failed to get followers for user %s. Skipping..." % user_id)
         logger.info("ERROR CODE: %s; REASON: %s" % (response, reason))
-        users_with_errors.append(user_id)
+        if user_id not in users_with_errors:
+            users_with_errors.append(user_id)
 
         
 # Upload list of users we failed to get followers for (likely the person proteceted their account in the meantime)
