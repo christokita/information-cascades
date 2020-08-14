@@ -25,7 +25,6 @@ import pandas as pd
 import json
 import tweepy
 import time
-import re
 
 
 ####################
