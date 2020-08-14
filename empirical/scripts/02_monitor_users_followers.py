@@ -46,7 +46,7 @@ del keys
 
 # s3 parameters
 bucket_name = "user-followers-initial"
-error_bucket_name = "users-followers-errors"
+error_bucket_name = "users-initial-errors"
 
 
 ####################
@@ -122,13 +122,13 @@ del already_processed
 
 # Load list of users who we know already had errors when trying to get their followers
 users_with_errors = []
-error_files = aws.list_files_in_s3_bucket(bucket = 'users-followers-errors', 
+error_files = aws.list_files_in_s3_bucket(bucket = error_bucket_name, 
                                           logger = logger, 
                                           aws_key = s3_key, 
                                           aws_secret_key = s3_secret_key)
 if "users_with_errors_" + news_outlet_name + ".csv" in error_files:
     error_users = aws.get_object_from_s3(file = "users_with_errors_" + news_outlet_name + ".csv", 
-                                         bucket = 'users-followers-errors', 
+                                         bucket = error_bucket_name, 
                                          logger = logger, 
                                          aws_key = s3_key, 
                                          aws_secret_key = s3_secret_key)
