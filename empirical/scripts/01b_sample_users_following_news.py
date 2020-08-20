@@ -21,6 +21,8 @@ import os
 
 # Path to datafiles
 path_to_all_followers = '../data/news_source_followers/'
+path_to_users_with_errors <- '../data_derived/users_initial_errors/'
+out_path <- '../data_derived/monitored_users'
 
 
 ####################
@@ -130,7 +132,7 @@ filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str']
 selected_followers = filtered_followers.groupby(['news_source']).sample(n = 2500, random_state = 323)
 
 # Write out
-selected_followers.to_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', index = False)
+selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = False)
 
 
 ####################
@@ -146,10 +148,10 @@ For those we couldn't get their follower list, we will replace them with users f
 not_selected = filtered_followers[~filtered_followers['user_id_str'].isin(selected_followers['user_id_str'])]
 
 # Load in our users who returned errors when pulling their follower ID list
-error_files = os.listdir('../data_derived/users_initial_errors/')
+error_files = os.listdir(path_to_users_with_errors')
 error_users = None
 for file in error_files:
-    data = pd.read_csv('../data_derived/users_initial_errors/' + file, dtype = {'user_id': object})
+    data = pd.read_csv(path_to_users_with_errors + file, dtype = {'user_id': object})
     if error_users is None:
         error_users = data
     else:
@@ -175,4 +177,4 @@ for news_source in news_sources:
 # Append to our selected user group and write out to file
 selected_followers = selected_followers.append(replacement_followers, ignore_index = True)
 selected_followers = selected_followers.sort_values(by = 'news_source').reset_index(drop = True)
-selected_followers.to_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', index = False)
+selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = False)
