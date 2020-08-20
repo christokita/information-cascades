@@ -69,6 +69,12 @@ for news_source in news_sources:
 # Onlys select users with 100 to 1,000 followers
 filtered_followers = news_followers[(news_followers.followers >= 100) & (news_followers.followers <= 1000)]
 
+# Onlys select users with 25 or more friends
+filtered_followers = filtered_followers[filtered_followers.friends >= 25]
+
+# Onlys select users with 100 or more tweets
+filtered_followers = filtered_followers[filtered_followers.statuses >= 100]
+
 # Remove verified and protected accounts
 filtered_followers = filtered_followers[~filtered_followers.verified]
 filtered_followers = filtered_followers[~filtered_followers.protected]
@@ -120,16 +126,30 @@ states_abbr = "|".join(states_abbr)
 states_full = "|".join(states_full)
 top_200_cities = "|".join(top_200_cities)
 usa_pattern = states_abbr + "|" + states_full + "|" + top_200_cities #create giant matching pattern
-filtered_followers = filtered_followers[filtered_followers['location'].str.match(usa_pattern)] #filter here
+filtered_followers = filtered_followers[filtered_followers['location'].str.contains(usa_pattern)] #filter here
 
 # Some users follow several of these sources. Let's drop them all.
 filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str'], keep = False)
  
-   
+# Filter out users who inadvertently match the above patterns
+country_list = np.genfromtxt("../data_derived/filtering_news_followers/country_list.txt", dtype = str, delimiter = "\n")
+country_list = np.char.upper(country_list)
+country_list = "|".join(country_list)
+noncase_sensitive_bad_matches = ["canada", #matches on top city names like Vancouver and Ontario
+                                 "ottawa", 
+                                 "toronto",
+                                 "hong kong",
+                                 "tokyo",
+                                 "PLANET EARTH"]
+noncase_sensitive_bad_matches = "|".join(noncase_sensitive_bad_matches)
+filtered_followers = filtered_followers[~filtered_followers['location'].str.contains(country_list)] #filter here
+filtered_followers = filtered_followers[~filtered_followers['location'].str.contains(noncase_sensitive_bad_matches, case = False)] #filter here
+
+
 ####################
-# Sample an initial 2,500 per news source
+# Sample an initial 3,000 per news source
 ####################
-selected_followers = filtered_followers.groupby(['news_source']).sample(n = 2500, random_state = 323)
+selected_followers = filtered_followers.groupby(['news_source']).sample(n = 3000, random_state = 323)
 
 # Write out
 selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = False)
