@@ -128,7 +128,8 @@ top_200_cities = "|".join(top_200_cities)
 usa_pattern = states_abbr + "|" + states_full + "|" + top_200_cities #create giant matching pattern
 filtered_followers = filtered_followers[filtered_followers['location'].str.contains(usa_pattern)] #filter here
 
-# Some users follow several of these sources. Let's drop them all.
+# Some users follow several of these sources. 
+# Let's drop them all in order to prevent some of users from being attached to multiple news sources of interest.
 filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str'], keep = False)
  
 # Filter out users who inadvertently match the above patterns
@@ -136,11 +137,11 @@ country_list = np.genfromtxt("../data_derived/filtering_news_followers/country_l
 country_list = np.char.upper(country_list)
 country_list = "|".join(country_list)
 noncase_sensitive_bad_matches = ["canada", #matches on top city names like Vancouver and Ontario
-                                 "ottawa", 
-                                 "toronto",
-                                 "hong kong",
-                                 "tokyo",
-                                 "PLANET EARTH"]
+                                 "ottawa", #due to matches with ontario
+                                 "toronto", #same as above
+                                 "hong kong", 
+                                 "tokyo", #match on KY
+                                 "PLANET EARTH"] #matches on NE, AR, etc.
 noncase_sensitive_bad_matches = "|".join(noncase_sensitive_bad_matches)
 filtered_followers = filtered_followers[~filtered_followers['location'].str.contains(country_list)] #filter here
 filtered_followers = filtered_followers[~filtered_followers['location'].str.contains(noncase_sensitive_bad_matches, case = False)] #filter here
@@ -160,7 +161,7 @@ selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = 
 ####################
 """
 Some of the above users had since made their account protected or possibly deleted their account.
-Thus, we couldn't get all 2,500 follower ID lists for each pool of users. 
+Thus, we couldn't get all 3,000 follower ID lists for each pool of users. 
 For those we couldn't get their follower list, we will replace them with users from the remaining eligible pool.
 """
 
@@ -180,7 +181,7 @@ for file in error_files:
     
 # Filter out these users from our selected set of users, determine how many new users we need to sample
 selected_followers = selected_followers[~selected_followers['user_id_str'].isin(error_users['user_id_str'])]
-needed_new_users = 2500 - selected_followers['news_source'].value_counts()
+needed_new_users = 3000 - selected_followers['news_source'].value_counts()
 
 # Sample these new rows
 replacement_followers = None
