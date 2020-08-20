@@ -151,8 +151,8 @@ for user_id in selected_users['user_id_str']:
         
     # Progress update by 5% increments
     which_row = selected_users[selected_users.user_id_str == user_id].index.item()
-    if which_row % 125 == 0:
-        progress = int((which_row / 125) * 5)
+    if which_row % 150 == 0:
+        progress = int((which_row / 150) * 5)
         print("...%d%% done." % progress)
         logger.info("...%d%% done." % progress)
 
