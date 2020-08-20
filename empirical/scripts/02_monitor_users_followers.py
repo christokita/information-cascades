@@ -71,7 +71,7 @@ logger.addHandler(file_handler)
 # Load our Twitter users of interest
 ####################
 # Load preliminary list of followers
-selected_users = pd.read_csv('../data_derived/news_source_followers/news_followers_preliminary.csv', 
+selected_users = pd.read_csv('../data_derived/monitored_users/monitored_users_preliminary.csv', 
                              dtype = {'user_id': object, 'user_id_str': str, 'location': str, 'verified': bool, 'protected': bool},
                              lineterminator = '\n') #this prevents read errors from other symbols (e.g., '\r')
 

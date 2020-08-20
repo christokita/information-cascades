@@ -21,8 +21,8 @@ import os
 
 # Path to datafiles
 path_to_all_followers = '../data/news_source_followers/'
-path_to_users_with_errors <- '../data_derived/users_initial_errors/'
-out_path <- '../data_derived/monitored_users'
+path_to_users_with_errors = '../data_derived/users_initial_errors/'
+out_path = '../data_derived/monitored_users/'
 
 
 ####################
@@ -148,7 +148,7 @@ For those we couldn't get their follower list, we will replace them with users f
 not_selected = filtered_followers[~filtered_followers['user_id_str'].isin(selected_followers['user_id_str'])]
 
 # Load in our users who returned errors when pulling their follower ID list
-error_files = os.listdir(path_to_users_with_errors')
+error_files = os.listdir(path_to_users_with_errors)
 error_users = None
 for file in error_files:
     data = pd.read_csv(path_to_users_with_errors + file, dtype = {'user_id': object})
@@ -177,4 +177,9 @@ for news_source in news_sources:
 # Append to our selected user group and write out to file
 selected_followers = selected_followers.append(replacement_followers, ignore_index = True)
 selected_followers = selected_followers.sort_values(by = 'news_source').reset_index(drop = True)
+
+# Remove carriage returns from description column because these cause errors when reading in as CSV
+selected_followers['description'] = selected_followers['description'].str.replace('\r', ' ')
+
+# Write out to file
 selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = False)
