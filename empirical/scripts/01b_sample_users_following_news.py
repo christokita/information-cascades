@@ -163,7 +163,11 @@ selected_followers.to_csv(out_path + 'monitored_users_preliminary.csv', index = 
 Some of the above users had since made their account protected or possibly deleted their account.
 Thus, we couldn't get all 3,000 follower ID lists for each pool of users. 
 For those we couldn't get their follower list, we will replace them with users from the remaining eligible pool.
+We can iteratively do this in case we get more errors from the replacement users. Load in the latest selected_followers and run.
 """
+
+# One can iteratively start from in case there are errors on the replacement users. Each
+selected_followers = pd.read_csv(out_path + 'monitored_users_preliminary.csv', dtype = {'user_id': str})
 
 # Get the remaining pool of eligble users
 not_selected = filtered_followers[~filtered_followers['user_id_str'].isin(selected_followers['user_id_str'])]
