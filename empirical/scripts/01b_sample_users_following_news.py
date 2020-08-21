@@ -184,6 +184,7 @@ selected_followers = selected_followers[~selected_followers['user_id_str'].isin(
 needed_new_users = 3000 - selected_followers['news_source'].value_counts()
 
 # Sample these new rows
+not_selected = not_selected[~not_selected['user_id_str'].isin(error_users['user_id_str'])]
 replacement_followers = None
 for news_source in news_sources:
     eligible_outlet_followers = not_selected[not_selected.news_source == news_source]
