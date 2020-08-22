@@ -11,6 +11,8 @@
 # If running this script in Rstudio, go to "Session" -> "Set Working Directory" -> "To Source File Location"
 ########################################
 
+rm(list = ls())
+
 ####################
 # Install required packages, per Pablo Barbera's instructions at URL above
 ####################
@@ -69,7 +71,8 @@ if (file_exists_already) {
                                 user_name = twitter_users$user_name,
                                 friend_count = twitter_users$friends,
                                 ideology_mle = NA, 
-                                ideology_corresp = NA)
+                                ideology_corresp = NA,
+                                issue = NA)
 }
 
 # Get our twitter API token sets, bind into one large set
@@ -116,13 +119,15 @@ switch_API_tokens <- function(current_token_number, n_tokens, first_token_start_
   # If we're back at the first token and it's been less than 15 since its first use, sleep until we can start again
   time_since_first_token <- Sys.time() - first_token_start_time
   if (current_token_number == 1 & time_since_first_token < 15*60) {
-    print("Sleeping until we can start on the first token again")
-    time_to_sleep <- 15*60 - time_since_first_token
+    time_to_sleep <- 15 - as.numeric(time_since_first_token)
+    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the first token again."))
     Sys.sleep(time_to_sleep)
     first_token_start_time <- Sys.time()
   }
   
-  return( c(current_token_number, first_token_start_time) )
+  # Return dataframe row so separate data types can be maintained
+  token_info <- data.frame(token_number = current_token_number, first_token_time = first_token_start_time)
+  return(token_info)
   
 }
 
@@ -146,8 +151,8 @@ for (i in no_estimate) {
   n_requests <- ceiling(user_ideologies$friend_count[i] / 5000) #we can only pull down 5,000 friends per request
   if ((requests_left - n_requests) <= 0) {
     token_switch <- switch_API_tokens(current_token_number = current_token_number, n_tokens = nrow(tokens), first_token_start_time = first_token_time)
-    current_token_number <- token_switch[1]
-    first_token_time <- token_switch[2]
+    current_token_number <- token_switch$token_number
+    first_token_time <- token_switch$first_token_time
     requests_left <- 15 - n_requests
   } else {
     requests_left <- requests_left - n_requests
@@ -160,21 +165,39 @@ for (i in no_estimate) {
                    access_token_secret = tokens$access_token_secret[current_token_number])
   
   # Get user's ID and look up friends
+  issue <- NA
   user_id <- user_ideologies$user_id_str[i]
   user_id <- gsub("\"", "", user_id) #remove quotes
-  suppressMessages( friends <- getFriends(user_id = user_id, oauth = my_oauth, sleep = 1) )
+  suppressMessages( friends <- tryCatch(getFriends(user_id = user_id, oauth = my_oauth, sleep = 1), error = function(err) { c() }) )
   
   # estimate ideology using two methods: 
   # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included
-  estimate_mle <- NA
-  estimate_corresp <- NA
-  suppressMessages( estimate_mle <- estimateIdeology(user_id, friends, method = "MLE", verbose = FALSE) )
-  estimate_mle <- mean(estimate_mle$samples[, , 2]) #this corresponds to mean of theta samples in ML estimation 
-  suppressMessages( estimate_corresp <- estimateIdeology2(user_id, friends, verbose = FALSE) )
-  
+  # If the account couldn't be found, do not calculate 
+  if (length(friends) > 0) {
+    
+    estimate_mle <- NA
+    estimate_corresp <- NA
+    suppressMessages( estimate_mle <- estimateIdeology(user_id, friends, method = "MLE", verbose = FALSE) )
+    estimate_mle <- mean(estimate_mle$samples[, , 2]) #this corresponds to mean of theta samples in ML estimation 
+    suppressMessages( estimate_corresp <- estimateIdeology2(user_id, friends, verbose = FALSE) )
+    
+    # If they follow no elite accounts, it will result in an NA score.
+    if(is.na(estimate_mle)) {
+      issue <- "No elite friends"
+    }
+    
+  } else {
+    
+    issue <- "Account not found"
+    
+  }
+
   # Add scores to our data set
   user_ideologies$ideology_mle[i] <- estimate_mle
   user_ideologies$ideology_corresp[i] <- estimate_corresp
+  
+  # Note issue
+  user_ideologies$issue[i] <- issue
   
   # Print progress to console
   progress_measure <- which(no_estimate == i)
@@ -183,9 +206,9 @@ for (i in no_estimate) {
     print(paste0(progress_measure / one_percent_increment, "% done..."))
   }
   
-  # Save every 2,000 new scores or if we hit the end
+  # Save every 1,000 new scores or if we hit the end
   # Write to temporary file and then upload to s3
-  if ( (progress_measure %% 2000 == 0) | (progress_measure == length(no_estimate)) ) {
+  if ( (progress_measure %% 1000 == 0) | (progress_measure == length(no_estimate)) ) {
     print("Saving what we have to file.")
     write.csv(user_ideologies, file = paste0(path_to_users, output_name), row.names = FALSE)
     # put_object(file = output_name, object = output_name, bucket = bucket_name)
