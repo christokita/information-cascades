@@ -43,15 +43,7 @@ output_name <- "monitored_users_ideology_scores.csv"
 bucket_name <- "ideology-scores"
 path_to_users <- "../data_derived/monitored_users/"
 path_to_twitter_keys <- "../api_keys/twitter_tokens/"
-path_to_s3_keys <- "../api_keys/s3_keys/s3_key.json"
 
-####################
-# Prep for AWS s3
-####################
-# s3_token <- read_json(path_to_s3_keys)
-# Sys.setenv("AWS_ACCESS_KEY_ID" = s3_token$access_key_id,
-#            "AWS_SECRET_ACCESS_KEY" = s3_token$access_secret_key,
-#            "AWS_DEFAULT_REGION" = "us-east-1")
 
 ####################
 # Prep for data collection via Twitter API
@@ -88,6 +80,10 @@ for (i in 1:length(token_lists)) {
     tokens <- token_set
   }
 }
+rm(token_lists, token_set) #clean up
+tokens$current_token <- FALSE
+tokens$use_count <- 0 #keep track of how many times each token has been used
+
 
 ####################
 # Helpful functions
@@ -106,30 +102,63 @@ check_rate_limit <- function(requests_left, user_friend_count) {
 }
 
 # Switch token to next token
-switch_API_tokens <- function(current_token_number, n_tokens, first_token_start_time) {
+switch_API_tokens <- function(tokens) {
   
   #  If it's the last in our set, go back to the first. 
-  if(current_token_number == n_tokens) {
-    current_token_number <- 1
+  n_tokens <- nrow(tokens)
+  prev_token_number <- which(tokens$current_token == TRUE) #note current token
+  tokens$use_count[prev_token_number] <-   tokens$use_count[prev_token_number] + 1 #note that we've now used the previous token
+  tokens$current_token <- FALSE #prepare to update current token
+  if(prev_token_number == n_tokens) {
+    tokens$current_token[1] <- TRUE
   } else {
-    current_token_number <- current_token_number + 1
+    tokens$current_token[prev_token_number + 1] <- TRUE
   }
-  print(paste("Switching to token", current_token_number))
+  current_token_number <- which(tokens$current_token == TRUE)
+  print(paste("Switched to token", current_token_number))
   
-  # If we're back at the first token and it's been less than 15 since its first use, sleep until we can start again
-  time_since_first_token <- Sys.time() - first_token_start_time
-  if (current_token_number == 1 & time_since_first_token < 15*60) {
-    time_to_sleep <- 15 - as.numeric(time_since_first_token)
-    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the first token again."))
-    Sys.sleep(time_to_sleep)
-    first_token_start_time <- Sys.time()
+  # Make sure it's been 15 since we last used this token. If not, sleep until we can start again.
+  # If it's the first use of this token, then don't worry since we assume it hasn't been used in a while.
+  if (tokens$use_count[current_token_number] > 0) {
+    
+    time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
+    if (time_since_last_use < 15) {
+      time_to_sleep <- 15 - as.numeric(time_since_last_use)
+      print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+      Sys.sleep(time_to_sleep*60)
+    }
+    
   }
   
-  # Return dataframe row so separate data types can be maintained
-  token_info <- data.frame(token_number = current_token_number, first_token_time = first_token_start_time)
-  return(token_info)
+  # Note start of use of this token and return updated token set
+  tokens$time_last_use[current_token_number] <- Sys.time()
+  return(tokens)
   
 }
+
+
+# Estimate ideology using two methods from tweetscores package:
+# (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included.
+# We wrap the estimating functions in funcitons to supress the output message.
+get_ideology <- function(user_id, frends) {
+  
+  # Estimate using MLE. If they don't follow any elite acccounts, it'll result in an error that we can catch.
+  suppressMessages( estimate_mle <- tryCatch(estimateIdeology(user_id, friends, method = "MLE", verbose = FALSE),
+                                             error = function(err) { NA }) )
+  if (!is.na(estimate_mle)) {
+    estimate_mle <- mean(estimate_mle$samples[, , 2]) #this corresponds to mean of theta samples in MLE estimation 
+  }
+  
+  # Estimate using correspondance. If they don't follow any elite acccounts, it'll result in an error that we can catch.
+  suppressMessages( estimate_corresp <- tryCatch(estimateIdeology2(user_id, friends, verbose = FALSE),
+                                                 error = function(err) { NA }))
+  
+  # Return estimates
+  estimates <- data.frame(estimate_mle = estimate_mle, estimate_corresp = estimate_corresp)
+  return(estimates)
+  
+}
+
 
 ####################
 # Estimate ideology of monitored users
@@ -141,22 +170,27 @@ switch_API_tokens <- function(current_token_number, n_tokens, first_token_start_
 no_estimate <- which(is.na(user_ideologies$ideology_mle))
 how_many_users <- length(no_estimate)
 
-# Loop through users
+# If we've recently ran this script, uncomment below to make sure all tokens are ready for use
+print("Since we recently used this script, sleeping for 15 min to make sure tokens can all be used.")
+Sys.sleep(15*60)
+
+# Prep our tokens for tracking use and avoiding rate limits
 requests_left <- 15 #assuming fresh start with new token that hasn't been used recently
 current_token_number <- 1 #start with our first token in our set
-first_token_time <- Sys.time()
+tokens$current_token[current_token_number] <- TRUE #flag our current token
+tokens$time_last_use <- Sys.time() #make time format, note start of first token use
+
+# Loop through users
 for (i in no_estimate) {
   
   # Check if we need to switch API tokens
-  n_requests <- ceiling(user_ideologies$friend_count[i] / 5000) #we can only pull down 5,000 friends per request
+  # We can only pull down 5,000 friends per request. So we account for number of requests we will need to make for this user.
+  n_requests <- ceiling( (user_ideologies$friend_count[i] + 500) / 5000)  #We add a buffer of 500 friends in case they followed more accounts recently.
   if ((requests_left - n_requests) <= 0) {
-    token_switch <- switch_API_tokens(current_token_number = current_token_number, n_tokens = nrow(tokens), first_token_start_time = first_token_time)
-    current_token_number <- token_switch$token_number
-    first_token_time <- token_switch$first_token_time
-    requests_left <- 15 - n_requests
-  } else {
-    requests_left <- requests_left - n_requests
-  }
+    tokens <- switch_API_tokens(tokens)
+    current_token_number <- which(tokens$current_token == TRUE)
+    requests_left <- 15 #fresh token
+  } 
   
   # Grab specific Twitter API key/token
   my_oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
@@ -169,34 +203,27 @@ for (i in no_estimate) {
   user_id <- user_ideologies$user_id_str[i]
   user_id <- gsub("\"", "", user_id) #remove quotes
   suppressMessages( friends <- tryCatch(getFriends(user_id = user_id, oauth = my_oauth, sleep = 1), error = function(err) { c() }) )
+  requests_left <- requests_left - n_requests
   
   # estimate ideology using two methods: 
   # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included
   # If the account couldn't be found, do not calculate 
   if (length(friends) > 0) {
-    
-    estimate_mle <- NA
-    estimate_corresp <- NA
-    suppressMessages( estimate_mle <- estimateIdeology(user_id, friends, method = "MLE", verbose = FALSE) )
-    estimate_mle <- mean(estimate_mle$samples[, , 2]) #this corresponds to mean of theta samples in ML estimation 
-    suppressMessages( estimate_corresp <- estimateIdeology2(user_id, friends, verbose = FALSE) )
-    
-    # If they follow no elite accounts, it will result in an NA score.
-    if(is.na(estimate_mle)) {
+    estimates <- get_ideology(user_id, friends)
+    estimate_mle <- estimates$estimate_mle
+    estimate_corresp <- estimates$estimate_corresp
+    if(is.na(estimate_mle) & is.na(estimate_corresp)) {
       issue <- "No elite friends"
     }
-    
   } else {
-    
     issue <- "Account not found"
-    
+    estimate_mle <- NA
+    estimate_corresp <- NA
   }
 
-  # Add scores to our data set
+  # Add scores to our data set, and note issue
   user_ideologies$ideology_mle[i] <- estimate_mle
   user_ideologies$ideology_corresp[i] <- estimate_corresp
-  
-  # Note issue
   user_ideologies$issue[i] <- issue
   
   # Print progress to console
