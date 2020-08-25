@@ -4,5 +4,6 @@ data_sim/
 s3_keys/
 aws_pem/
 twitter_tokens/
+monitored_users/
 **/__pycache__/
 *-checkpoint.ipynb
