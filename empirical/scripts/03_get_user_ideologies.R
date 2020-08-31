@@ -39,12 +39,16 @@ if (!"tweetscores" %in% rownames(installed.packages())) {
 library(tweetscores)
 library(jsonlite)
 library(dplyr)
-library(aws.s3)
 
+# High-level data directory
+data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
+#data_directory <- "../" #path if done within local directory
+
+# File paths
 output_name <- "monitored_users_ideology_scores.csv"
 bucket_name <- "ideology-scores"
-path_to_users <- "../data_derived/monitored_users/"
-path_to_twitter_keys <- "../api_keys/twitter_tokens/"
+path_to_users <- paste0(data_directory, "data_derived/monitored_users/")
+path_to_twitter_keys <- paste0(data_directory, "../api_keys/twitter_tokens/")
 
 
 ####################
