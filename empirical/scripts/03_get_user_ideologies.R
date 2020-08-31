@@ -15,10 +15,12 @@ rm(list = ls())
 
 ####################
 # Install required packages, per Pablo Barbera's instructions at URL above
+#
+# If doing this in a linux environment, before opening R to install packages, make sure to type into command line:
+# > module load rh/devtoolset/8
 ####################
 # Dependendcies
 toInstall <- c("ggplot2", "scales", "R2WinBUGS", "devtools", "yaml", "httr", "RJSONIO") #dependendices as listed on the package website
-# toInstall <- c(toInstall, "aws.s3") #extra needed packages for this script
 toInstall <- toInstall[!toInstall %in% rownames(installed.packages())] #check to see what is already installed
 if (length(toInstall) > 0) {
   install.packages(toInstall, repos = "https://cloud.r-project.org/")
