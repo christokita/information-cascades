@@ -48,7 +48,8 @@ data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to e
 output_name <- "monitored_users_ideology_scores.csv"
 bucket_name <- "ideology-scores"
 path_to_users <- paste0(data_directory, "data_derived/monitored_users/")
-path_to_twitter_keys <- paste0(data_directory, "../api_keys/twitter_tokens/")
+path_to_twitter_keys <- "../api_keys/twitter_tokens/"
+path_for_user_friends <- paste0(data_directory, "data_derived/monitored_users/friend_lists/")
 
 
 ####################
@@ -58,10 +59,8 @@ path_to_twitter_keys <- paste0(data_directory, "../api_keys/twitter_tokens/")
 twitter_users <- read.csv(paste0(path_to_users, "monitored_users_preliminary.csv"), colClasses = c("user_id"="character"))
 
 # Load user ideology table if it exists, otherwise create it
-# suppressMessages( file_exists_already <- head_object(object = output_name, bucket = bucket_name)[1] ) #supress message because it will print an error if not found
 file_exists_already <- file.exists(paste0(path_to_users, output_name))
 if (file_exists_already) {
-  # user_ideologies <- s3read_using(read.csv, object = output_name, bucket = bucket_name)
   user_ideologies <- read.csv(paste0(path_to_users, output_name))
 } else {
   user_ideologies <- data.frame(user_id = twitter_users$user_id, 
@@ -173,7 +172,7 @@ get_ideology <- function(user_id, frends) {
 # For a given token, we can only do 15 calls per token per 15 minutes
 
 # Grab indicies of which  users don't have estimates yet (in case this has been run partially before)
-no_estimate <- which(is.na(user_ideologies$ideology_mle))
+no_estimate <- which(is.na(user_ideologies$ideology_corresp))
 how_many_users <- length(no_estimate)
 
 # If we've recently ran this script, uncomment below to make sure all tokens are ready for use
@@ -215,12 +214,20 @@ for (i in no_estimate) {
   # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included
   # If the account couldn't be found, do not calculate 
   if (length(friends) > 0) {
+    
+    # Estimate ideolgoy
     estimates <- get_ideology(user_id, friends)
     estimate_mle <- estimates$estimate_mle
     estimate_corresp <- estimates$estimate_corresp
-    if(is.na(estimate_mle) & is.na(estimate_corresp)) {
+    if( (is.na(estimate_mle)) & (is.na(estimate_corresp)) ) {
       issue <- "No elite friends"
     }
+    
+    # Save friends list
+    friend_list = data.frame('user_id' = friends) %>% 
+      mutate(user_id_str = paste0("\"", user_id, "\""))
+    write.csv(friend_list, file = paste0(path_for_user_friends, "FriendIDs_", user_id, ".csv"), row.names = FALSE)
+    
   } else {
     issue <- "Account not found"
     estimate_mle <- NA

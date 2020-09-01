@@ -38,6 +38,32 @@ rm(users)
 plot_color <- "#1B3B6F"
 ideol_pal <- c("#006195", "#d9d9d9", "#d54c54")
 
+
+####################
+# Compare old scores to new scores (we repulled ideology scores ~1 week later)
+####################
+old_scores <-read.csv(paste0(data_directory, 'data_derived/monitored_users/monitored_users_ideology_scores_2020-08-23.csv')) %>% 
+  select(user_id_str, ideology_mle, ideology_corresp) %>% 
+  rename(old_mle = ideology_mle, old_corresp = ideology_corresp)
+
+score_check <- merge(users_ideology, old_scores, by = "user_id_str")
+
+ggplot(score_check, aes(x = old_mle, ideology_mle)) +
+  geom_hline(yintercept = 0, size = 0.3, linetype = "dashed") +
+  geom_vline(xintercept = 0, size = 0.3, linetype = "dashed") +
+  geom_point(size = 1, alpha = 0.3, stroke = 0, color = plot_color) +
+  xlab("First MLE ideology score") +
+  ylab("Second MLE ideology score") +
+  theme_ctokita()
+
+ggplot(score_check, aes(x = old_corresp, ideology_corresp)) +
+  geom_hline(yintercept = 0, size = 0.3, linetype = "dashed") +
+  geom_vline(xintercept = 0, size = 0.3, linetype = "dashed") +
+  geom_point(size = 1, alpha = 0.3, stroke = 0, color = plot_color) +
+  xlab("First C.A. ideology score") +
+  ylab("Second C.A. ideology score") +
+  theme_ctokita()
+
 ####################
 # Compare two methods of ideology estimation
 ####################
