@@ -105,7 +105,6 @@ print("Since we recently used this script, sleeping for 15 min to make sure toke
 Sys.sleep(15*60)
 
 # Prep our tokens for tracking use and avoiding rate limits
-requests_left <- 15 #assuming fresh start with new token that hasn't been used recently
 current_token_number <- 1 #start with our first token in our set
 tokens$current_token[current_token_number] <- TRUE #flag our current token
 tokens$time_last_use <- Sys.time() #make time format, note start of first token use
@@ -116,6 +115,7 @@ for (i in no_estimate) {
   # Check if we need to switch API tokens
   # We can only pull down 5,000 friends per request. So we account for number of requests we will need to make for this user.
   n_requests <- ceiling( (user_ideologies$friend_count[i] + 500) / 5000)  #We add a buffer of 500 friends in case they followed more accounts recently.
+  requests_left <- check_rate_limit(my_oauth)
   if ((requests_left - n_requests) <= 0) {
     tokens <- switch_API_tokens(tokens)
     current_token_number <- which(tokens$current_token == TRUE)
