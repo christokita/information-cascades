@@ -43,13 +43,12 @@ source("twitter_api_scraper/ideology_utility_functions.R")
 
 # High-level data directory
 data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
-#data_directory <- "../" #path if done within local directory
+# data_directory <- "../" #path if done within local directory
 
 # File paths
 path_to_users <- paste0(data_directory, "data_derived/monitored_users/")
 path_to_twitter_keys <- "../api_keys/twitter_tokens/"
 path_for_user_friends <- paste0(data_directory, "data_derived/monitored_users/friend_lists/")
-path_for_follower_samples <- paste0(data_directory, "data_derived/monitored_users/sampled_follower_friendlists/")
 output_name <- paste0(path_to_users, "follower_ideology_samples.csv")
 
 
@@ -103,7 +102,7 @@ tokens$use_count <- 0 #keep track of how many times each token has been used
 ####################
 # Prep for getting follower ideologies
 follower_files <- list.files(paste0(data_directory, "data_derived/user_followers_initial"), full.names = TRUE)
-current_token_number <- 10 #start with our first token in our set
+current_token_number <- 1 #start with our first token in our set
 tokens$current_token[current_token_number] <- TRUE #flag our current token
 tokens$time_last_use <- Sys.time() #make time format, note start of first token use
 
@@ -115,6 +114,11 @@ my_oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
 
 # Loop through users in need of sample follower ideologies
 for (user_id in final_users$user_id) {
+  
+  # If we've reached our goal of sampled followers, end sampling process. 
+  if (nrow(follower_samples) == n_samples) {
+    break 
+  }
   
   # Print progress
   print(paste0("STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id))
@@ -198,19 +202,8 @@ for (user_id in final_users$user_id) {
         # Print progress
         print(paste0("User ", user_id, ": ", nrow(follower_samples), "/", n_samples, " follower samples acquired."))
         
-        # Save friends list
-        friend_list = data.frame('user_id' = friends) %>% 
-          mutate(user_id_str = paste0("\"", user_id, "\""))
-        write.csv(friend_list, file = paste0(path_for_follower_samples, "Sampled_FriendIDs_", follower_id, ".csv"), row.names = FALSE)
-        
-        # Increase our sample count
-        sample_count <- sample_count + 1
       }
       
-      # If we've reached the end of our possible set of followers to sample from OR we've hit our goal of sampled followers, end sampling process. 
-      if (j > length(follower_order) | nrow(follower_samples) == n_samples) {
-        break 
-      }
     }
     
   }
