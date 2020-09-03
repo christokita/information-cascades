@@ -42,8 +42,8 @@ library(dplyr)
 source("twitter_api_scraper/ideology_utility_functions.R")
 
 # High-level data directory
-data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
-# data_directory <- "../" #path if done within local directory
+# data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
+data_directory <- "../" #path if done within local directory
 
 # File paths
 path_to_users <- paste0(data_directory, "data_derived/monitored_users/")
@@ -106,30 +106,24 @@ current_token_number <- 1 #start with our first token in our set
 tokens$current_token[current_token_number] <- TRUE #flag our current token
 tokens$time_last_use <- Sys.time() #make time format, note start of first token use
 
-# Set up first token
-my_oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                 consumer_secret = tokens$consumer_secret[current_token_number],
-                 access_token = tokens$access_token[current_token_number],
-                 access_token_secret = tokens$access_token_secret[current_token_number])
-
 # Loop through users in need of sample follower ideologies
 for (user_id in final_users$user_id) {
   
-  # If we've reached our goal of sampled followers, end sampling process. 
-  if (nrow(follower_samples) == n_samples) {
-    break 
-  }
+  # Grab followers that have already been sampled (or if none have been sampled yet, create empty dataframe with desired columns)
+  follower_samples <- follower_ideologies[follower_ideologies$user_id == user_id,]
   
   # Print progress
   print(paste0("STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id))
+  
+  # If we already had sampled enough from this user before, skip.
+  if (nrow(follower_samples) == n_samples) {
+    next 
+  }
   
   # Load follower list
   follower_file <- follower_files[grep(paste0("followerIDs_", user_id, ".csv"), follower_files)]
   followers <- read.csv(follower_file, colClasses = c("user_id" = "character"))
   followers$user_id <- gsub("\"", "", followers$user_id_str)
-  
-  # Grab followers that have already been sampled (or if none have been sampled yet, create empty dataframe with desired columns)
-  follower_samples <- follower_ideologies[follower_ideologies$user_id == user_id,]
   
   # Randomly set order that followers will be sampled. Remove IDs that have already been sampled in previous runs.
   set.seed(323)
@@ -143,36 +137,37 @@ for (user_id in final_users$user_id) {
   # Go through followers until we have N sample ideologies
   for(j in 1:length(follower_order)) {
     
+    # If we've already reached our goal of sampled followers, end sampling process. 
+    if (nrow(follower_samples) == n_samples) {
+      break 
+    }
+    
+    # Set up token to check basic user info
+    current_token_number <- which(tokens$current_token == TRUE)
+    my_oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                     consumer_secret = tokens$consumer_secret[current_token_number],
+                     access_token = tokens$access_token[current_token_number],
+                     access_token_secret = tokens$access_token_secret[current_token_number])
+    
     # Get user's ID and see how many friends they have
     follower_id <- follower_order[j]
     follower_info <- getUsers(oauth = my_oauth, ids = follower_id) # we get 900 GET users calls per 15 min so not a worry with current token
     friend_count <- follower_info[[1]]$friends_count
     follower_screenname <- follower_info[[1]]$screen_name
     is_protected <-  follower_info[[1]]$protected
+    
+    # Skip if account can't be found (i.e., deleted/suspended account) or is protected
+    if (is.null(is_protected)) {
+      next
+    }
     if (is_protected) {
       next
     }
     
-    # Check if we need to switch API tokens
-    # We can only pull down 5,000 friends per request. So we account for number of requests we will need to make for this user.
-    n_requests <- ceiling(friend_count / 5000)
-    requests_left <- check_rate_limit(my_oauth)
-    if ((requests_left - n_requests) <= 0) {
-      tokens <- switch_API_tokens(tokens)
-      current_token_number <- which(tokens$current_token == TRUE)
-      if (n_requests >= 15) {  # If person has massive number of friends, we're going to have to sleep. no way around it
-        print(paste0("Follower @", follower_screenname, " is going to need ", n_requests, " requests to get all their friends. We're going to have to sleep for a while."))
-      }
-    } 
-    
-    # Grab specific Twitter API key/token
-    my_oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                     consumer_secret = tokens$consumer_secret[current_token_number],
-                     access_token = tokens$access_token[current_token_number],
-                     access_token_secret = tokens$access_token_secret[current_token_number])
-    
-    # Get user's ID and look up friends
-    suppressMessages( friends <- tryCatch(getFriends(user_id = follower_id, oauth = my_oauth, sleep = 0), error = function(err) { c() }) )
+    # Look up friends, get back friend list and updated token set (noting which token is currently in use)
+    search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1)
+    friends <- search_results$friends
+    tokens <- search_results$tokens
 
     # estimate ideology using two methods: 
     # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included

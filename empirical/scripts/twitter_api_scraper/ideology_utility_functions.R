@@ -18,7 +18,7 @@ check_rate_limit <- function(oauth) {
 }
 
 # Switch token to next token
-switch_API_tokens <- function(tokens) {
+switch_API_tokens <- function(tokens, time_buffer = 0.1) {
   
   #  If it's the last in our set, go back to the first. 
   n_tokens <- nrow(tokens)
@@ -39,7 +39,8 @@ switch_API_tokens <- function(tokens) {
     
     time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
     if (time_since_last_use < 15) {
-      time_to_sleep <- 15 - as.numeric(time_since_last_use)
+      time_to_sleep <- 15 - as.numeric(time_since_last_use) 
+      time_to_sleep <- time_to_sleep + time_buffer #add a few seconds just in case
       print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
       Sys.sleep(time_to_sleep*60)
     }
@@ -52,6 +53,7 @@ switch_API_tokens <- function(tokens) {
   
 }
 
+# Borrowed from tweetscores package, specifically script oauth-utils.R
 getOAuth <- function(x, verbose=TRUE){
   # first check if x is an object
   if (class(x)=="list"){
@@ -113,13 +115,89 @@ getOAuth <- function(x, verbose=TRUE){
   return(my_oauth)
 }
 
-# 
+# Borrowed from tweetscores package, scpecifically script oauth-utils.R
 getLimitFriends <- function(my_oauth){
   url <- "https://api.twitter.com/1.1/application/rate_limit_status.json"
   params <- list(resources = "friends,application")
   response <- my_oauth$OAuthRequest(URL=url, params=params, method="GET",
                                     cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
   return(unlist(jsonlite::fromJSON(response)$resources$friends$`/friends/ids`['remaining']))
+}
+
+# Modified version of getFriends function from tweetscores package, script get-friends.R
+# This will allow us to switch tokens when paging through people with many friends
+# Takes data.frame of tokens instead of single oauth 
+getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_id = NULL, verbose = TRUE, sleep = 1){
+
+  ## loading credentials
+  current_token_number <- which(tokens$current_token == TRUE)
+  oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                consumer_secret = tokens$consumer_secret[current_token_number],
+                access_token = tokens$access_token[current_token_number],
+                access_token_secret = tokens$access_token_secret[current_token_number])
+  my_oauth <- getOAuth(oauth, verbose=verbose)
+
+  ## url to call
+  url <- "https://api.twitter.com/1.1/friends/ids.json"
+  
+  ## empty list for friends
+  friends <- c()
+  
+  ## while there's more data to download...
+  while (cursor!=0){
+    
+    ## Check if we need to switch tokens. If so, switch to fresh token.
+    requests_left <- check_rate_limit(my_oauth)
+    if (requests_left == 0) {
+      tokens <- switch_API_tokens(tokens)
+      current_token_number <- which(tokens$current_token == TRUE)
+      current_token_number <- which(tokens$current_token == TRUE)
+      oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                    consumer_secret = tokens$consumer_secret[current_token_number],
+                    access_token = tokens$access_token[current_token_number],
+                    access_token_secret = tokens$access_token_secret[current_token_number])
+      my_oauth <- getOAuth(oauth, verbose=verbose)
+    }
+    
+    ## making API call. Try making call. If we get something weird (e.g., error: service unavailable), sleep for a while and try again
+    if (!is.null(screen_name)){
+      params <- list(screen_name = screen_name, cursor = cursor, stringify_ids="true")
+    }
+    if (!is.null(user_id)){
+      params <- list(user_id = user_id, cursor = cursor, stringify_ids="true")
+    }
+    
+    url.data <- tryCatch(
+      {
+        my_oauth$OAuthRequest(URL=url, params=params, method="GET",
+                              cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
+      }, 
+      
+      # If error, sleep and try again
+      error = function(err) {
+        print("We got an error from the Twitter API. Let's sleep 3 minutes and try again.")
+        Sys.Sleep(180)
+        my_oauth$OAuthRequest(URL=url, params=params, method="GET",
+                              cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
+      })
+    Sys.sleep(sleep)
+
+    ## trying to parse JSON data
+    json.data <- jsonlite::fromJSON(url.data)
+    if (length(json.data$error)!=0){
+      if (verbose){message(url.data)}
+      stop("error! Last cursor: ", cursor)
+    }
+    
+    ## adding new IDS
+    friends <- c(friends, as.character(json.data$ids))
+    
+    ## get cursor info
+    prev_cursor <- json.data$previous_cursor_str
+    cursor <- json.data$next_cursor_str
+  }
+  list_to_return <- list(friends = friends, tokens = tokens)
+  return(list_to_return)
 }
 
 
