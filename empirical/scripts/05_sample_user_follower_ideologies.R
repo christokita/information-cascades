@@ -111,9 +111,7 @@ for (user_id in final_users$user_id) {
   
   # Grab followers that have already been sampled (or if none have been sampled yet, create empty dataframe with desired columns)
   follower_samples <- follower_ideologies[follower_ideologies$user_id == user_id,]
-  
-  # Print progress
-  print(paste0("STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id))
+  print(paste0("~~ STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id, " ~~"))
   
   # If we already had sampled enough from this user before, skip.
   if (nrow(follower_samples) == n_samples) {
@@ -132,6 +130,10 @@ for (user_id in final_users$user_id) {
     already_sampled <- which(follower_order %in% follower_samples$follower_id) #determine which have already been sampled
     start_here <- max(already_sampled)+1 #find last follower we found scores for
     follower_order <- follower_order[ start_here:length(follower_order) ] #remove up to this last-sampled-and-scored follower
+    follower_order <- follower_order[!is.na(follower_order)] #if we are at the end of the follower_order, it'll return NAs in previous step
+    if (length(follower_order) == 0) { #skip this user if we've already tapped out their followers
+      next 
+    }
   }
   
   # Go through followers until we have N sample ideologies
@@ -164,40 +166,46 @@ for (user_id in final_users$user_id) {
       next
     }
     
-    # Look up friends, get back friend list and updated token set (noting which token is currently in use)
-    search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1)
-    friends <- search_results$friends
-    tokens <- search_results$tokens
-
-    # estimate ideology using two methods: 
-    # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included
-    # If the account couldn't be found, do not calculate 
-    if (length(friends) > 0) {
+    # If we've already calculated this follower's ideology before, get their ideology from our dataset.
+    # Otherwise, estimate ideology from scratch.
+    if (follower_id %in% follower_ideologies$follower_id) {
       
-      # Estimate ideolgoy
+      follower_in_dataset <- follower_ideologies[follower_ideologies$follower_id == follower_id, ]
+      estimate_mle <- follower_in_dataset$ideology_mle[1] #grab first instance in case there are multiple rows
+      estimate_corresp <- follower_in_dataset$ideology_corresp[1] #grab first instance in case there are multiple rows
+      
+    } else {
+      
+      # Look up friends, get back friend list and updated token set (noting which token is currently in use)
+      search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1)
+      friends <- search_results$friends
+      tokens <- search_results$tokens
+      
+      # estimate ideology using two methods: 
+      # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included
       estimates <- get_ideology(follower_id, friends)
       estimate_mle <- estimates$estimate_mle
       estimate_corresp <- estimates$estimate_corresp
       
-      # If the C.A. ideology score (what we are using for this project) isn't NA, add to our set of ideologoy samples
-      if(!is.na(estimate_corresp) ) { 
-        
-        # Add row to our ideology samples
-        new_row <- data.frame(user_id = user_id,
-                              user_id_str = paste0("\"", user_id, "\""),
-                              follower_count = nrow(followers),
-                              follower_id = follower_id,
-                              follower_id_str = paste0("\"", follower_id, "\""),
-                              follower_user_name = follower_screenname,
-                              ideology_mle = estimate_mle, 
-                              ideology_corresp = estimate_corresp)
-        follower_samples <- rbind(follower_samples, new_row)
-        rm(new_row)
-        
-        # Print progress
-        print(paste0("User ", user_id, ": ", nrow(follower_samples), "/", n_samples, " follower samples acquired."))
-        
-      }
+    }
+    
+    # If the C.A. ideology score (what we are using for this project) isn't NA, add to our set of ideologoy samples
+    if(!is.na(estimate_corresp) ) { 
+      
+      # Add row to our ideology samples
+      new_row <- data.frame(user_id = user_id,
+                            user_id_str = paste0("\"", user_id, "\""),
+                            follower_count = nrow(followers),
+                            follower_id = follower_id,
+                            follower_id_str = paste0("\"", follower_id, "\""),
+                            follower_user_name = follower_screenname,
+                            ideology_mle = estimate_mle, 
+                            ideology_corresp = estimate_corresp)
+      follower_samples <- rbind(follower_samples, new_row)
+      rm(new_row)
+      
+      # Print progress
+      print(paste0("User ", user_id, ": ", nrow(follower_samples), "/", n_samples, " follower samples acquired. j = ", j))
       
     }
     

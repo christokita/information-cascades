@@ -115,6 +115,41 @@ getOAuth <- function(x, verbose=TRUE){
   return(my_oauth)
 }
 
+
+# Function to handle an OAuthRequest error with Twitter API. 
+# If we get an error, we'll sleep a few minutes, and if still nothing, 
+# return an object that will cause the code to stop searching for this user.
+handle_OAuth_error <- function(URL, params, method, cainfo, user_id) {
+  
+  url_return_data <- tryCatch(
+    # Sleep and try again (checking if we need to switch tokens before querying API again).
+    {
+      print(paste0("We got an error from the Twitter API with user ", user_id, ". Let's sleep 3 minutes and try again."))
+      Sys.sleep(180)
+      requests_left <- check_rate_limit(my_oauth)
+      if (requests_left == 0) {
+        tokens <- switch_API_tokens(tokens)
+        current_token_number <- which(tokens$current_token == TRUE)
+        oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                      consumer_secret = tokens$consumer_secret[current_token_number],
+                      access_token = tokens$access_token[current_token_number],
+                      access_token_secret = tokens$access_token_secret[current_token_number])
+        my_oauth <- getOAuth(oauth, verbose=verbose)
+      }
+      attempt <- my_oauth$OAuthRequest(URL=URL, params=params, method=method,cainfo=cainfo)
+      return(attempt)
+    },
+    
+    # If still throwing error, return NA friend list since we can't get their friends.
+    error = function(e) {
+      print(paste0("We still can't get the friends for user ", user_id, ". Skipping..."))
+      attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = 0))
+      return(attempt)
+    })
+  return(url_return_data)
+}
+
+
 # Borrowed from tweetscores package, scpecifically script oauth-utils.R
 getLimitFriends <- function(my_oauth){
   url <- "https://api.twitter.com/1.1/application/rate_limit_status.json"
@@ -151,7 +186,6 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
     if (requests_left == 0) {
       tokens <- switch_API_tokens(tokens)
       current_token_number <- which(tokens$current_token == TRUE)
-      current_token_number <- which(tokens$current_token == TRUE)
       oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
                     consumer_secret = tokens$consumer_secret[current_token_number],
                     access_token = tokens$access_token[current_token_number],
@@ -159,7 +193,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
       my_oauth <- getOAuth(oauth, verbose=verbose)
     }
     
-    ## making API call. Try making call. If we get something weird (e.g., error: service unavailable), sleep for a while and try again
+    ## Prep parameters for API request
     if (!is.null(screen_name)){
       params <- list(screen_name = screen_name, cursor = cursor, stringify_ids="true")
     }
@@ -167,23 +201,25 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
       params <- list(user_id = user_id, cursor = cursor, stringify_ids="true")
     }
     
+    ## making API call. Try making call. If we get something weird (e.g., error: service unavailable), sleep for a while and try again
+    Sys.sleep(sleep)
     url.data <- tryCatch(
       {
         my_oauth$OAuthRequest(URL=url, params=params, method="GET",
                               cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
       }, 
       
-      # If error, sleep and try again
-      error = function(err) {
-        print("We got an error from the Twitter API. Let's sleep 3 minutes and try again.")
-        Sys.Sleep(180)
-        my_oauth$OAuthRequest(URL=url, params=params, method="GET",
-                              cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
-      })
-    Sys.sleep(sleep)
+      # If error, sleep and try again (checking if we need to switch tokens before querying API again).
+      error = function (e) {
+        handle_OAuth_error(URL=url, params=params, method="GET", cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"),
+                                 user_id=user_id)
+      }
+    )
 
     ## trying to parse JSON data
     json.data <- jsonlite::fromJSON(url.data)
+    
+    ## Catch if error from Twitter API normally
     if (length(json.data$error)!=0){
       if (verbose){message(url.data)}
       stop("error! Last cursor: ", cursor)
@@ -204,17 +240,17 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
 # Estimate ideology using two methods from tweetscores package:
 # (1) MLE and (2) the newer corerspondence analysis with more "elite" accounts included.
 # We wrap the estimating functions in funcitons to supress the output message.
-get_ideology <- function(user_id, frends) {
+get_ideology <- function(user_id, friend_list) {
   
   # Estimate using MLE. If they don't follow any elite acccounts, it'll result in an error that we can catch.
-  suppressMessages( estimate_mle <- tryCatch(estimateIdeology(user_id, friends, method = "MLE", verbose = FALSE),
+  suppressMessages( estimate_mle <- tryCatch(estimateIdeology(user_id, friend_list, method = "MLE", verbose = FALSE),
                                              error = function(err) { NA }) )
   if (length(estimate_mle) > 1) {
     estimate_mle <- mean(estimate_mle$samples[, , 2]) #this corresponds to mean of theta samples in MLE estimation 
   }
   
   # Estimate using correspondance. If they don't follow any elite acccounts, it'll result in an error that we can catch.
-  suppressMessages( estimate_corresp <- tryCatch(estimateIdeology2(user_id, friends, verbose = FALSE, replace_outliers = TRUE), #replace_outliers deals with -inf/inf values
+  suppressMessages( estimate_corresp <- tryCatch(estimateIdeology2(user_id, friend_list, verbose = FALSE, replace_outliers = TRUE), #replace_outliers deals with -inf/inf values
                                                  error = function(err) { NA }))
   
   # Return estimates
