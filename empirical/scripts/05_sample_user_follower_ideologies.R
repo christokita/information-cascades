@@ -75,6 +75,7 @@ if ( file.exists(output_name) ) {
                                     follower_id = character(),
                                     follower_id_str = character(),
                                     follower_user_name = character(),
+                                    follower_friend_count = numeric(),
                                     ideology_mle = numeric(), 
                                     ideology_corresp = numeric())
 }
@@ -200,6 +201,7 @@ for (user_id in final_users$user_id) {
                             follower_id = follower_id,
                             follower_id_str = paste0("\"", follower_id, "\""),
                             follower_user_name = follower_screenname,
+                            follower_friend_count = friend_count,
                             ideology_mle = estimate_mle, 
                             ideology_corresp = estimate_corresp)
       follower_samples <- rbind(follower_samples, new_row)
