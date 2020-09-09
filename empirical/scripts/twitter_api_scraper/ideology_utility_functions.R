@@ -17,6 +17,7 @@ check_rate_limit <- function(oauth) {
   
 }
 
+
 # Switch token to next token
 switch_API_tokens <- function(tokens, time_buffer = 0.1) {
   
@@ -52,6 +53,36 @@ switch_API_tokens <- function(tokens, time_buffer = 0.1) {
   return(tokens)
   
 }
+
+
+# Function to check if we need to switch tokens, and if we do, it switches it.
+check_tokens <- function(tokens) {
+  
+  # Set up Oauth with current token
+  current_token_number <- which(tokens$current_token == TRUE)
+  oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                consumer_secret = tokens$consumer_secret[current_token_number],
+                access_token = tokens$access_token[current_token_number],
+                access_token_secret = tokens$access_token_secret[current_token_number])
+  my_oauth <- getOAuth(oauth, verbose=verbose)
+  
+  # Check requests limit status and if needed, swith token until we get a fresh one.
+  requests_left <- check_rate_limit(my_oauth)
+  while (requests_left == 0) {
+    tokens <- switch_API_tokens(tokens)
+    current_token_number <- which(tokens$current_token == TRUE)
+    oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                  consumer_secret = tokens$consumer_secret[current_token_number],
+                  access_token = tokens$access_token[current_token_number],
+                  access_token_secret = tokens$access_token_secret[current_token_number])
+    my_oauth <- getOAuth(oauth, verbose=verbose)
+    requests_left <- check_rate_limit(my_oauth)
+  }
+  
+  # Return updated tokens (will be the same if we didn't need to swithc tokens)
+  return(tokens)
+}
+
 
 # Borrowed from tweetscores package, specifically script oauth-utils.R
 getOAuth <- function(x, verbose=TRUE){
@@ -119,25 +150,22 @@ getOAuth <- function(x, verbose=TRUE){
 # Function to handle an OAuthRequest error with Twitter API. 
 # If we get an error, we'll sleep a few minutes, and if still nothing, 
 # return an object that will cause the code to stop searching for this user.
-handle_OAuth_error <- function(URL, params, method, cainfo, user_id) {
+handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens) {
   
   url_return_data <- tryCatch(
     # Sleep and try again (checking if we need to switch tokens before querying API again).
     {
       print(paste0("We got an error from the Twitter API with user ", user_id, ". Let's sleep 3 minutes and try again."))
       Sys.sleep(180)
-      requests_left <- check_rate_limit(my_oauth)
-      if (requests_left == 0) {
-        tokens <- switch_API_tokens(tokens)
-        current_token_number <- which(tokens$current_token == TRUE)
-        oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                      consumer_secret = tokens$consumer_secret[current_token_number],
-                      access_token = tokens$access_token[current_token_number],
-                      access_token_secret = tokens$access_token_secret[current_token_number])
-        my_oauth <- getOAuth(oauth, verbose=verbose)
-      }
-      attempt <- my_oauth$OAuthRequest(URL=URL, params=params, method=method,cainfo=cainfo)
-      return(attempt)
+      tokens <- check_tokens(tokens)
+      current_token_number <- which(tokens$current_token == TRUE)
+      oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                    consumer_secret = tokens$consumer_secret[current_token_number],
+                    access_token = tokens$access_token[current_token_number],
+                    access_token_secret = tokens$access_token_secret[current_token_number])
+      my_oauth <- getOAuth(oauth, verbose = verbose)
+      attempt <- my_oauth$OAuthRequest(URL = URL, params = params, method=method,cainfo=cainfo)
+      return(list(result = attempt, tokens = tokens))
     },
     
     # If still throwing error, return NA friend list since we can't get their friends.
@@ -146,7 +174,7 @@ handle_OAuth_error <- function(URL, params, method, cainfo, user_id) {
       attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = 0))
       return(attempt)
     })
-  return(url_return_data)
+  return(list(result = attempt, tokens = tokens))
 }
 
 
@@ -164,14 +192,6 @@ getLimitFriends <- function(my_oauth){
 # Takes data.frame of tokens instead of single oauth 
 getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_id = NULL, verbose = TRUE, sleep = 1){
 
-  ## loading credentials
-  current_token_number <- which(tokens$current_token == TRUE)
-  oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                consumer_secret = tokens$consumer_secret[current_token_number],
-                access_token = tokens$access_token[current_token_number],
-                access_token_secret = tokens$access_token_secret[current_token_number])
-  my_oauth <- getOAuth(oauth, verbose=verbose)
-
   ## url to call
   url <- "https://api.twitter.com/1.1/friends/ids.json"
   
@@ -181,17 +201,14 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
   ## while there's more data to download...
   while (cursor!=0){
     
-    ## Check if we need to switch tokens. If so, switch to fresh token.
-    requests_left <- check_rate_limit(my_oauth)
-    if (requests_left == 0) {
-      tokens <- switch_API_tokens(tokens)
-      current_token_number <- which(tokens$current_token == TRUE)
-      oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                    consumer_secret = tokens$consumer_secret[current_token_number],
-                    access_token = tokens$access_token[current_token_number],
-                    access_token_secret = tokens$access_token_secret[current_token_number])
-      my_oauth <- getOAuth(oauth, verbose=verbose)
-    }
+    ## Check if we need to switch tokens. If so, switch to fresh token. Then, load credentials
+    tokens <- check_tokens(tokens)
+    current_token_number <- which(tokens$current_token == TRUE)
+    oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                  consumer_secret = tokens$consumer_secret[current_token_number],
+                  access_token = tokens$access_token[current_token_number],
+                  access_token_secret = tokens$access_token_secret[current_token_number])
+    my_oauth <- getOAuth(oauth, verbose=verbose)
     
     ## Prep parameters for API request
     if (!is.null(screen_name)){
@@ -205,14 +222,17 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
     Sys.sleep(sleep)
     url.data <- tryCatch(
       {
-        my_oauth$OAuthRequest(URL=url, params=params, method="GET",
-                              cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
+        my_oauth$OAuthRequest(URL = url, params = params, method = "GET",
+                              cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"))
       }, 
       
       # If error, sleep and try again (checking if we need to switch tokens before querying API again).
       error = function (e) {
-        handle_OAuth_error(URL=url, params=params, method="GET", cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"),
-                                 user_id=user_id)
+        handled_error <- handle_OAuth_error(URL = url, params = params, method = "GET", cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
+                                            user_id = user_id, tokens = tokens)
+        tokens <<- handled_error$tokens #update tokens globally in case we had to switch during error handling
+        result <- handled_error$result
+        return(result)
       }
     )
 
