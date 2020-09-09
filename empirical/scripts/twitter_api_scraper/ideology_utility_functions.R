@@ -171,7 +171,7 @@ handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens) {
     # If still throwing error, return NA friend list since we can't get their friends.
     error = function(e) {
       print(paste0("We still can't get the friends for user ", user_id, ". Skipping..."))
-      attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = 0))
+      attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = NA))
       return(attempt)
     })
   return(list(result = attempt, tokens = tokens))
@@ -245,6 +245,11 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
       stop("error! Last cursor: ", cursor)
     }
     
+    ## If we are skipping this user because we couldn't fully page through friends, return no friends
+    if (is.na(json.data$next_cursor_str)) {
+      return(list(friends = c(), tokens = tokens))
+    }
+    
     ## adding new IDS
     friends <- c(friends, as.character(json.data$ids))
     
@@ -252,8 +257,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
     prev_cursor <- json.data$previous_cursor_str
     cursor <- json.data$next_cursor_str
   }
-  list_to_return <- list(friends = friends, tokens = tokens)
-  return(list_to_return)
+  return(list(friends = friends, tokens = tokens))
 }
 
 
