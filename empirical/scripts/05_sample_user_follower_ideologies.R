@@ -124,7 +124,8 @@ for (user_id in final_users$user_id) {
   followers$user_id <- gsub("\"", "", followers$user_id_str)
   
   # Randomly set order that followers will be sampled. Remove IDs that have already been sampled in previous runs.
-  set.seed(323)
+  user_seed <- substr(user_id, start = 1, stop = 8) #take first 8 digits of user ID as seed (will be shorter for shorter user IDs)
+  set.seed(user_seed)
   follower_order <- sample(followers$user_id)
   if (nrow(follower_samples) > 0) {
     already_sampled <- which(follower_order %in% follower_samples$follower_id) #determine which have already been sampled
