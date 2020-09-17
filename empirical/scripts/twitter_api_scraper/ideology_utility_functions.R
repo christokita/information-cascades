@@ -172,9 +172,9 @@ handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens) {
     error = function(e) {
       print(paste0("We still can't get the friends for user ", user_id, ". Skipping..."))
       attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = NA))
-      return(attempt)
+      return(list(result = attempt, tokens = tokens))
     })
-  return(list(result = attempt, tokens = tokens))
+  return(url_return_data)
 }
 
 
