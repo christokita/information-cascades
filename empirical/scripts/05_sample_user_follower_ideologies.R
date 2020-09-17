@@ -66,7 +66,7 @@ n_samples <- 50
 if ( file.exists(output_name) ) {
   follower_ideologies <- read.csv(output_name) %>% 
     mutate(user_id = gsub("\"", "", user_id_str),
-           follower_id = gsub("\"", "", follower_id))
+           follower_id = gsub("\"", "", follower_id_str))
 } else {
   follower_ideologies <- data.frame(user_id = character(), 
                                     user_id_str = character(),
@@ -124,16 +124,19 @@ for (user_id in final_users$user_id) {
   followers <- read.csv(follower_file, colClasses = c("user_id" = "character"))
   followers$user_id <- gsub("\"", "", followers$user_id_str)
   
-  # Randomly set order that followers will be sampled. Remove IDs that have already been sampled in previous runs.
+  # Randomly set order that followers will be sampled. 
   user_seed <- substr(user_id, start = 1, stop = 8) #take first 8 digits of user ID as seed (will be shorter for shorter user IDs)
   set.seed(user_seed)
   follower_order <- sample(followers$user_id)
+  
+  # Remove IDs that have already been sampled in previous runs.
   if (nrow(follower_samples) > 0) {
     already_sampled <- which(follower_order %in% follower_samples$follower_id) #determine which have already been sampled
     start_here <- max(already_sampled)+1 #find last follower we found scores for
     follower_order <- follower_order[ start_here:length(follower_order) ] #remove up to this last-sampled-and-scored follower
-    follower_order <- follower_order[!is.na(follower_order)] #if we are at the end of the follower_order, it'll return NAs in previous step
-    if (length(follower_order) == 0) { #skip this user if we've already tapped out their followers
+    
+    # Skip this user if we've already tapped out their followers--in the event they have less than 50 total with ideology scores
+    if (start_here > length(followers$user_id)) { 
       next 
     }
   }
@@ -215,6 +218,7 @@ for (user_id in final_users$user_id) {
   }
   
   # Finished getting N sample follower ideologies for this user, add to our large dataset and save our progress
+  follower_ideologies <- follower_ideologies[follower_ideologies$user_id != user_id, ] #remove this set of rows since we will reappend them with new data next
   follower_ideologies <- rbind(follower_ideologies, follower_samples) %>% 
     arrange(user_id)
   write.csv(follower_ideologies, file = output_name, row.names = FALSE)
