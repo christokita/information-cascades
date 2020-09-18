@@ -121,8 +121,16 @@ rm(token_lists, token_set) #clean up
 follower_files <- list.files(paste0(data_directory, "data_derived/user_followers_initial"), full.names = TRUE)
 current_token_number <- 1 #start with our first token in our set
 tokens$current_token[current_token_number] <- TRUE #flag our current token
-tokens$time_last_use[current_token_number] <- Sys.time() #start use on this token, so mark time.
 
+# Make sure it's been 15 min since we last used this token (due to rate limits).
+time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
+if (time_since_last_use <= 15) {
+  time_to_sleep <- 15.05 - as.numeric(time_since_last_use) 
+  time_to_sleep <- time_to_sleep
+  print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+  Sys.sleep(time_to_sleep*60)
+}
+tokens$time_last_use[current_token_number] <- Sys.time() #start use on this token, so mark time.
 
 # Loop through users in need of sample follower ideologies
 for (user_id in final_users$user_id) {
