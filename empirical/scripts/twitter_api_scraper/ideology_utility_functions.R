@@ -19,7 +19,7 @@ check_rate_limit <- function(oauth) {
 
 
 # Switch token to next token
-switch_API_tokens <- function(tokens, time_buffer = 0.1) {
+switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.1) {
   
   #  If it's the last in our set, go back to the first. 
   n_tokens <- nrow(tokens)
@@ -34,29 +34,28 @@ switch_API_tokens <- function(tokens, time_buffer = 0.1) {
   current_token_number <- which(tokens$current_token == TRUE)
   print(paste("Switched to token", current_token_number))
   
-  # Make sure it's been 15 since we last used this token. If not, sleep until we can start again.
-  # If it's the first use of this token, then don't worry since we assume it hasn't been used in a while.
-  if (tokens$use_count[current_token_number] > 0) {
-    
-    time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
-    if (time_since_last_use < 15) {
-      time_to_sleep <- 15 - as.numeric(time_since_last_use) 
-      time_to_sleep <- time_to_sleep + time_buffer #add a few seconds just in case
-      print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
-      Sys.sleep(time_to_sleep*60)
-    }
-    
+  # Make sure it's been 15 min since we last used this token (due to rate limits).
+  wait_time <- 15 + time_buffer #option to add time in case we want to be safe
+  time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
+  if (time_since_last_use < wait_time) {
+    time_to_sleep <- wait_time - as.numeric(time_since_last_use) 
+    time_to_sleep <- time_to_sleep
+    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+    Sys.sleep(time_to_sleep*60)
   }
   
-  # Note start of use of this token and return updated token set
+  # Note start of use of this token,
   tokens$time_last_use[current_token_number] <- Sys.time()
+  
+  # Output latest list of token use timestamps, and return updated token set
+  write.csv(data.frame(time_last_use = tokens$time_last_use), file = token_time_file, row.names = FALSE)
   return(tokens)
   
 }
 
 
 # Function to check if we need to switch tokens, and if we do, it switches it.
-check_tokens <- function(tokens) {
+check_tokens <- function(tokens, token_time_file) {
   
   # Set up Oauth with current token
   current_token_number <- which(tokens$current_token == TRUE)
@@ -69,7 +68,7 @@ check_tokens <- function(tokens) {
   # Check requests limit status and if needed, swith token until we get a fresh one.
   requests_left <- check_rate_limit(my_oauth)
   while (requests_left == 0) {
-    tokens <- switch_API_tokens(tokens)
+    tokens <- switch_API_tokens(tokens = tokens, token_time_file = token_time_file, time_buffer = 0.1)
     current_token_number <- which(tokens$current_token == TRUE)
     oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
                   consumer_secret = tokens$consumer_secret[current_token_number],
@@ -150,14 +149,14 @@ getOAuth <- function(x, verbose=TRUE){
 # Function to handle an OAuthRequest error with Twitter API. 
 # If we get an error, we'll sleep a few minutes, and if still nothing, 
 # return an object that will cause the code to stop searching for this user.
-handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens) {
+handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens, token_time_file) {
   
   url_return_data <- tryCatch(
     # Sleep and try again (checking if we need to switch tokens before querying API again).
     {
       print(paste0("We got an error from the Twitter API with user ", user_id, ". Let's sleep 3 minutes and try again."))
       Sys.sleep(180)
-      tokens <- check_tokens(tokens)
+      tokens <- check_tokens(tokens, token_time_file)
       current_token_number <- which(tokens$current_token == TRUE)
       oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
                     consumer_secret = tokens$consumer_secret[current_token_number],
@@ -187,10 +186,44 @@ getLimitFriends <- function(my_oauth){
   return(unlist(jsonlite::fromJSON(response)$resources$friends$`/friends/ids`['remaining']))
 }
 
+#
+getLimitUsers <- function(my_oauth){
+  url <- "https://api.twitter.com/1.1/application/rate_limit_status.json"
+  params <- list(resources = "users,application")
+  response <- my_oauth$OAuthRequest(URL=url, params=params, method="GET",
+                                    cainfo=system.file("CurlSSL", "cacert.pem", package = "RCurl"))
+  return(unlist(jsonlite::fromJSON(response)$resources$users$`/users/lookup`[['remaining']]))
+  
+}
+
+# Function to get user info
+get_user_info <- function(user_id, tokens) {
+  
+  # Check if we need to switch tokens. If so, switch to fresh token. Then, load credentials
+  # TO DO: INSERT CUSTOM CHECKING FOR getLimitUsers()
+  current_token_number <- which(tokens$current_token == TRUE)
+  oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+                consumer_secret = tokens$consumer_secret[current_token_number],
+                access_token = tokens$access_token[current_token_number],
+                access_token_secret = tokens$access_token_secret[current_token_number])
+  my_oauth <- getOAuth(oauth, verbose = verbose)
+  
+  user_oauth <- getOAuth(my_oauth)
+  requests_left <- getLimitUsers(user_oauth)
+  
+  # Look up user
+  follower_info <- getUsers(oauth = my_oauth, ids = user_id) # we get 900 GET users calls per 15 min so not a worry with current token
+  friend_count <- follower_info[[1]]$friends_count
+  follower_screenname <- follower_info[[1]]$screen_name
+  is_protected <-  follower_info[[1]]$protected
+  
+  
+}
+
 # Modified version of getFriends function from tweetscores package, script get-friends.R
 # This will allow us to switch tokens when paging through people with many friends
 # Takes data.frame of tokens instead of single oauth 
-getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_id = NULL, verbose = TRUE, sleep = 1){
+getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_id = NULL, verbose = TRUE, sleep = 1, token_time_file){
 
   ## url to call
   url <- "https://api.twitter.com/1.1/friends/ids.json"
@@ -202,7 +235,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
   while (cursor!=0){
     
     ## Check if we need to switch tokens. If so, switch to fresh token. Then, load credentials
-    tokens <- check_tokens(tokens)
+    tokens <- check_tokens(tokens, token_time_file)
     current_token_number <- which(tokens$current_token == TRUE)
     oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
                   consumer_secret = tokens$consumer_secret[current_token_number],

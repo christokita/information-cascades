@@ -50,6 +50,7 @@ path_to_users <- paste0(data_directory, "data_derived/monitored_users/")
 path_to_twitter_keys <- "../api_keys/twitter_tokens/"
 path_for_user_friends <- paste0(data_directory, "data_derived/monitored_users/friend_lists/")
 output_name <- paste0(path_to_users, "follower_ideology_samples.csv")
+token_timestamps_file <- "../api_keys/twitter_token_timestamps.csv" #this file stores the last time these tokens were used
 
 
 ####################
@@ -84,18 +85,33 @@ if ( file.exists(output_name) ) {
 token_lists <- list.files(path_to_twitter_keys, full.names = TRUE)
 token_lists <- gsub("//", "/", token_lists) #prevent double slash that occurs when list.files gives full file paths
 for (i in 1:length(token_lists)) {
+  
+  # Load token, add extra tracking data.
   token_set <- stream_in( file(token_lists[i]) )
   set_name <- gsub( paste0(path_to_twitter_keys, "([_a-z0-9]+).json"), "\\1", token_lists[i], perl = TRUE)
   token_set$set_name <- set_name
+  token_set$current_token <- FALSE
+  token_set$use_count <- 0 #keep track of how many times each token has been used
+  
+  # Make sure we properly keep track of when tokens were last used. 
+  # Either use record of last use or set as time over 15 minutes ago.
+  if (file.exists(token_timestamps_file)) {
+    token_times <- read.csv(token_timestamps_file)
+    token_set$time_last_use <- as.POSIXct(token_times$time_last_use[i])
+    rm(token_times)
+  }  else {
+    token_set$time_last_use <- Sys.time() - 16*60 #16 minutes ago
+  }
+  
+  # Bind together
   if (exists("tokens")) {
     tokens <- rbind(tokens, token_set)
   } else {
     tokens <- token_set
   }
+  
 }
 rm(token_lists, token_set) #clean up
-tokens$current_token <- FALSE
-tokens$use_count <- 0 #keep track of how many times each token has been used
 
 
 ####################
@@ -105,7 +121,8 @@ tokens$use_count <- 0 #keep track of how many times each token has been used
 follower_files <- list.files(paste0(data_directory, "data_derived/user_followers_initial"), full.names = TRUE)
 current_token_number <- 1 #start with our first token in our set
 tokens$current_token[current_token_number] <- TRUE #flag our current token
-tokens$time_last_use <- Sys.time() #make time format, note start of first token use
+tokens$time_last_use[current_token_number] <- Sys.time() #start use on this token, so mark time.
+
 
 # Loop through users in need of sample follower ideologies
 for (user_id in final_users$user_id) {
@@ -115,7 +132,8 @@ for (user_id in final_users$user_id) {
   print(paste0("~~ STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id, " ~~"))
   
   # If we already had sampled enough from this user before, skip.
-  if (nrow(follower_samples) == n_samples) {
+  # if (nrow(follower_samples) == n_samples) {
+  if (nrow(follower_samples) > 0) { #for now skip if we already have samples of some sort (means we've already gone through this user)
     next 
   }
   
@@ -182,7 +200,7 @@ for (user_id in final_users$user_id) {
     } else {
       
       # Look up friends, get back friend list and updated token set (noting which token is currently in use)
-      search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1)
+      search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1, token_time_file = token_timestamps_file)
       friends <- search_results$friends
       tokens <- search_results$tokens
       
