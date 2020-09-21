@@ -124,8 +124,8 @@ tokens$current_token[current_token_number] <- TRUE #flag our current token
 
 # Make sure it's been 15 min since we last used this token (due to rate limits).
 time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
-if (time_since_last_use <= 15) {
-  time_to_sleep <- 15.05 - as.numeric(time_since_last_use) 
+if (time_since_last_use < 15.01) {
+  time_to_sleep <- 15.01 - as.numeric(time_since_last_use) 
   time_to_sleep <- time_to_sleep
   print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
   Sys.sleep(time_to_sleep*60)
