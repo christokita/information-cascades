@@ -19,7 +19,7 @@ check_rate_limit <- function(oauth) {
 
 
 # Switch token to next token
-switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.1) {
+switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0) {
   
   #  If it's the last in our set, go back to the first. 
   n_tokens <- nrow(tokens)
@@ -37,7 +37,7 @@ switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.1) {
   # Make sure it's been 15 min since we last used this token (due to rate limits).
   wait_time <- 15 + time_buffer #option to add time in case we want to be safe
   time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
-  if (time_since_last_use <= wait_time) {
+  if (time_since_last_use < wait_time) {
     time_to_sleep <- wait_time - as.numeric(time_since_last_use) 
     time_to_sleep <- time_to_sleep
     print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
