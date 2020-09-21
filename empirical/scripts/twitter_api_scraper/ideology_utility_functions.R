@@ -19,7 +19,7 @@ check_rate_limit <- function(oauth) {
 
 
 # Switch token to next token
-switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0) {
+switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.01) {
   
   #  If it's the last in our set, go back to the first. 
   n_tokens <- nrow(tokens)
