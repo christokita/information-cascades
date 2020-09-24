@@ -3,6 +3,7 @@ data_sim/
 .Rhistory
 s3_keys/
 aws_pem/
+dropbox_token/
 twitter_tokens/
 monitored_users/
 **/__pycache__/
