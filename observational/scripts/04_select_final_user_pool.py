@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 # High-level data directory
-data_directory = "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
+data_directory = "/Volumes/CKT-DATA/information-cascades/observational/" #path to external HD
 #data_directory = "../" #path if done within local directory
 
 # File paths
@@ -47,21 +47,21 @@ liberal_users = liberal_users[liberal_users.ideology_corresp < 0]
 # Output for handcheck
 conservative_users['handcheck_remove'] = ''
 liberal_users['handcheck_remove'] = ''
-conservative_users.to_excel(data_directory + 'data_derived/monitored_users/handcheck_conservative_users.xlsx', index = False)
-liberal_users.to_excel(data_directory + 'data_derived/monitored_users/handcheck_liberal_users.xlsx', index = False)
+conservative_users.to_excel(data_directory + 'data_derived/monitored_users/handcheck_users/handcheck_conservative_users.xlsx', index = False)
+liberal_users.to_excel(data_directory + 'data_derived/monitored_users/handcheck_users/handcheck_liberal_users.xlsx', index = False)
 
 
 ####################
 # Read in manually checked users, update our pool of users
 ####################
 # Load manually checked liberal users
-liberals_checked = pd.read_excel(data_directory + 'data_derived/monitored_users/handcheck_liberal_users_DONE.xlsx', dtype = {'user_id': object})
+liberals_checked = pd.read_excel(data_directory + 'data_derived/monitored_users/handcheck_users/handcheck_liberal_users_DONE.xlsx', dtype = {'user_id': object})
 liberals_checked['user_id'] = liberals_checked['user_id_str'].str.replace("\"", "")
 liberals_checked = liberals_checked[pd.isna(liberals_checked.handcheck_remove)] #those not selected for removal
 liberals_checked_IDs = liberals_checked['user_id']
 
 # Load manually checked conservative users
-conservatives_checked = pd.read_excel(data_directory + 'data_derived/monitored_users/handcheck_conservative_users_DONE.xlsx', dtype = {'user_id': object})
+conservatives_checked = pd.read_excel(data_directory + 'data_derived/monitored_users/handcheck_users/handcheck_conservative_users_DONE.xlsx', dtype = {'user_id': object})
 conservatives_checked['user_id'] = conservatives_checked['user_id_str'].str.replace("\"", "")
 conservatives_checked = conservatives_checked[pd.isna(conservatives_checked.handcheck_remove)] #those not selected for removal
 conservative_checked_IDs = conservatives_checked['user_id']

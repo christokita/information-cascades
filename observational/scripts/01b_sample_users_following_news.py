@@ -20,7 +20,7 @@ import re
 import os
 
 # Path to datafiles
-data_directory = '/Volumes/CKT-DATA/information-cascades/empirical/' #external HD for large dataset
+data_directory = '/Volumes/CKT-DATA/information-cascades/observational/' #external HD for large dataset
 path_to_all_followers = data_directory + 'data/news_source_followers/'
 path_to_users_with_errors = data_directory + 'data_derived/users_initial_errors/'
 out_path = data_directory + 'data_derived/monitored_users/'
