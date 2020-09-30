@@ -1,10 +1,17 @@
+# Simulation data from model
 data_sim/
+
+# R project related items
 .Rproj.user
 .Rhistory
+
+# API keys, logs
 s3_keys/
 aws_pem/
 dropbox_token/
 twitter_tokens/
-monitored_users/
+api_logs/
+
+# Python module items
 **/__pycache__/
 *-checkpoint.ipynb
