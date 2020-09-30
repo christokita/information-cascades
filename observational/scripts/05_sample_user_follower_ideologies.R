@@ -42,7 +42,7 @@ library(dplyr)
 source("twitter_api_scraper/ideology_utility_functions.R")
 
 # High-level data directory
-# data_directory <- "/Volumes/CKT-DATA/information-cascades/empirical/" #path to external HD
+# data_directory <- "/Volumes/CKT-DATA/information-cascades/observational/" #path to external HD
 data_directory <- "../" #path if done within local directory
 
 # File paths
