@@ -30,8 +30,11 @@ import time
 ####################
 # Set important paths and parameters
 ####################
-# Path to tokens
-token_file = '../api_keys/twitter_tokens/ag_tokens2.json'
+# path to data (e.g., list of users to monitor) and tokens
+data_directory = '../'
+token_file = '../api_keys/twitter_tokens/ckt_tokens2.json'
+#user_file = 'monitored_users_preliminary.csv' #if doing the initial monitoring
+user_file = 'monitored_users_final.csv' #if doing the final monitoring
 
 # New source to get followers from. Use Twitter formatting, i.e., "@xyz"
 news_outlet_name = "dcexaminer"
@@ -44,8 +47,8 @@ s3_secret_key = keys.get('access_secret_key')
 del keys
 
 # s3 parameters
-bucket_name = "user-followers-initial"
-error_bucket_name = "users-initial-errors"
+bucket_name = "user-followers-final"
+error_bucket_name = "users-final-errors"
 
 
 ####################
@@ -70,8 +73,8 @@ logger.addHandler(file_handler)
 ####################
 # Load our Twitter users of interest
 ####################
-# Load preliminary list of followers
-selected_users = pd.read_csv('../data_derived/monitored_users/monitored_users_preliminary.csv', 
+# Load list
+selected_users = pd.read_csv(data_directory + user_file, 
                              dtype = {'user_id': object, 'user_id_str': str, 'location': str, 'verified': bool, 'protected': bool},
                              lineterminator = '\n') #this prevents read errors from other symbols (e.g., '\r')
 
