@@ -140,8 +140,7 @@ for (user_id in final_users$user_id) {
   print(paste0("~~ STARTING user ", which(user_id == final_users$user_id), "/", length(final_users$user_id), ": user ID ", user_id, " ~~"))
   
   # If we already had sampled enough from this user before, skip.
-  # if (nrow(follower_samples) == n_samples) {
-  if (nrow(follower_samples) > 0) { #for now skip if we already have samples of some sort (means we've already gone through this user)
+  if (nrow(follower_samples) == n_samples) {
     next 
   }
   
