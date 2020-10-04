@@ -1,3 +1,4 @@
+# Core packages
 numpy
 pandas
 scipy
@@ -5,5 +6,7 @@ igraph
 networkx
 tweepy
 boto3
-xlwings
-dropbox
+
+# Packages for handling survey data (comment out if on ec2 linux instance)
+#xlwings
+#dropbox
