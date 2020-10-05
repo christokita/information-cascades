@@ -7,7 +7,7 @@ Created on Fri Aug  7 12:55:35 2020
 
 SCRIPT
 Get 1,000 followers of each of our four news sources of interest.
-We will start with a broader 2,500 per news source and narrow this down with machine learning
+We will start with a broader 3,00 per news source and narrow this down with machine learning
 such that we get 1k liberals from CBS & Vox and 1k conservatives from USA Today & Washington Examiner.
 """
 
@@ -134,7 +134,7 @@ filtered_followers = filtered_followers[filtered_followers['location'].str.conta
 filtered_followers = filtered_followers.drop_duplicates(subset = ['user_id_str'], keep = False)
  
 # Filter out users who inadvertently match the above patterns
-country_list = np.genfromtxt("../data_derived/filtering_news_followers/country_list.txt", dtype = str, delimiter = "\n")
+country_list = np.genfromtxt(data_directory + "data_derived/filtering_news_followers/country_list.txt", dtype = str, delimiter = "\n")
 country_list = np.char.upper(country_list)
 country_list = "|".join(country_list)
 noncase_sensitive_bad_matches = ["canada", #matches on top city names like Vancouver and Ontario
