@@ -24,7 +24,7 @@ data_directory = "/Volumes/CKT-DATA/information-cascades/observational/" #path t
 output_name = "final_monitored_users_ideology_scores.csv"
 ideology_file = data_directory + 'data_derived/monitored_users/monitored_users_ideology_scores.csv'
 users_file = data_directory + 'data_derived/monitored_users/monitored_users_preliminary.csv'
-final_users_file = data_directory + 'data_derived/monitored_users/monitored_users_final.csv'
+final_users_file = data_directory + 'data_derived/monitored_users/monitored_users_final-interim.csv'
 
 
 ####################
