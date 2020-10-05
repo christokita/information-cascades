@@ -33,8 +33,7 @@ import time
 # path to data (e.g., list of users to monitor) and tokens
 data_directory = '../'
 token_file = '../api_keys/twitter_tokens/ckt_tokens2.json'
-#user_file = 'monitored_users_preliminary.csv' #if doing the initial monitoring
-user_file = 'monitored_users_final.csv' #if doing the final monitoring
+user_file = 'monitored_users_preliminary.csv'
 
 # New source to get followers from. Use Twitter formatting, i.e., "@xyz"
 news_outlet_name = "dcexaminer"
