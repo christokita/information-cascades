@@ -153,7 +153,7 @@ def set_api_keys(consumer_key, consumer_secret, access_token, access_token_secre
                          timeout = 20)
         
         # Initialize the api before returning it
-        _ = api.user_timeline(id = "@ChrisTokita", count = 1)
+        _ = api.user_timeline(id = "@Princeton", count = 1)
         
         logger.info(f"Successfully set the API keys.\n")
 
