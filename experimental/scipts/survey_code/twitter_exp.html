@@ -1,0 +1,77 @@
+<div style="display: grid; padding: 10vh;">
+    <p class="lead" style="margin: auto;">
+        May we access your tweets?
+    </p>
+    <br>
+    <div id="request-token" href="/twitter/request_token" style="margin: auto;cursor: pointer;font-weight: 700;" target="_blank" class="btn btn-success">Get Twitter Data</div>
+</div>
+
+<pre id="twitter-feed" style="display: none;"></pre>
+
+<script>
+
+// when someone presses the request-token button, call readTwitterTimeline, 
+// post the timeline to the console, and get the most recent 200 tweets.
+makeTwitterButton("#request-token", () => {
+    console.log("making api call");
+    readTwitterTimeline((timeline) => {
+        console.log(timeline);
+    }, 200);
+});
+
+
+/**
+ * cb: callback function that will be called with the complete timeline as an array
+ * count (optional): number of Tweets to retreive per single call to the Twitter API, max 200, default 20
+ * max_tweets (optional): stop retreiving Tweets after at least this many have been returned, default 3200
+ * max_id: ignore, don't set this
+ * timeline: ignore, don't set this
+*/
+function readTwitterTimeline(cb, count, max_tweets, max_id, timeline) {
+    if(max_id) {
+        let params = {"max_id": max_id};
+        if(count) {
+            params["count"] = count;
+        }
+        
+        twitterAPICall("statuses/user_timeline", params, (data) => {
+            if(data.length > 0) {
+                let minID = data[data.length - 1].id_str;
+                timeline = timeline.concat(data);
+                console.log(timeline.length + " tweets read!");
+                if(!max_tweets || timeline.length < max_tweets) {
+                    readTwitterTimeline(cb, count, max_tweets, sub1(minID), timeline);
+                }
+                else {
+                    cb(timeline);  
+                }
+            }
+            else {
+                cb(timeline);   
+            }
+        });
+    }
+    else {
+        twitterAPICall("statuses/user_timeline", {"count": 1}, (data) => {
+            let minID = data[data.length - 1].id_str;
+            readTwitterTimeline(cb, count, max_tweets, sub1(minID), data);
+        });
+    }
+}
+
+// note that this will wrap around, so not good for retreiving the first ever Tweet
+function sub1(s) {
+    let num =  s.split("");
+    num.map(x => parseInt(x));
+    for(let i = num.length - 1; i >= 0; i--) {
+        if(num[i] > 0) {
+            num[i] = num[i] - 1;
+            break;
+        }
+        else {
+            num[i] = 9;
+        }
+    }
+    return num.join("");
+}
+</script>
