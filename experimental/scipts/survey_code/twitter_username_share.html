@@ -1,0 +1,53 @@
+If you are willing, please click the button below to share your Twitter username with us. This allows us to note the username of the Twitter account you are currently signed into so that we ensure you are sharing the username of a valid and active account. We will not have access to any other data. Only those who share their username will be invited back for a follow up survey with a separate payment worth up to $2.50.&nbsp;<div><br></div><div>&nbsp;After clicking the button below, it may briefly take you to Twitter to ensure you are signed into your account.
+
+<div><br></div>
+
+    <div id="request-token" href="/twitter/request_token" style="margin: auto;cursor: pointer;font-weight: 700;" target="_blank" class="btn btn-success">Click to share Twitter username</div>
+
+
+<pre id="twitter-feed" style="display: none;"></pre>
+
+
+
+<script>
+
+/* Twitter widget setup */
+window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));
+
+// /* The variables Twitter and Facebook may be customized. */
+// var Twitter = "<a href='[LINKURL]'><img src='/images/Twitter.png'></a>";
+
+// function MakeTwitterButton()
+// {
+//    var linkURL = "https://twitter.com/intent/tweet?text=";
+//    var title = document.title;
+//    if( title.length > 117 ) { title = title.substr(0,112) + "[...]"; }
+//    linkURL += encodeURIComponent(title) + " " + encodeURIComponent(document.URL);
+//    return Twitter.replace(/\[LINKURL\]/,linkURL);
+// }
+
+
+
+makeTwitterButton("#request-token", () => {
+    console.log("making api call");
+    twitterAPICall("account/verify_credentials", {}, (data) => {
+        $("#twitter-feed").html(JSON.stringify(data, null, 2));
+        $("#twitter-feed").show();
+    });
+});
+</script>
