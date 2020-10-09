@@ -78,7 +78,9 @@ do_not_pay = pd.DataFrame(data = raw_survey_data.qid[raw_survey_data.Finished ==
 
 # Create list of partipants that will form basis of our crosswalk
 user_crosswalk = raw_survey_data[['qid', 'twitter_username']].copy()
-user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.replace("^@", "") #clean up user names by removing leading "@"
+user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.replace("^.*@", "") #clean up user names by removing leading "@". Some people put their name before the @.
+user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.replace(" [^a-zA-Z0-9]+", "") #one person put a trailing marks at the end of the entry
+user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.strip() #remove trailing/leading space
 user_crosswalk = user_crosswalk.rename(columns = {'twitter_username': 'survey_user_name'})
 
 # Remove twitter identifying data & irrelevant columns from survey
@@ -137,8 +139,14 @@ API = twee.set_api_keys(consumer_key = consumer_key,
 ####################
 logger.info("Now looking up our survey particpants to get their full twitter info...")  
 
+# Remove obvious non-real usernames
+fake_names = ["no thanks", "none", "BulldogsFan2020", "No"]
+usernames_to_check = user_crosswalk['survey_user_name'].dropna()
+usernames_to_check = usernames_to_check[~usernames_to_check.isin(fake_names)]
+usernames_to_check = usernames_to_check[~usernames_to_check.str.contains(' ')]
+
 # Determine how many batches of 100 user names we'll need (can only search 100 users at a time)
-n_batches = math.ceil( len(user_crosswalk['survey_user_name']) / 100 )
+n_batches = math.ceil( len(usernames_to_check) / 100 )
 
 # Loop thorugh our participants and look them up
 info_cols =['user_id', 'user_id_str', 'user_name', 'friends', 'followers', 'statuses',
@@ -154,7 +162,7 @@ for i in range(n_batches):
         API = twee.switch_token(API, all_tokens, logger)
         
     # Look up users
-    username_batch = user_crosswalk['survey_user_name'].iloc[100*i:100*(i+1)]
+    username_batch = usernames_to_check.iloc[100*i:100*(i+1)]
     user_data = API.lookup_users(screen_names = list(username_batch), include_entities = False)
     
     # Parse and add to dataframe
@@ -202,7 +210,49 @@ for j in range(users_to_check.shape[0]):
 twitter_info = twitter_info.merge(users_to_check[['user_id', 'user_id_str', 'following_news_source']], 
                                   on = ['user_id', 'user_id_str'],
                                   how = 'left')
+
+
+####################
+# Batch out users for second wave
+####################
+# Create dataset of relevant user info
+batch_data = user_crosswalk.merge(survey_data[['qid', 'hi_corr', 'ideology']], on = 'qid', how = 'left')
+batch_data = batch_data.merge(twitter_info[['user_id', 'user_id_str', 'user_name', 'following_news_source']], on = ['user_id', 'user_id_str'], how = 'left')
+
+# Flag who is in the final user pool based on our criteria of:
+#     (1) provided real twitter username
+batch_data['final_user_pool'] = ~pd.isna(batch_data['user_id_str'])
+user_crosswalk['final_user_pool'] = batch_data['final_user_pool']
+
+# Split users into hi-corr and low-corr treatment groups
+batch_data = batch_data[batch_data.final_user_pool]
+high_corr_group = batch_data[batch_data.hi_corr == '1'].copy()
+low_corr_group = batch_data[batch_data.hi_corr == '0'].copy()
+
+# Assign survey wave
+def assign_survey_wave(df):
+    n_rows = df.shape[0]
+    n_repeats = math.ceil(n_rows / 3)
+    batch_assignments = np.tile([1, 2, 3], n_repeats)
+    batch_assignments = batch_assignments[0:n_rows]
+    return batch_assignments
     
+high_corr_group['survey_wave'] = assign_survey_wave(high_corr_group)
+low_corr_group['survey_wave'] = assign_survey_wave(low_corr_group)
+
+# Create set of arrays for use in follow up survey
+def create_survey_wave_lists(df):
+    wave1 = list(df.user_name[df.survey_wave == 1])
+    wave2 = list(df.user_name[df.survey_wave == 2])
+    wave3 = list(df.user_name[df.survey_wave == 3])
+    wave_lists = [wave1, wave2, wave3]
+    return wave_lists
+    
+high_corr_waves = create_survey_wave_lists(high_corr_group)
+low_corr_waves = create_survey_wave_lists(low_corr_group)
+
+    
+
 ####################
 # Upload to dropbox
 ####################
@@ -215,9 +265,14 @@ user_crosswalk.to_excel(tmp_dir + 'user_crosswalk.xlsx', index = False)
 do_not_pay.to_csv(tmp_dir + 'donotpay_rd1.csv', index = False)
 survey_data.to_csv(tmp_dir + 'survey_data_rd1.csv', index = False)
 twitter_info.to_csv(tmp_dir + 'participant_twitter_info.csv', index = False)
+with open(tmp_dir + 'survey2_high_corr_waves.txt', 'w') as filehandle:
+    filehandle.writelines("%s\n" % x for x in high_corr_waves)
+with open(tmp_dir + 'survey2_low_corr_waves.txt', 'w') as filehandle:
+    filehandle.writelines("%s\n" % x for x in low_corr_waves)    
+
 
 # Upload to dropbox
-for file in ['donotpay_rd1.csv', 'survey_data_rd1.csv']:
+for file in ['donotpay_rd1.csv', 'survey_data_rd1.csv', 'survey2_high_corr_waves.txt', 'survey2_low_corr_waves.txt']:
     with open(tmp_dir + file, "rb") as f:
         dbx.files_upload(f.read(), path = path_to_survey_data + file, mode = dropbox.files.WriteMode.overwrite)
         
