@@ -18,69 +18,69 @@ check_rate_limit <- function(oauth) {
 }
 
 
-# Switch token to next token
-switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.01) {
-  
-  #  If it's the last in our set, go back to the first. 
-  n_tokens <- nrow(tokens)
-  prev_token_number <- which(tokens$current_token == TRUE) #note current token
-  tokens$use_count[prev_token_number] <-   tokens$use_count[prev_token_number] + 1 #note that we've now used the previous token
-  tokens$current_token <- FALSE #prepare to update current token
-  if(prev_token_number == n_tokens) {
-    tokens$current_token[1] <- TRUE
-  } else {
-    tokens$current_token[prev_token_number + 1] <- TRUE
-  }
-  current_token_number <- which(tokens$current_token == TRUE)
-  print(paste("Switched to token", current_token_number))
-  
-  # Make sure it's been 15 min since we last used this token (due to rate limits).
-  wait_time <- 15 + time_buffer #option to add time in case we want to be safe
-  time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
-  if (time_since_last_use < wait_time) {
-    time_to_sleep <- wait_time - as.numeric(time_since_last_use) 
-    time_to_sleep <- time_to_sleep
-    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
-    Sys.sleep(time_to_sleep*60)
-  }
-  
-  # Note start of use of this token,
-  tokens$time_last_use[current_token_number] <- Sys.time()
-  
-  # Output latest list of token use timestamps, and return updated token set
-  write.csv(data.frame(time_last_use = tokens$time_last_use), file = token_time_file, row.names = FALSE)
-  return(tokens)
-  
-}
+# Switch token to next token (This was a mistake do not violate rate limits)
+# switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.01) {
+#   
+#   #  If it's the last in our set, go back to the first. 
+#   n_tokens <- nrow(tokens)
+#   prev_token_number <- which(tokens$current_token == TRUE) #note current token
+#   tokens$use_count[prev_token_number] <-   tokens$use_count[prev_token_number] + 1 #note that we've now used the previous token
+#   tokens$current_token <- FALSE #prepare to update current token
+#   if(prev_token_number == n_tokens) {
+#     tokens$current_token[1] <- TRUE
+#   } else {
+#     tokens$current_token[prev_token_number + 1] <- TRUE
+#   }
+#   current_token_number <- which(tokens$current_token == TRUE)
+#   print(paste("Switched to token", current_token_number))
+#   
+#   # Make sure it's been 15 min since we last used this token (due to rate limits).
+#   wait_time <- 15 + time_buffer #option to add time in case we want to be safe
+#   time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
+#   if (time_since_last_use < wait_time) {
+#     time_to_sleep <- wait_time - as.numeric(time_since_last_use) 
+#     time_to_sleep <- time_to_sleep
+#     print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+#     Sys.sleep(time_to_sleep*60)
+#   }
+#   
+#   # Note start of use of this token,
+#   tokens$time_last_use[current_token_number] <- Sys.time()
+#   
+#   # Output latest list of token use timestamps, and return updated token set
+#   write.csv(data.frame(time_last_use = tokens$time_last_use), file = token_time_file, row.names = FALSE)
+#   return(tokens)
+#   
+# }
+# 
 
-
-# Function to check if we need to switch tokens, and if we do, it switches it.
-check_tokens <- function(tokens, token_time_file) {
-  
-  # Set up Oauth with current token
-  current_token_number <- which(tokens$current_token == TRUE)
-  oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                consumer_secret = tokens$consumer_secret[current_token_number],
-                access_token = tokens$access_token[current_token_number],
-                access_token_secret = tokens$access_token_secret[current_token_number])
-  my_oauth <- getOAuth(oauth, verbose=verbose)
-  
-  # Check requests limit status and if needed, swith token until we get a fresh one.
-  requests_left <- check_rate_limit(my_oauth)
-  while (requests_left == 0) {
-    tokens <- switch_API_tokens(tokens = tokens, token_time_file = token_time_file, time_buffer = 0)
-    current_token_number <- which(tokens$current_token == TRUE)
-    oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
-                  consumer_secret = tokens$consumer_secret[current_token_number],
-                  access_token = tokens$access_token[current_token_number],
-                  access_token_secret = tokens$access_token_secret[current_token_number])
-    my_oauth <- getOAuth(oauth, verbose=verbose)
-    requests_left <- check_rate_limit(my_oauth)
-  }
-  
-  # Return updated tokens (will be the same if we didn't need to swithc tokens)
-  return(tokens)
-}
+# Function to check if we need to switch tokens, and if we do, it switches it. (This was a mistake do not violate rate limits)
+# check_tokens <- function(tokens, token_time_file) {
+#   
+#   # Set up Oauth with current token
+#   current_token_number <- which(tokens$current_token == TRUE)
+#   oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+#                 consumer_secret = tokens$consumer_secret[current_token_number],
+#                 access_token = tokens$access_token[current_token_number],
+#                 access_token_secret = tokens$access_token_secret[current_token_number])
+#   my_oauth <- getOAuth(oauth, verbose=verbose)
+#   
+#   # Check requests limit status and if needed, swith token until we get a fresh one.
+#   requests_left <- check_rate_limit(my_oauth)
+#   while (requests_left == 0) {
+#     tokens <- switch_API_tokens(tokens = tokens, token_time_file = token_time_file, time_buffer = 0)
+#     current_token_number <- which(tokens$current_token == TRUE)
+#     oauth <- list(consumer_key = tokens$consumer_key[current_token_number],
+#                   consumer_secret = tokens$consumer_secret[current_token_number],
+#                   access_token = tokens$access_token[current_token_number],
+#                   access_token_secret = tokens$access_token_secret[current_token_number])
+#     my_oauth <- getOAuth(oauth, verbose=verbose)
+#     requests_left <- check_rate_limit(my_oauth)
+#   }
+#   
+#   # Return updated tokens (will be the same if we didn't need to swithc tokens)
+#   return(tokens)
+# }
 
 
 # Borrowed from tweetscores package, specifically script oauth-utils.R
