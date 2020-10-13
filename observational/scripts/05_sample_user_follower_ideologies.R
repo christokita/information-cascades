@@ -3,7 +3,7 @@
 # @author: ChrisTokita
 #
 # SCRIPT
-# This script wil use Pablo Barbera's R package, "tweetsscores", to get the ideology scores of the followers of each of our monitored users.
+# Use Pablo Barbera's R package, "tweetsscores", to get the ideology scores of the followers of each of our monitored users.
 #
 # NOTE
 # Normally with Rstudio we set the working directory to where the .Rproject file is, but here we will set WD to the locaiton of the script so it can be run from command line.
