@@ -22,7 +22,7 @@ import boto3
 ####################
 # Establish API scraper class
 ####################
-def load_tokens(path, logger):
+def load_tokens(path, logger = None):
     """
     Function to load tokens into a dictionary. 
     
@@ -34,7 +34,8 @@ def load_tokens(path, logger):
     n is the total number of tokens. Each value of the dictionary holds the token keys.
     """
     
-    logger.info(f"Loading tokens from: '{path}' ...")
+    if logger is not None:
+        logger.info(f"Loading tokens from: '{path}' ...")
     
     token_dict = {}
     count = 0 
@@ -45,7 +46,8 @@ def load_tokens(path, logger):
             token = json.loads(line)
             token_dict.update({count_str : token})
     
-    logger.info(f"Tokens loaded successfully.\n")
+    if logger is not None:
+        logger.info(f"Tokens loaded successfully.\n")
     
     return token_dict
 
