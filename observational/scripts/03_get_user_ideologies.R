@@ -132,7 +132,7 @@ for (i in no_estimate) {
   issue <- NA
   user_id <- user_ideologies$user_id_str[i]
   user_id <- gsub("\"", "", user_id) #remove quotes
-  suppressMessages( friends <- tryCatch(getFriends(user_id = user_id, oauth = my_oauth, sleep = 1), error = function(err) { c() }) )
+  friends <- tryCatch(getFriends(user_id = user_id, oauth = my_oauth, sleep = 1, verbose = FALSE), error = function(err) { c() }) 
   requests_left <- requests_left - n_requests
   
   # estimate ideology using two methods: 
@@ -176,9 +176,8 @@ for (i in no_estimate) {
   if ( (progress_measure %% 1000 == 0) | (progress_measure == length(no_estimate)) ) {
     print("Saving what we have to file.")
     write.csv(user_ideologies, file = paste0(path_to_users, output_name), row.names = FALSE)
-    # put_object(file = output_name, object = output_name, bucket = bucket_name)
-    # file.remove(output_name)
   }
+  
 }
 
 

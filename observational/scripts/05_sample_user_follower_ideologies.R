@@ -88,7 +88,7 @@ for (i in 1:length(token_lists)) {
   
   # Load token, add extra tracking data.
   token_set <- stream_in( file(token_lists[i]) )
-  set_name <- gsub( paste0(path_to_twitter_keys, "([_a-z0-9]+).json"), "\\1", token_lists[i], perl = TRUE)
+  set_name <- gsub(".*/([_a-z0-9]+).json", "\\1", token_lists[i], perl = TRUE)
   token_set$set_name <- set_name
   token_set$current_token <- FALSE
   token_set$use_count <- 0 #keep track of how many times each token has been used
