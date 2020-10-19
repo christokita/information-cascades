@@ -19,8 +19,7 @@ create_token_set <- function(list_of_token_files, token_timestamps_file, n_token
     set_name <- gsub(".*/([_a-z0-9]+).json", "\\1", token_lists[i], perl = TRUE)
     token_set$set_name <- set_name
     token_set$current_token <- FALSE
-    token_set$use_count <- 0 #keep track of how many times each token has been used
-    
+
     # Make sure we are only using as many tokens as we want (should be only one)
     token_limit <- min(n_tokens_per_set, nrow(token_set))
     token_set <- token_set[token_limit, ]
@@ -53,7 +52,6 @@ switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.01) {
   #  If it's the last in our set, go back to the first.
   n_tokens <- nrow(tokens)
   prev_token_number <- which(tokens$current_token == TRUE) #note current token
-  tokens$use_count[prev_token_number] <-   tokens$use_count[prev_token_number] + 1 #note that we've now used the previous token
   tokens$current_token <- FALSE #prepare to update current token
   if(prev_token_number == n_tokens) {
     tokens$current_token[1] <- TRUE
