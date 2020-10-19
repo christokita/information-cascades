@@ -24,7 +24,6 @@ data_directory <- "../" #path if done within local directory
 
 # File paths
 token_file1 <- "../api_keys/twitter_tokens/ag_tokens1.json"
-token_file2 <- "../api_keys/twitter_tokens/ckt_tokens1.json"
 token_timestamps_file <- "../api_keys/twitter_token_timestamps.csv" #this file stores the last time these tokens were used
 changed_ties_data_file = paste0(data_directory, "data_derived/monitored_users/changed_ties.csv")
 
@@ -79,7 +78,7 @@ followers_of_interest <- changed_ties %>%
 # Prep Twitter token
 ####################
 # Load tokens, add extra info
-token_lists <- c(token_file1, token_file2) #we're only going to use one token!
+token_lists <- c(token_file1) #we're only going to use one token!
 tokens <- create_token_set(list_of_token_files = token_lists, 
                            token_timestamps_file = token_timestamps_file, 
                            n_tokens_per_set = 1)
@@ -91,7 +90,7 @@ time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_n
 if (time_since_last_use < 15.01) {
   time_to_sleep <- 15.01 - as.numeric(time_since_last_use) 
   time_to_sleep <- time_to_sleep
-  print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+  print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on token ", current_token_number, " again."))
   Sys.sleep(time_to_sleep*60)
 }
 tokens$time_last_use[current_token_number] <- Sys.time() #start use on this token, so mark time.

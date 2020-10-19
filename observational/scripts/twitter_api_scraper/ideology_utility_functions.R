@@ -78,7 +78,7 @@ wait_on_rate_limit <- function(tokens, current_token_number, time_buffer = 0) {
   if (time_since_last_use < wait_time) {
     time_to_sleep <- wait_time - as.numeric(time_since_last_use)
     time_to_sleep <- time_to_sleep
-    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on the token ", current_token_number, " again."))
+    print(paste0("Sleeping for ", round(time_to_sleep, 1), " minutes until we can start on token ", current_token_number, " again."))
     Sys.sleep(time_to_sleep*60)
   }
   tokens$time_last_use[current_token_number] <- Sys.time()
