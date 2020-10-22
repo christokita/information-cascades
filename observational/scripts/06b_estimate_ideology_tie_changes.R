@@ -127,11 +127,12 @@ for (follower_id in followers_of_interest) {
     search_results <- getFriends_autocursor(user_id = follower_id, tokens = tokens, sleep = 1, token_time_file = token_timestamps_file)
     friends <- search_results$friends
     tokens <- search_results$tokens
+    issue <- search_results$error #will be NA unless we encountered an issue with the Twitter API itself
     estimates <- get_ideology(follower_id, friends) #estimate ideology based on friend list
     estimate_mle <- estimates$estimate_mle
     estimate_corresp <- estimates$estimate_corresp
-    if( is.na(estimate_corresp) ) {
-      issue <- "No elite friends"
+    if( is.na(estimate_corresp) & is.na(issue) ) {
+      issue <- "No elite friends" #only assign to users who we didn't encounter an API issue during the attempt to get their friends
     }
     
   } else {

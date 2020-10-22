@@ -210,6 +210,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
   
   ## empty list for friends
   friends <- c()
+  error <- NA #will list if we get a Twitter API issue
   
   ## Check if we need to switch tokens. If so, switch to fresh token. Then, load credentials
   tokens <- check_tokens(tokens, token_time_file)
@@ -251,6 +252,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
                                             user_id = user_id, tokens = tokens)
         tokens <<- handled_error$tokens #update tokens globally in case we had to wait on token (updated time of use in that case)
         result <- handled_error$result
+        error <- handled_error$error
         return(result)
       }
     )
@@ -276,7 +278,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
     prev_cursor <- json.data$previous_cursor_str
     cursor <- json.data$next_cursor_str
   }
-  return(list(friends = friends, tokens = tokens))
+  return(list(friends = friends, tokens = tokens, error = error))
 }
 
 # Function to handle an OAuthRequest error with Twitter API. 
@@ -302,14 +304,14 @@ handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens, tok
                     access_token_secret = tokens$access_token_secret[current_token_number])
       my_oauth <- getOAuth(oauth, verbose = verbose)
       attempt <- my_oauth$OAuthRequest(URL = URL, params = params, method=method,cainfo=cainfo)
-      return(list(result = attempt, tokens = tokens))
+      return(list(result = attempt, tokens = tokens, error = NA))
     },
     
     # If still throwing error, return NA friend list since we can't get their friends.
     error = function(e) {
       print(paste0("We still can't get the friends for user ", user_id, ". Skipping..."))
       attempt <- jsonlite::toJSON(list(friends = "", previous_cursor_str = NA, next_cursor_str = NA))
-      return(list(result = attempt, tokens = tokens))
+      return(list(result = attempt, tokens = tokens, error = "Twitter API error"))
     })
   return(url_return_data)
 }
