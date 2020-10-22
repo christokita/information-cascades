@@ -63,16 +63,17 @@ switch_API_tokens <- function(tokens, token_time_file, time_buffer = 0.01) {
 
   # Make sure it's been 15 min since we last used this token (due to rate limits).
   # Updates time we last waited on this token
-  tokens <- wait_on_rate_limit(tokens = tokens, current_token_number = current_token_number, time_buffer = 0.1)
+  tokens <- wait_on_rate_limit(tokens = tokens, 
+                               current_token_number = current_token_number,
+                               token_time_file = token_time_file,
+                               time_buffer = 0.1)
 
-  # Output latest list of token use timestamps, and return updated token set
-  write.csv(data.frame(time_last_use = tokens$time_last_use), file = token_time_file, row.names = FALSE)
   return(tokens)
 }
 
 
 # Function to wait on using token
-wait_on_rate_limit <- function(tokens, current_token_number, time_buffer = 0) {
+wait_on_rate_limit <- function(tokens, current_token_number, token_time_file, time_buffer = 0) {
   wait_time <- 15 + time_buffer #option to add time in case we want to be safe
   time_since_last_use <- difftime(Sys.time(), tokens$time_last_use[current_token_number], units = "mins")
   if (time_since_last_use < wait_time) {
@@ -82,6 +83,7 @@ wait_on_rate_limit <- function(tokens, current_token_number, time_buffer = 0) {
     Sys.sleep(time_to_sleep*60)
   }
   tokens$time_last_use[current_token_number] <- Sys.time()
+  write.csv(data.frame(time_last_use = tokens$time_last_use), file = token_time_file, row.names = FALSE) # Output latest list of token use timestamps
   return(tokens)
 }
 
