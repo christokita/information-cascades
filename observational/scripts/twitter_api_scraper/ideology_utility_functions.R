@@ -229,7 +229,7 @@ getFriends_autocursor <- function(screen_name = NULL, tokens, cursor = -1, user_
     ## Check if we need to wait on using this token
     requests_left <- check_rate_limit(my_oauth)
     if (requests_left == 0) {
-      tokens <- wait_on_rate_limit(tokens = tokens, current_token_number = current_token_number, time_buffer = 0.1)
+      tokens <- wait_on_rate_limit(tokens = tokens, current_token_number = current_token_number, token_time_file = token_time_file, time_buffer = 0.1)
     }
     
     ## Prep parameters for API request
@@ -296,7 +296,7 @@ handle_OAuth_error <- function(URL, params, method, cainfo, user_id, tokens, tok
       # Check if we need to wait on using this token
       requests_left <- check_rate_limit(my_oauth)
       if (requests_left == 0) {
-        tokens <- wait_on_rate_limit(tokens = tokens, current_token_number = current_token_number, time_buffer = 0.1)
+        tokens <- wait_on_rate_limit(tokens = tokens, current_token_number = current_token_number, token_time_file = token_time_file, time_buffer = 0.1)
       }
       # Try again
       current_token_number <- which(tokens$current_token == TRUE)
