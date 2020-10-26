@@ -8,6 +8,7 @@ data_sim/
 # API keys, logs
 s3_keys/
 aws_pem/
+mturk_keys/
 dropbox_token/
 twitter_tokens/
 api_logs/
