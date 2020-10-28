@@ -24,6 +24,7 @@ data_directory <- "../" #path if done within local directory
 
 # File paths
 token_file1 <- "../api_keys/twitter_tokens/ag_tokens1.json"
+# token_file2 <- "../api_keys/twitter_tokens/ckt_tokens1.json" #only use one token!
 token_timestamps_file <- "../api_keys/twitter_token_timestamps.csv" #this file stores the last time these tokens were used
 changed_ties_data_file = paste0(data_directory, "data_derived/monitored_users/changed_ties.csv")
 
@@ -69,10 +70,11 @@ followers_of_interest <- changed_ties %>%
          found_on_twitter == "True",
          protected == "False",
          is.na(ideology_corresp),
-         is.na(issue)) %>% 
+         is.na(issue) | issue == "Twitter API error") %>% #add no elite friends flag for now because this could include people for whom we encountered a Twitter API error
   distinct(follower_id) %>% 
   pull(follower_id)
 
+print(paste0("Attempting to estimate ideology scores for ", length(followers_of_interest), " users."))
 
 ####################
 # Prep Twitter token
