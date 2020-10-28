@@ -12,6 +12,8 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(Bolstad)
+library(RColorBrewer)
 source("_plot_themes/theme_ctokita.R")
 
 # High-level data directory
@@ -27,6 +29,7 @@ outpath_ideology <- "observational/output/ideology/"
 # Parameters for plots
 plot_color <- "#1B3B6F"
 ideol_pal <- c("#006195", "#d9d9d9", "#d54c54")
+info_corr_pal <- brewer.pal(5, "PuOr")[c(1, 5)]
 
 # Load data
 monitored_users <- read.csv(user_file) %>% 
@@ -52,8 +55,7 @@ ideology_mix <- follower_ideologies %>%
             n_follower_conservative = sum(ideology_corresp > 0)) %>% 
   mutate(followers_freq_liberal = n_follower_liberal / n_follower_samples,
          followers_freq_conservative = n_follower_conservative / n_follower_samples,
-         followers_ideology = (n_follower_conservative - n_follower_liberal) / n_follower_samples) %>% 
-  select(-n_follower_liberal, - n_follower_conservative)
+         followers_ideology = (n_follower_conservative - n_follower_liberal) / n_follower_samples)
 
 # Calculate freq of breaks by ideology
 tie_change_summary <- tie_changes %>%
@@ -70,6 +72,7 @@ tie_change_summary <- tie_changes %>%
 user_data <- merge(monitored_users, ideology_mix) %>% 
   merge(tie_change_summary, all.x = TRUE) %>% 
   mutate(info_correlation = ifelse(news_source %in% c("cbsnews", "usatoday"), "High correlation", "Low correlation")) %>% 
+  mutate(info_correlation = factor(info_correlation, levels = c("Low correlation", "High correlation"))) %>% 
   mutate(followers_freq_same = NA,
          followers_freq_diff = NA,
          tiebreak_freq_same = NA,
@@ -113,16 +116,28 @@ user_data <- user_data %>%
 ####################
 # Plot: preliminary summary plots
 ####################
+# Follower ideology distribution
+gg_follower_dist <- ggplot(follower_ideologies, aes(x = ideology_corresp, fill = ..x..)) +
+  geom_histogram(bins = 30) +
+  scale_fill_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish) +
+  xlab("Follower ideology") +
+  ylab("Count") +
+  theme_ctokita() +
+  theme(legend.position = "none",
+        aspect.ratio = 0.5)
+gg_follower_dist
+ggsave(gg_follower_dist, filename = paste0(outpath_ideology, "follower_ideology.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+
 # Comparison of user ideology vs ideological composition of followers
 gg_follower_ideol <- ggplot(user_data, aes(x = ideology_corresp, y = followers_freq_conservative, color = ideology_corresp)) +
   geom_point(size = 0.9, stroke = 0, alpha = 0.7) +
   scale_color_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish) +
-  theme_ctokita() +
-  theme(legend.position = "none") +
   xlab("User ideology") +
-  ylab("Freq. conservative followers")
+  ylab("Freq. conservative followers") +
+  theme_ctokita() +
+  theme(legend.position = "none") 
 gg_follower_ideol
-ggsave(gg_follower_ideol, filename = paste0(outpath_ideology, "follower_ideology.png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(gg_follower_ideol, filename = paste0(outpath_ideology, "user_vs_follower_ideology.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
 # Comparison of user ideology vs relative ideological composition of followers
 gg_follower_same <- ggplot(user_data, aes(x = ideology_corresp, y = followers_freq_same, color = ideology_corresp)) +
@@ -133,41 +148,50 @@ gg_follower_same <- ggplot(user_data, aes(x = ideology_corresp, y = followers_fr
   xlab("User ideology") +
   ylab("Freq. followers same ideology")
 gg_follower_same
-ggsave(gg_follower_same, filename = paste0(outpath_ideology, "follower_same_ideology.png"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(gg_follower_same, filename = paste0(outpath_ideology, "follower_same_ideology.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
 
 ####################
 # Plot: Opposite-ideology unfollows (tie breaks) by information corelation
 ####################
-# Difference between expected number of opposite ideology follower tie breaks vs actual number
-gg_opposite_breaks <- ggplot(user_data, aes(x = info_correlation, y = delta_freq_tiebreak_diff)) +
-  geom_point(size = 0.9, stroke = 0, alpha = 0.7, position = position_jitter(0.1)) +
+# Raw plot between expected number of opposite ideology follower tie breaks vs actual number
+gg_opposite_breaks_raw <- ggplot(user_data, aes(x = info_correlation, y = delta_freq_tiebreak_diff, color = info_correlation)) +
+  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_point(size = 0.9, stroke = 0, alpha = 0.5, position = position_jitter(width = 0.05, height = 0.05)) +
+  scale_y_continuous(limits = c(-1, 1)) +
+  scale_color_manual(values = info_corr_pal) +
   theme_ctokita() +
   theme(legend.position = "none") +
   xlab("Information ecosystem") +
-  ylab("")
-gg_opposite_breaks
+  ylab("Diff. ideology unfollows relative to expected")
+gg_opposite_breaks_raw
+ggsave(gg_opposite_breaks_raw, filename = paste0(outpath_tiebreaks, "breaks_above_expected_infocorr_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
 
 # Estimate mean using bayesian inference
-library(Bolstad)
-low_corr_estimate <- normnp(x = user_data$delta_n_tiebreak_diff[user_data$info_correlation == "Low correlation"],
-                            m.x = 0, s.x = 1)
-high_corr_estimate <- normnp(x = user_data$delta_n_tiebreak_diff[user_data$info_correlation == "High correlation"],
-                             m.x = 0, s.x = 1)
-info_correlation_estimates <- data.frame(info_correlation = c("Low correlation", "High correlation"), 
+low_corr_estimate <- Bolstad::normnp(x = user_data$delta_n_tiebreak_diff[user_data$info_correlation == "Low correlation"],
+                                     m.x = 0, s.x = 1, quiet = TRUE, plot = FALSE)
+high_corr_estimate <- Bolstad::normnp(x = user_data$delta_n_tiebreak_diff[user_data$info_correlation == "High correlation"],
+                                      m.x = 0, s.x = 1, quiet = TRUE, plot = FALSE)
+info_correlation_estimates <- data.frame(info_correlation = factor(c("Low corr.", "High corr."), levels = c("Low corr.", "High corr.")), 
                                          delta_n_tiebreak_diff = c(low_corr_estimate$mean, high_corr_estimate$mean),
-                                         ci_95_low = c(low_corr_estimate$quantileFun(0.025), high_corr_estimate$quantileFun(0.025)),
-                                         ci_95_high = c(low_corr_estimate$quantileFun(0.975), high_corr_estimate$quantileFun(0.975)))
+                                         ci_80_low = c(low_corr_estimate$quantileFun(0.1), high_corr_estimate$quantileFun(0.1)),
+                                         ci_80_high = c(low_corr_estimate$quantileFun(0.9), high_corr_estimate$quantileFun(0.9)),
+                                         ci_95_low = c(low_corr_estimate$quantileFun(0.01), high_corr_estimate$quantileFun(0.01)),
+                                         ci_95_high = c(low_corr_estimate$quantileFun(0.99), high_corr_estimate$quantileFun(0.99)))
 
-gg_opp_breaks_estimate <- ggplot(user_data, aes(x = perc_diff_breaks_above_expected)) +
-  geom_errorbar()
-  # scale_y_log10() +
+# Plot estimates of mean number of breaks above/below expected number of breaks
+gg_opposite_breaks <- ggplot(info_correlation_estimates, aes(x = info_correlation, color = info_correlation)) +
+  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_errorbar(aes(ymin = ci_95_low, ymax = ci_95_high), width = 0, size = 0.3) +
+  geom_errorbar(aes(ymin = ci_80_low, ymax = ci_80_high), width = 0, size = 0.8) +
+  geom_point(aes(y = delta_n_tiebreak_diff), size = 2) + 
+  scale_color_manual(values = info_corr_pal) +
+  xlab("Information ecosystem") +
+  ylab("Diff. ideology unfollows\nrelative to expected") +
   theme_ctokita() +
-  theme(legend.position = "none") +
-  xlab("News source") +
-  ylab("") +
-  facet_wrap(~info_correlation)
-gg_opp_breaks_estimate
+  theme(legend.position = "none")
+gg_opposite_breaks
+ggsave(gg_opposite_breaks, filename = paste0(outpath_tiebreaks, "breaks_above_expected_infocorr.pdf"), width = 50, height = 45, units = "mm")
 
 test  <- user_data %>% 
   group_by(info_correlation) %>% 
