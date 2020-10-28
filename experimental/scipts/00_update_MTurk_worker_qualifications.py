@@ -48,15 +48,18 @@ Now that it's a new work week, we want to deploy it again.
 To do that, we need to make sure people don't double take our survey.
 '''
 # Read in list of previous workers
-_, res = dbx.files_download(dropbox_dir + 'survey_data/MTurk_workers/workers_rd1_conservative_batch1.csv')
-with io.BytesIO(res.content) as stream:
-    rd1_pt1_workers = pd.read_csv(stream)
-    
-_, res = dbx.files_download(dropbox_dir + 'survey_data/MTurk_workers/workers_rd1_liberal_batch1.csv')
-with io.BytesIO(res.content) as stream:
-    tmp_workers = pd.read_csv(stream)
-rd1_pt1_workers = rd1_pt1_workers.append(tmp_workers)
-del tmp_workers
+worker_rd1_files = ['survey_data/MTurk_workers/workers_rd1_conservative_batch1.csv',
+                    'survey_data/MTurk_workers/workers_rd1_liberal_batch1.csv',
+                    'survey_data/MTurk_workers/workers_rd1_conservative_batch2.csv',
+                    'survey_data/MTurk_workers/workers_rd1_liberal_batch2.csv']
+rd1_pt1_workers = []
+for file in worker_rd1_files:
+    _, res = dbx.files_download(dropbox_dir + file)
+    with io.BytesIO(res.content) as stream:
+        workers = pd.read_csv(stream)
+        rd1_pt1_workers.append(workers)
+        del workers
+rd1_pt1_workers = pd.concat(rd1_pt1_workers)
 
 # Connect to Mturk API    
 mturk = boto3.client('mturk', 
