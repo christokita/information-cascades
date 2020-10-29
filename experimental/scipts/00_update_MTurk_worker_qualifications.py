@@ -51,7 +51,9 @@ To do that, we need to make sure people don't double take our survey.
 worker_rd1_files = ['survey_data/MTurk_workers/workers_rd1_conservative_batch1.csv',
                     'survey_data/MTurk_workers/workers_rd1_liberal_batch1.csv',
                     'survey_data/MTurk_workers/workers_rd1_conservative_batch2.csv',
-                    'survey_data/MTurk_workers/workers_rd1_liberal_batch2.csv']
+                    'survey_data/MTurk_workers/workers_rd1_liberal_batch2.csv',
+                    'survey_data/MTurk_workers/workers_rd1_conservative_batch3.csv',
+                    'survey_data/MTurk_workers/workers_rd1_liberal_batch3.csv']
 rd1_pt1_workers = []
 for file in worker_rd1_files:
     _, res = dbx.files_download(dropbox_dir + file)
