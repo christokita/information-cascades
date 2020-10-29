@@ -53,7 +53,7 @@ worker_rd1_files = ['survey_data/MTurk_workers/workers_rd1_conservative_batch1.c
                     'survey_data/MTurk_workers/workers_rd1_conservative_batch2.csv',
                     'survey_data/MTurk_workers/workers_rd1_liberal_batch2.csv',
                     'survey_data/MTurk_workers/workers_rd1_conservative_batch3.csv',
-                    'survey_data/MTurk_workers/workers_rd1_liberal_batch3.csv'
+                    'survey_data/MTurk_workers/workers_rd1_liberal_batch3.csv',
                     'survey_data/MTurk_workers/workers_rd1_allideols_batch1.csv']
 rd1_pt1_workers = []
 for file in worker_rd1_files:
