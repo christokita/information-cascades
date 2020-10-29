@@ -14,6 +14,7 @@ library(dplyr)
 library(tidyr)
 library(Bolstad)
 library(RColorBrewer)
+library(ebbr)
 source("_plot_themes/theme_ctokita.R")
 
 # High-level data directory
@@ -54,9 +55,22 @@ ideology_mix <- follower_ideologies %>%
   summarise(n_follower_samples = length(ideology_corresp),
             follower_liberal_n = sum(ideology_corresp < 0), #count liberals
             follower_conservative_n = sum(ideology_corresp > 0)) %>% #count conservatives
-  mutate(followers_liberal_freq = follower_liberal_n / n_follower_samples,
-         followers_conservative_freq = follower_conservative_n / n_follower_samples,
+  mutate(followers_liberal_freq = follower_liberal_n / n_follower_samples, #MLE estimate
+         followers_conservative_freq = follower_conservative_n / n_follower_samples, #MLE estimate
          followers_ideology = (follower_conservative_n - follower_liberal_n) / n_follower_samples)
+
+# Bayesian estimate of follower ideology
+prior_liberal <- ideology_mix %>%
+  ebbr::ebb_fit_prior(follower_liberal_n, n_follower_samples)
+prior_conserv <- ideology_mix %>%
+  ebbr::ebb_fit_prior(follower_conservative_n, n_follower_samples)
+a_L <- prior_liberal$parameters$alpha
+b_L <- prior_liberal$parameters$beta
+a_C <- prior_conserv$parameters$alpha
+b_C <- prior_conserv$parameters$beta
+ideology_mix <- ideology_mix %>% 
+  mutate(followers_liberal_est = (follower_liberal_n + a_L) / (n_follower_samples + a_L + b_L),
+         followers_conservative_est = (follower_conservative_n + a_C) / (n_follower_samples + a_C + b_C))
 
 # Calculate freq of breaks by ideology
 tie_change_summary <- tie_changes %>%
@@ -79,6 +93,8 @@ user_data <- merge(monitored_users, ideology_mix) %>%
   #create columns for classification of data by same/diff ideology
   mutate(followers_diffideol_freq = NA,
          followers_sameideol_freq = NA,
+         followers_diffideol_est = NA,
+         followers_sameideol_est = NA,
          tiebreak_diffideol_freq = NA,
          tiebreak_diffideol_n = NA)
 user_data$n_tiebreaks[is.na(user_data$n_tiebreaks)] <- 0
@@ -92,6 +108,11 @@ user_data$followers_sameideol_freq[liberal_users] <- user_data$followers_liberal
 user_data$followers_diffideol_freq[conservative_users] <- user_data$followers_liberal_freq[conservative_users]
 user_data$followers_sameideol_freq[conservative_users] <- user_data$followers_conservative_freq[conservative_users]
 
+user_data$followers_diffideol_est[liberal_users] <- user_data$followers_conservative_est[liberal_users]
+user_data$followers_sameideol_est[liberal_users] <- user_data$followers_liberal_est[liberal_users]
+user_data$followers_diffideol_est[conservative_users] <- user_data$followers_liberal_est[conservative_users]
+user_data$followers_sameideol_est[conservative_users] <- user_data$followers_conservative_est[conservative_users]
+
 user_data$tiebreak_diffideol_freq[liberal_users] <- user_data$tiebreak_conservative_freq[liberal_users]
 user_data$tiebreak_diffideol_freq[conservative_users] <- user_data$tiebreak_liberal_freq[conservative_users]
 
@@ -103,9 +124,14 @@ user_data$tiebreak_diffideol_n[conservative_users] <- user_data$tiebreak_liberal
 # Prep data: calcualte expected frequency of diff ideology tie breaks (same ideology breaks will be mirror image)
 #################### 
 user_data <- user_data %>% 
-  mutate(tiebreak_diffideol_expected = followers_diffideol_freq * n_tiebreaks) %>% 
+  # Calcualte expected number of breaks given follower ideol composition (raw or bayesian estiamte)
+  mutate(tiebreak_diffideol_expected = followers_diffideol_freq * n_tiebreaks,
+         tiebreak_diffideol_expected_est = followers_diffideol_est * n_tiebreaks) %>% 
+  # Calcualte delta between expected and actual tie break number/frequency
   mutate(delta_tiebreak_n = tiebreak_diffideol_n - tiebreak_diffideol_expected,
-         delta_tiebreak_freq = tiebreak_diffideol_freq - followers_diffideol_freq) %>% 
+         delta_tiebreak_n_est = tiebreak_diffideol_n - tiebreak_diffideol_expected_est,
+         delta_tiebreak_freq = tiebreak_diffideol_freq - followers_diffideol_freq,
+         delta_tiebreak_freq_est = tiebreak_diffideol_freq - followers_diffideol_est) %>% 
   # Filter out individuals that didn't show any breaks
   filter(n_tiebreaks > 0)
 
@@ -162,6 +188,7 @@ ggplot(user_data, aes(x = followers_sameideol_freq)) +
 gg_infoeco_breaks_raw <- ggplot(user_data, aes(x = info_ecosystem, y = delta_tiebreak_freq, color = info_ecosystem)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_point(size = 0.9, stroke = 0, alpha = 0.4, position = position_jitter(width = 0.05, height = 0.02)) +
+  # geom_violin() +
   scale_y_continuous(limits = c(-1, 1)) +
   scale_color_manual(values = info_corr_pal) +
   theme_ctokita() +
@@ -188,7 +215,7 @@ gg_infoeco_breaks <- ggplot(info_correlation_estimates, aes(x = info_ecosystem, 
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_errorbar(aes(ymin = ci_95_low, ymax = ci_95_high), width = 0, size = 0.3) +
   geom_errorbar(aes(ymin = ci_80_low, ymax = ci_80_high), width = 0, size = 0.8) +
-  scale_y_continuous(limits = c(-0.02, 0.043)) +
+  # scale_y_continuous(limits = c(-0.02, 0.043)) +
   geom_point(aes(y = delta_freq_tiebreak_diff), size = 2) + 
   scale_color_manual(values = info_corr_pal) +
   xlab("Information ecosystem") +
@@ -198,7 +225,6 @@ gg_infoeco_breaks <- ggplot(info_correlation_estimates, aes(x = info_ecosystem, 
         axis.text.x = element_text(size = 5))
 gg_infoeco_breaks
 ggsave(gg_infoeco_breaks, filename = paste0(outpath_tiebreaks, "tiebreaks_relativefreq_infocorr.pdf"), width = 45, height = 45, units = "mm")
-
 
 
 ####################
@@ -220,8 +246,8 @@ ggsave(gg_newssource_breaks_raw, filename = paste0(outpath_tiebreaks, "tiebreaks
 # Bayesian estimate  of relative frequency of cross-ideology tie breaks
 newssource_estimates <- data.frame()
 for (outlet in unique(user_data$news_source)) {
-  estimate <-Bolstad::normnp(x = user_data$delta_tiebreak_freq[user_data$news_source == outlet],
-                             m.x = 0, s.x = 0.1, quiet = TRUE, plot = TRUE)
+  estimate <-Bolstad::normnp(x = user_data$delta_tiebreak_n[user_data$news_source == outlet],
+                             m.x = 0, s.x = 0.1, quiet = TRUE, plot = FALSE)
   lean <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
   estimate <- data.frame(news_source = outlet, 
                          ideology = lean,
