@@ -79,8 +79,6 @@ do_not_pay = pd.DataFrame(data = raw_survey_data.qid[raw_survey_data.Finished ==
 # Get list of individuals show shared their username voluntarily
 shared_username = raw_survey_data[~pd.isna(raw_survey_data['username_manual_compile'])].copy()
 treatment_counts = shared_username.groupby(['ideology', 'hi_corr']).size()
-shared_username['EndDate'] = pd.to_datetime(shared_username['EndDate'], format = '%y/%m/%d %H:%M:%S')
-treatment_counts_with_workerID = shared_username[shared_username['EndDate'] < '10/29/2020'].groupby(['ideology', 'hi_corr']).size()
 
 # Create list of partipants that will form basis of our crosswalk
 user_crosswalk = shared_username[['qid', 'username_manual_compile']].copy()
