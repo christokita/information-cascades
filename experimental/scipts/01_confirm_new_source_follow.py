@@ -50,7 +50,7 @@ del key
 ####################
 # Make temporary directory
 tmp_dir = "/Users/ChrisTokita/Documents/Research/Tarnita Lab/Information Cascades/information-cascades/experimental/data/tmp/"
-os.mkdir(tmp_dir)
+os.makedirs(tmp_dir, exist_ok = True)
 
 # Download encrypted excel file and open for now
 dbx = dropbox.Dropbox(dropbox_token)
@@ -76,20 +76,27 @@ raw_survey_data = raw_survey_data[raw_survey_data.Finished == 'True']
 # Get list of individuals we should not pay in the event they submit a HIT code for payment
 do_not_pay = pd.DataFrame(data = raw_survey_data.qid[raw_survey_data.Finished == 'False'], columns = ['qid'])
 
+# Get list of individuals show shared their username voluntarily
+shared_username = raw_survey_data[~pd.isna(raw_survey_data['username_manual_compile'])].copy()
+treatment_counts = shared_username.groupby(['ideology', 'hi_corr']).size()
+shared_username['EndDate'] = pd.to_datetime(shared_username['EndDate'], format = '%y/%m/%d %H:%M:%S')
+treatment_counts_with_workerID = shared_username[shared_username['EndDate'] < '10/29/2020'].groupby(['ideology', 'hi_corr']).size()
+
 # Create list of partipants that will form basis of our crosswalk
-user_crosswalk = raw_survey_data[['qid', 'twitter_username']].copy()
-user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.replace("^.*@", "") #clean up user names by removing leading "@". Some people put their name before the @.
-user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.replace(" [^a-zA-Z0-9]+", "") #one person put a trailing marks at the end of the entry
-user_crosswalk['twitter_username'] = user_crosswalk['twitter_username'].str.strip() #remove trailing/leading space
-user_crosswalk = user_crosswalk.rename(columns = {'twitter_username': 'survey_user_name'})
+user_crosswalk = shared_username[['qid', 'username_manual_compile']].copy()
+user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_compile'].str.replace("^.*@", "") #clean up user names by removing leading "@". Some people put their name before the @.
+user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_compile'].str.replace(" [^a-zA-Z0-9]+", "") #one person put a trailing marks at the end of the entry
+user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_compile'].str.strip() #remove trailing/leading space
+user_crosswalk = user_crosswalk.rename(columns = {'username_manual_compile': 'survey_user_name'})
 
 # Remove twitter identifying data & irrelevant columns from survey
 # This will be our set of survey data we can save for use later.
-survey_data = raw_survey_data.drop(columns = ['twitter_username', 'confirmed_username', 
+survey_data = shared_username.drop(columns = ['twitterhandle', 'username_manual_compile', 
                                               'Status', 'IPAddress', 'Progress',
                                               'RecipientLastName', 'RecipientFirstName', 'RecipientEmail',
                                               'ExternalReference', 'LocationLatitude', 'LocationLongitude',
                                               'DistributionChannel', 'UserLanguage'])
+
 
 
 ####################
@@ -139,11 +146,8 @@ API = twee.set_api_keys(consumer_key = consumer_key,
 ####################
 logger.info("Now looking up our survey particpants to get their full twitter info...")  
 
-# Remove obvious non-real usernames
-fake_names = ["no thanks", "none", "BulldogsFan2020", "No"]
+# Remove users who did not volunteer to share username
 usernames_to_check = user_crosswalk['survey_user_name'].dropna()
-usernames_to_check = usernames_to_check[~usernames_to_check.isin(fake_names)]
-usernames_to_check = usernames_to_check[~usernames_to_check.str.contains(' ')]
 
 # Determine how many batches of 100 user names we'll need (can only search 100 users at a time)
 n_batches = math.ceil( len(usernames_to_check) / 100 )
