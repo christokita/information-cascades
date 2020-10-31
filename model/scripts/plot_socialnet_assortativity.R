@@ -63,8 +63,7 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
 gg_assorttype #show plot before saving
-ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
-ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".pdf"), width = 45, height = 45, units = "mm", dpi = 600)
 
 # Change in assortativity
 assort_type_change <- assort_sum %>% 
@@ -82,8 +81,7 @@ gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assorttypeD #show plot before saving
-ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_assorttypeD, filename = paste0(out_path, "assortchange_type", plot_tag, ".pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: assortativity by threshold
@@ -105,7 +103,7 @@ gg_assortthresh <- ggplot(data = assort_thresh, aes(x = gamma, y = mean)) +
   # scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
 gg_assortthresh #show plot before saving
-ggsave(plot = gg_assortthresh, filename = paste0(out_path, "assortativity_threshold", plot_tag, ".png"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_assortthresh, filename = paste0(out_path, "assortativity_threshold", plot_tag, ".pdf"), width = 45, height = 45, units = "mm", dpi = 600)
 
 # Plot against assortativity by type
 assort_comp <- rbind(assort_thresh, assort_type)
@@ -130,7 +128,7 @@ gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = met
                      expand = c(0, 0)) +
   theme_ctokita() 
 gg_assortcomp #show plot before saving
-ggsave(plot = gg_assortcomp, filename = paste0(out_path, "assortativity_comparison", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_assortcomp, filename = paste0(out_path, "assortativity_comparison", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 600)
 
 
 
@@ -189,9 +187,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_type_change #show plot before saving
-ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".svg"), width = 75, height = 45, units = "mm")
-
+ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Breaks/new ties by gamma
@@ -226,5 +222,4 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   theme_ctokita() +
   theme(aspect.ratio = 1)
 gg_ties #show plot before saving
-ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".png"), width = 90, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".svg"), width = 90, height = 45, units = "mm")
+ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".pdf"), width = 90, height = 45, units = "mm", dpi = 400)

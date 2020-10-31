@@ -119,7 +119,7 @@ gg_act <- ggplot(activity, aes(x = threshold, y = value, color = gamma)) +
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_act
-ggsave(gg_act, filename = paste0(out_path, "threshold-activity.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_act, filename = paste0(out_path, "threshold-activity.pdf"), width = 90, height = 60, units = "mm")
 
 ####################
 # Plot: Base behavior rates vs threshold
@@ -142,7 +142,7 @@ gg_tp <- ggplot(baserates %>% filter(metric == "true_positive"), aes(x = thresho
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_tp #show plot before saving
-ggsave(gg_tp, filename = paste0(out_path, "threshold-truepositive.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_tp, filename = paste0(out_path, "threshold-truepositive.pdf"), width = 90, height = 60, units = "mm")
 
 # False Positive
 gg_fp <- ggplot(baserates %>% filter(metric == "false_positive"), aes(x = threshold, y = value, color = gamma)) +
@@ -158,7 +158,7 @@ gg_fp <- ggplot(baserates %>% filter(metric == "false_positive"), aes(x = thresh
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_fp #show plot before saving
-ggsave(gg_fp, filename = paste0(out_path, "threshold-falsepositive.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_fp, filename = paste0(out_path, "threshold-falsepositive.pdf"), width = 90, height = 60, units = "mm")
 
 # True Negative
 gg_tn <- ggplot(baserates %>% filter(metric == "true_negative"), aes(x = threshold, y = value, color = gamma)) +
@@ -174,7 +174,7 @@ gg_tn <- ggplot(baserates %>% filter(metric == "true_negative"), aes(x = thresho
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_tn #show plot before saving
-ggsave(gg_tn, filename = paste0(out_path, "threshold-truenegative.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_tn, filename = paste0(out_path, "threshold-truenegative.pdf"), width = 90, height = 60, units = "mm")
 
 # False Negative
 gg_fn <- ggplot(baserates %>% filter(metric == "false_negative"), aes(x = threshold, y = value, color = gamma)) +
@@ -190,7 +190,7 @@ gg_fn <- ggplot(baserates %>% filter(metric == "false_negative"), aes(x = thresh
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_fn #show plot before saving
-ggsave(gg_fn, filename = paste0(out_path, "threshold-falsenegative.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_fn, filename = paste0(out_path, "threshold-falsenegative.pdf"), width = 90, height = 60, units = "mm")
 
 
 ####################
@@ -215,7 +215,7 @@ gg_sens <- ggplot(sens, aes(x = threshold, y = value, color = gamma)) +
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_sens #show plot before saving
-ggsave(gg_sens, filename = paste0(out_path, "threshold-sensitivity.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_sens, filename = paste0(out_path, "threshold-sensitivity.pdf"), width = 90, height = 60, units = "mm")
 
 
 ####################
@@ -240,7 +240,7 @@ gg_spec <- ggplot(spec, aes(x = threshold, y = value, color = gamma)) +
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_spec #show plot before saving
-ggsave(gg_spec, filename = paste0(out_path, "threshold-specificity.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_spec, filename = paste0(out_path, "threshold-specificity.pdf"), width = 90, height = 60, units = "mm")
 
 
 ####################
@@ -265,5 +265,5 @@ gg_prec <- ggplot(prec, aes(x = threshold, y = value, color = gamma)) +
   facet_grid(trial~gamma, 
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_prec #show plot before saving
-ggsave(gg_prec, filename = paste0(out_path, "threshold-precision.png"), width = 90, height = 60, units = "mm")
+ggsave(gg_prec, filename = paste0(out_path, "threshold-precision.pdf"), width = 90, height = 60, units = "mm")
 

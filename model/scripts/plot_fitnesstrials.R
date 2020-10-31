@@ -65,8 +65,7 @@ gg_activity <- ggplot(activity, aes(x = trial, y = mean, color = gamma, group = 
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_activity #show plot before saving
-ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_activity + theme(legend.position = "none"), filename = paste0(out_path, "cascadeactivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_activity, filename = paste0(out_path, "cascadeactivity", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Avg.cascade size 
@@ -86,9 +85,7 @@ gg_size <- ggplot(avgsize, aes(x = trial, y = mean, color = gamma, group = gamma
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_size #show plot before saving
-ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_size + theme(legend.position = "none"), filename = paste0(out_path, "cascadesize", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
-
+ggsave(plot = gg_size, filename = paste0(out_path, "cascadesize", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Cascade bias
@@ -108,8 +105,7 @@ gg_bias <- ggplot(bias, aes(x = trial, y = mean, color = gamma, group = gamma)) 
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_bias #show plot before saving
-ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_bias + theme(legend.position = "none"), filename = paste0(out_path, "cascadebias", plot_tag ,".svg"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_bias, filename = paste0(out_path, "cascadebias", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 
 
@@ -153,11 +149,7 @@ gg_behavrates <- ggplot(behavrates, aes(x = trial, y = mean, color = gamma, grou
         axis.title.x = element_blank()) +
   facet_wrap(~metric, scales = "free")
 gg_behavrates #show plot before saving
-ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".png"), width = 120, height = 90, units = "mm", dpi = 400)
-ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".svg"), width = 120, height = 90, units = "mm", dpi = 400)
-ggsave(plot = gg_behavrates + facet_wrap(~metric, scales = "fixed"), filename = paste0(out_path, "behaviorrates_fixedscale", plot_tag ,".png"), width = 120, height = 90, units = "mm", dpi = 400)
-
-
+ggsave(plot = gg_behavrates, filename = paste0(out_path, "behaviorrates", plot_tag ,".pdf"), width = 120, height = 90, units = "mm", dpi = 400)
 
 ####################
 # Plot: Sensitivity
@@ -177,8 +169,8 @@ gg_sens <- ggplot(sensitivity, aes(x = trial, y = mean, color = gamma, group = g
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_sens #show plot before saving
-ggsave(plot = gg_sens, filename = paste0(out_path, "sensitivity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_sens + theme(legend.position = "none"), filename = paste0(out_path, "sensitivity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_sens, filename = paste0(out_path, "sensitivity", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
+
 
 ####################
 # Plot: Specificity
@@ -198,8 +190,7 @@ gg_spec <- ggplot(specificity, aes(x = trial, y = mean, color = gamma, group = g
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_spec #show plot before saving
-ggsave(plot = gg_spec, filename = paste0(out_path, "specificity", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_spec + theme(legend.position = "none"), filename = paste0(out_path, "specificity", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_spec, filename = paste0(out_path, "specificity", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Precision
@@ -219,8 +210,7 @@ gg_prec <- ggplot(precision, aes(x = trial, y = mean, color = gamma, group = gam
   theme_ctokita() +
   theme(axis.title.x = element_blank())
 gg_prec #show plot before saving
-ggsave(plot = gg_prec, filename = paste0(out_path, "precision", plot_tag ,".png"), width = 75, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_prec + theme(legend.position = "none"), filename = paste0(out_path, "precision", plot_tag ,".svg"), width = 45, height = 45, units = "mm")
+ggsave(plot = gg_prec, filename = paste0(out_path, "precision", plot_tag ,".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 
 
@@ -276,9 +266,7 @@ gg_behavrates_lowthresh <- ggplot(behavrates_lowthresh, aes(x = trial, y = mean,
         axis.title.x = element_blank()) +
   facet_wrap(~metric, scales = "free")
 gg_behavrates_lowthresh #show plot before saving
-ggsave(plot = gg_behavrates_lowthresh, filename = paste0(out_path, "behaviorrates_lowthresh", plot_tag ,".png"), width = 55, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_behavrates_lowthresh, filename = paste0(out_path, "behaviorrates_lowthresh", plot_tag ,".svg"), width = 55, height = 45, units = "mm")
-
+ggsave(plot = gg_behavrates_lowthresh, filename = paste0(out_path, "behaviorrates_lowthresh", plot_tag ,".pdf"), width = 55, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Base behavior rates, high threshold
@@ -305,5 +293,4 @@ gg_behavrates_highthresh <- ggplot(behavrates_highthresh, aes(x = trial, y = mea
         legend.position = "none") +
   facet_wrap(~metric, scales = "free")
 gg_behavrates_highthresh #show plot before saving
-ggsave(plot = gg_behavrates_highthresh, filename = paste0(out_path, "behaviorrates_highthresh", plot_tag ,".png"), width = 55, height = 45, units = "mm", dpi = 400)
-ggsave(plot = gg_behavrates_highthresh, filename = paste0(out_path, "behaviorrates_highthresh", plot_tag ,".svg"), width = 55, height = 45, units = "mm")
+ggsave(plot = gg_behavrates_highthresh, filename = paste0(out_path, "behaviorrates_highthresh", plot_tag ,".pdf"), width = 55, height = 45, units = "mm", dpi = 400)

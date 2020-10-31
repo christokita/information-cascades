@@ -106,7 +106,7 @@ gg_centrality <- ggplot(fit_cent, aes(x = threshold, y = Estimate, color = gamma
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_centrality
-ggsave(gg_centrality, filename = paste0(out_path, "threshold-centrality", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_centrality, filename = paste0(out_path, "threshold-centrality", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -170,7 +170,6 @@ fit_deg <- lapply(seq(1:length(gamma_values)), function(i) {
 })
 fit_deg <- do.call("rbind", fit_deg)
 
-
 ####################
 # Plot fitted regressions for thresold value vs degree in each info ecosystem (gamma)
 ####################
@@ -184,7 +183,7 @@ gg_degree <- ggplot(fit_deg, aes(x = threshold, y = Estimate, color = gamma, gro
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_degree
-ggsave(gg_degree, filename = paste0(out_path, "threshold-degree", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_degree, filename = paste0(out_path, "threshold-degree", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -209,7 +208,6 @@ gg_degree_select <- fit_deg %>%
         legend.position = "none", 
         strip.background = element_blank())
 gg_degree_select
-
 
 ####################
 # Plot degree distribution for each info ecosystem (gamma)
@@ -285,7 +283,7 @@ gg_localassort <- ggplot(fit_la, aes(x = threshold, y = Estimate, color = gamma,
   xlab(expression(paste("Threshold, ", theta[i]))) +
   theme_ctokita() 
 gg_localassort
-ggsave(gg_localassort, filename = paste0(out_path, "threshold-localassort", plot_tag, ".png"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(gg_localassort, filename = paste0(out_path, "threshold-localassort", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 # Select gammas
 gamma_vals <- c(-1, 0.8, 0.6, 0.4, 0, 1)
@@ -385,9 +383,7 @@ gg_localnetmetrics <- fits %>%
         axis.title.y = element_blank(),
         strip.text.y = element_text(size = 6))
 gg_localnetmetrics
-ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".png"), width = 90, height = 60, units = "mm", dpi = 400)
-# ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".svg"), width = 90, height = 60, units = "mm")
-
+ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".pdf"), width = 90, height = 60, units = "mm", dpi = 400)
 
 ####################
 # Plot linear component of fit by gamma (for each metric)
@@ -433,6 +429,4 @@ gg_coeffs <- ggplot(coeffs_all, aes(x = gamma, y = slope, color = gamma)) +
         aspect.ratio = NULL, 
         strip.text.y = element_text(size = 6))
 gg_coeffs
-ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".png"), width = 35, height = 54, units = "mm", dpi = 400)
-# ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".svg"), width = 35, height = 54, units = "mm")
-
+ggsave(gg_coeffs, filename = paste0(out_path, "threshold-networkmetriccoeffs", plot_tag, ".pdf"), width = 35, height = 54, units = "mm", dpi = 400)
