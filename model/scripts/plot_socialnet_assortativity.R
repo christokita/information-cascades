@@ -145,11 +145,11 @@ network_change_data <- lapply(network_files, function(x) {
            net_centrality = centrality - centrality_initial)
   return(run_file)
 })
-network_change_data <- do.call("rbind", network_change_data) %>% 
-  gather(metric, value, -gamma, -replicate, -individual, -type, -threshold)
+network_change_data <- do.call("rbind", network_change_data) 
 
 #Summarize
 network_change_sum <- network_change_data %>% 
+  gather(metric, value, -gamma, -replicate, -individual, -type, -threshold)
   select(-replicate, -individual, -type, -threshold) %>% 
   group_by(gamma, metric) %>% 
   summarise(mean = mean(value), 
@@ -173,7 +173,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
-  ylab(expression( paste("Net", Delta, " social ties")) ) +
+  ylab(expression( paste("Net ", Delta, " social ties")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(breaks = seq(-2, 2, 0.5)) +
   scale_shape_manual(values = c(19, 21),
@@ -195,6 +195,8 @@ ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag,
 ties_data <- network_change_sum %>% 
   filter(metric %in% c("diff_type_adds", "diff_type_breaks", "same_type_adds", "same_type_breaks")) %>% 
   mutate(metric = factor(metric, levels = c("same_type_adds", "same_type_breaks", "diff_type_adds", "diff_type_breaks")))
+
+# All ties
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
               alpha = 0.2,
@@ -223,3 +225,56 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
   theme(aspect.ratio = 1)
 gg_ties #show plot before saving
 ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+
+# Breaks only
+gg_breaks <- ties_data %>% 
+  filter(grepl("breaks", metric)) %>% 
+  ggplot(., aes(x = gamma, y = mean, group = metric)) +
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
+              alpha = 0.2,
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 1, color = pal) +
+  ylab("Number of broken ties") +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
+  scale_y_continuous(limits = c(0, 3),
+                     breaks = seq(0, 3, 0.5),
+                     expand = c(0, 0)) +
+  scale_shape_manual(values = c(17, 24),
+                     labels = c("Same ideology",
+                                "Diff. ideology"),
+                     name = "") +
+  scale_fill_manual(values = c("black", "white"),
+                    labels = c("Same ideology",
+                               "Diff. ideology"),
+                    name = "") +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+gg_breaks #show plot before saving
+ggsave(plot = gg_breaks, filename = paste0(out_path, "tie_breaks", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
+
+
+####################
+# Plot: Diff. ideology tie breaks by gamme
+####################
+diff_ideol_breaks <- network_change_data %>% 
+  mutate(diffideol_breaks_freq = diff_type_breaks / (diff_type_breaks + same_type_breaks)) %>% 
+  group_by(gamma) %>% 
+  summarise(mean = mean(diffideol_breaks_freq, na.rm = TRUE),
+            sd = sd(diffideol_breaks_freq, na.rm = TRUE),
+            error = qnorm(0.975)*sd(diffideol_breaks_freq, na.rm = TRUE) / sqrt(sum(!is.na(diffideol_breaks_freq))))
+gg_breaks <- ggplot(diff_ideol_breaks, aes(x = gamma, y = mean)) +
+  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
+              alpha = 0.2,
+              fill = pal) +
+  geom_line(size = 0.3, color = pal) +
+  geom_point(size = 1, color = pal) +
+  ylab("Freq. broken ties, diff. ideology") +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
+  # scale_y_continuous(limits = c(0, 1.21), 
+  #                    breaks = seq(0, 2, 0.2),
+  #                    expand = c(0, 0)) +
+  theme_ctokita() +
+  theme(aspect.ratio = 1)
+gg_breaks #show plot before saving
