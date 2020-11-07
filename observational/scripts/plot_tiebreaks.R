@@ -54,10 +54,11 @@ ideology_mix <- follower_ideologies %>%
   group_by(user_id) %>% 
   summarise(n_follower_samples = length(ideology_corresp),
             follower_liberal_n = sum(ideology_corresp < 0), #count liberals
-            follower_conservative_n = sum(ideology_corresp > 0)) %>% #count conservatives
+            follower_conservative_n = sum(ideology_corresp > 0), #count conservatives
+            followers_ideol_avg = mean(ideology_corresp)) %>%
   mutate(followers_liberal_freq = follower_liberal_n / n_follower_samples, #MLE estimate
          followers_conservative_freq = follower_conservative_n / n_follower_samples, #MLE estimate
-         followers_ideology = (follower_conservative_n - follower_liberal_n) / n_follower_samples)
+         followers_ideology_skew = (follower_conservative_n - follower_liberal_n) / n_follower_samples)
 
 # Bayesian estimate of follower ideology
 prior_liberal <- ideology_mix %>%
@@ -75,11 +76,12 @@ ideology_mix <- ideology_mix %>%
 # Calculate freq of breaks by ideology
 tie_change_summary <- tie_changes %>%
   filter(tie_change == "broken",
-         !is.na(ideology_corresp)) %>% 
+         !is.na(ideology_corresp)) %>%
   group_by(user_id) %>% 
   summarise(n_tiebreaks = length(ideology_corresp),
             tiebreak_liberal_n = sum(ideology_corresp < 0),
-            tiebreak_conservative_n = sum(ideology_corresp > 0)) %>% 
+            tiebreak_conservative_n = sum(ideology_corresp > 0),
+            tiebreak_ideol_avg = mean(ideology_corresp)) %>% 
   mutate(tiebreak_liberal_freq = tiebreak_liberal_n / n_tiebreaks,
          tiebreak_conservative_freq = tiebreak_conservative_n / n_tiebreaks)
 
@@ -131,9 +133,7 @@ user_data <- user_data %>%
   mutate(delta_tiebreak_n = tiebreak_diffideol_n - tiebreak_diffideol_expected,
          delta_tiebreak_n_est = tiebreak_diffideol_n - tiebreak_diffideol_expected_est,
          delta_tiebreak_freq = tiebreak_diffideol_freq - followers_diffideol_freq,
-         delta_tiebreak_freq_est = tiebreak_diffideol_freq - followers_diffideol_est) %>% 
-  # Filter out individuals that didn't show any breaks
-  filter(n_tiebreaks > 0)
+         delta_tiebreak_freq_est = tiebreak_diffideol_freq - followers_diffideol_est)
 
 
 ####################
@@ -168,7 +168,9 @@ gg_follower_dist
 ggsave(gg_follower_dist, filename = paste0(outpath_ideology, "follower_ideology.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
 
 # Comparison of user ideology vs ideological composition of followers
-gg_follower_ideol <- ggplot(user_data, aes(x = ideology_corresp, y = followers_conservative_freq, color = ideology_corresp)) +
+gg_follower_ideol <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = ideology_corresp, y = followers_conservative_freq, color = ideology_corresp)) +
   geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16) +
   scale_color_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish) +
   xlab("User ideology") +
@@ -179,7 +181,9 @@ gg_follower_ideol
 ggsave(gg_follower_ideol, filename = paste0(outpath_ideology, "user_vs_follower_ideology.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
 # Comparison of user ideology vs relative ideological composition of followers
-gg_follower_same <- ggplot(user_data, aes(x = ideology_corresp, y = followers_sameideol_freq, color = ideology_corresp)) +
+gg_follower_same <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = ideology_corresp, y = followers_sameideol_freq, color = ideology_corresp)) +
   geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16) +
   scale_color_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish) +
   theme_ctokita() +
@@ -191,12 +195,13 @@ ggsave(gg_follower_same, filename = paste0(outpath_ideology, "follower_same_ideo
 
 # Same ideology follow composition by news source
 gg_follower_dist <- ggplot(user_data, aes(x = followers_conservative_freq)) +
-  geom_histogram(fill = plot_color, color = plot_color) +
-  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.5)) +
+  geom_histogram(fill = plot_color, color = plot_color, binwidth = 0.01, size = 1) +
+  scale_x_continuous(breaks = seq(0, 1, 0.5)) +
   xlab("Freq. of conservative followers") +
   theme_ctokita() +
   theme(legend.position = "none") +
-  facet_wrap(~news_source, scales = "free_x")
+  facet_wrap(~news_source)
+gg_follower_dist
 ggsave(gg_follower_dist, filename = paste0(outpath_ideology, "follower_conservative_bynewssource.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
 
 
@@ -207,7 +212,9 @@ ggsave(gg_follower_dist, filename = paste0(outpath_ideology, "follower_conservat
 ########## Relative frequency ########## 
 
 # Scatter plot of relative frequency of cross-ideology breaks (relative to expected by random chance)
-gg_infoeco_breaks_freq_raw <- ggplot(user_data, aes(x = info_ecosystem, y = delta_tiebreak_freq, color = info_ecosystem)) +
+gg_infoeco_breaks_freq_raw <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = info_ecosystem, y = delta_tiebreak_freq, color = info_ecosystem)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_point(size = 1, stroke = 0, alpha = 0.4, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
   # geom_violin() +
@@ -217,13 +224,16 @@ gg_infoeco_breaks_freq_raw <- ggplot(user_data, aes(x = info_ecosystem, y = delt
   theme(legend.position = "none") +
   xlab("Information ecosystem") +
   ylab("Relative freq. of opposite-ideology unfollows")
-gg_infoeco_breaks_raw
-ggsave(gg_infoeco_breaks_raw, filename = paste0(outpath_tiebreaks, "relativefreq_infoeco_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
+gg_infoeco_breaks_freq_raw
+ggsave(gg_infoeco_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "relativefreq_infoeco_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
 
 # Estimate mean using bayesian inference
 infoeco_freq_estimates <- data.frame()
 for (info_corr in c("Low correlation", "High correlation")) {
-  info_eco_data <- user_data$delta_tiebreak_freq[user_data$info_ecosystem == info_corr]
+  info_eco_data <- user_data %>% 
+    filter(info_ecosystem == info_corr,
+           n_tiebreaks > 0) %>% 
+    .$delta_tiebreak_freq
   estimate <- estimate_mean(data = info_eco_data, 
                             mean_prior = 0,
                             std_prior = 0.05, 
@@ -248,14 +258,16 @@ gg_infoeco_breaks_freq <- ggplot(infoeco_freq_estimates, aes(x = info_ecosystem,
   theme_ctokita() +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 5))
-gg_infoeco_breaks
-ggsave(gg_infoeco_breaks, filename = paste0(outpath_tiebreaks, "relativefreq_infoeco.pdf"), width = 45, height = 45, units = "mm")
+gg_infoeco_breaks_freq
+ggsave(gg_infoeco_breaks_freq, filename = paste0(outpath_tiebreaks, "relativefreq_infoeco.pdf"), width = 45, height = 45, units = "mm")
 
 
 ########## Relative count ########## 
 
 # Scatter plot of number of cross-ideology breaks (relative to expected by random chance)
-gg_infoeco_breaks_n_raw <- ggplot(user_data, aes(x = info_ecosystem, y = delta_tiebreak_n, color = info_ecosystem)) +
+gg_infoeco_breaks_n_raw <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = info_ecosystem, y = delta_tiebreak_n, color = info_ecosystem)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_point(size = 1, stroke = 0, alpha = 0.4, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
   scale_color_manual(values = info_corr_pal) +
@@ -269,7 +281,10 @@ ggsave(gg_infoeco_breaks_n_raw, filename = paste0(outpath_tiebreaks, "relativenu
 # Estimate mean using bayesian inference
 infoeco_n_estimates <- data.frame()
 for (info_corr in c("Low correlation", "High correlation")) {
-  info_eco_data <- user_data$delta_tiebreak_n[user_data$info_ecosystem == info_corr]
+  info_eco_data <- user_data %>% 
+    filter(info_ecosystem == info_corr,
+           n_tiebreaks > 0) %>% 
+    .$delta_tiebreak_n
   estimate <- estimate_mean(data = info_eco_data, 
                             mean_prior = 0,
                             std_prior = 0.5, 
@@ -305,7 +320,9 @@ ggsave(gg_infoeco_breaks_n, filename = paste0(outpath_tiebreaks, "relativenumber
 ########## Relative frequency ##########
 
 # Scatter plot of frequency of cross-ideology breaks (relative to expected by random chance)
-gg_newssource_breaks_freq_raw <- ggplot(user_data, aes(x = news_source, y = delta_tiebreak_freq, color = news_source)) +
+gg_newssource_breaks_freq_raw <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = news_source, y = delta_tiebreak_freq, color = news_source)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
   scale_y_continuous(limits = c(-1, 1)) +
@@ -320,7 +337,9 @@ ggsave(gg_newssource_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "rela
 # Bayesian estimate  of relative frequency of cross-ideology tie breaks
 newssource_freq_estimates <- data.frame()
 for (outlet in unique(user_data$news_source)) {
-  newssource_data <- user_data[user_data$news_source == outlet, ]
+  newssource_data <- user_data %>% 
+    filter(news_source == outlet,
+           n_tiebreaks > 0)
   ideology <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
   estimate <- estimate_mean(data = newssource_data$delta_tiebreak_freq, 
                             mean_prior = 0,
@@ -360,7 +379,9 @@ ggsave(gg_newssource_breaks_freq, filename = paste0(outpath_tiebreaks, "relative
 ########## Relative count ##########
 
 # Scatter plot of number of cross-ideology breaks (relative to expected by random chance)
-gg_newssource_breaks_n_raw <- ggplot(user_data, aes(x = news_source, y = delta_tiebreak_n, color = news_source)) +
+gg_newssource_breaks_n_raw <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  ggplot(., aes(x = news_source, y = delta_tiebreak_n, color = news_source)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
   scale_y_continuous(limits = c(-15, 15), breaks = seq(-15, 15, 5)) +
@@ -375,7 +396,9 @@ ggsave(gg_newssource_breaks_n_raw, filename = paste0(outpath_tiebreaks, "relativ
 # Bayesian estimate  of relative frequency of cross-ideology tie breaks
 newssource_n_estimates <- data.frame()
 for (outlet in unique(user_data$news_source)) {
-  newssource_data <- user_data[user_data$news_source == outlet, ]
+  newssource_data <- user_data %>% 
+    filter(n_tiebreaks > 0,
+           news_source == outlet)
   ideology <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
   estimate <- estimate_mean(data = newssource_data$delta_tiebreak_n, 
                             mean_prior = 0,
@@ -422,13 +445,13 @@ ggsave(gg_newssource_breaks_n, filename = paste0(outpath_tiebreaks, "relativenum
 # Bayesian estimate  of unadjusted frequency of cross-ideology unfollows and initial followers
 infoeco_unadjust_estimates <- data.frame()
 for (info_corr in c("Low correlation", "High correlation")) {
-  estimate_unfollows <- estimate_mean(data = user_data$tiebreak_diffideol_freq[user_data$info_ecosystem == info_corr], 
+  estimate_unfollows <- estimate_mean(data = user_data %>% filter(info_ecosystem == info_corr, n_tiebreaks > 0) %>% .$tiebreak_diffideol_freq, 
                                       mean_prior = 0,
                                       std_prior = 0.5, 
                                       info_ecosystem = info_corr, 
                                       ideology = NA) %>% 
     mutate(measure = "Cross-ideology unfollows")
-  estimate_followers <- estimate_mean(data = user_data$followers_diffideol_freq[user_data$info_ecosystem == info_corr], 
+  estimate_followers <- estimate_mean(data = user_data %>% filter(info_ecosystem == info_corr, n_tiebreaks > 0) %>% .$followers_diffideol_freq, 
                                       mean_prior = 0,
                                       std_prior = 0.5, 
                                       info_ecosystem = info_corr, 
@@ -468,13 +491,13 @@ ggsave(gg_infoeco_unadjusted, filename = paste0(outpath_tiebreaks, "unadjusted_f
 newssource_unadjust_estimates <- data.frame()
 for (outlet in unique(user_data$news_source)) {
   ideology <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
-  estimate_unfollows <- estimate_mean(data = user_data$tiebreak_diffideol_freq[user_data$news_source == outlet], 
+  estimate_unfollows <- estimate_mean(data = user_data %>% filter(news_source == outlet, n_tiebreaks > 0) %>% .$tiebreak_diffideol_freq, 
                                       mean_prior = 0,
                                       std_prior = 0.5, 
                                       info_ecosystem = unique(user_data$info_ecosystem), 
                                       ideology = ideology) %>% 
     mutate(measure = "Cross-ideology unfollows")
-  estimate_followers <- estimate_mean(data = user_data$followers_diffideol_freq[user_data$news_source == outlet], 
+  estimate_followers <- estimate_mean(data = user_data %>% filter(news_source == outlet, n_tiebreaks > 0) %>% .$followers_diffideol_freq, 
                                       mean_prior = 0,
                                       std_prior = 0.5, 
                                       info_ecosystem = unique(user_data$info_ecosystem), 
@@ -502,16 +525,56 @@ gg_newssource_unadjusted <- ggplot(newssource_unadjust_estimates,
   ylab("Frequency") +
   theme_ctokita() +
   theme(legend.position = "right",
-        axis.text.x = element_text(size = 5),
+        axis.text.x = element_text(size = 5, angle = 45, hjust = 1),
         aspect.ratio = NULL) +
   guides(color = FALSE)
 gg_newssource_unadjusted
-ggsave(gg_newssource_unadjusted, filename = paste0(outpath_tiebreaks, "unadjusted_freq_newssource.pdf"), width = 90, height = 45, units = "mm")
+ggsave(gg_newssource_unadjusted, filename = paste0(outpath_tiebreaks, "unadjusted_freq_newssource.pdf"), width = 75, height = 45, units = "mm")
 
 
+####################
+# Plot: Avg ideological distance of unfollows
+####################
+# Calcualte difference in follower and tie-breaker (users who unfollowed) ideology
+unfollow_ideol_data <- user_data %>% 
+  filter(n_tiebreaks > 0) %>% 
+  mutate(relative_tiebreak_ideol = tiebreak_ideol_avg - followers_ideol_avg)
 
-ggplot(user_data, aes(x = followers_diffideol_freq)) +
-  geom_histogram() +
+# Bayesian estimate  of unadjusted frequency of cross-ideology unfollows and initial followers
+newssource_unfollow_ideology <- data.frame()
+for (outlet in unique(user_data$news_source)) {
+  newssource_data <- unfollow_ideol_data %>% 
+    filter(n_tiebreaks > 0,
+           news_source == outlet)
+  ideology <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
+  estimate <- estimate_mean(data = newssource_data$relative_tiebreak_ideol, 
+                            mean_prior = 0,
+                            std_prior = 0.05, 
+                            info_ecosystem = unique(newssource_data$info_ecosystem), 
+                            ideology = ideology)
+  estimate$news_source <- outlet
+  newssource_unfollow_ideology <- rbind(newssource_unfollow_ideology, estimate)
+  rm(newssource_data, ideology, estimate)
+}
+newssource_unfollow_ideology <- newssource_unfollow_ideology %>% 
+  mutate(news_source = factor(news_source, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
+
+# Plot
+gg_unfollow_ideol <- ggplot(newssource_unfollow_ideology, 
+                                   aes(x = news_source, y = est_mean, color = news_source)) +
+  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_errorbar(aes(ymin = ci_95_low, ymax = ci_95_high), 
+                position = position_dodge(dodge_width), width = 0, size = 0.3) +
+  geom_errorbar(aes(ymin = ci_80_low, ymax = ci_80_high),
+                position = position_dodge(dodge_width), width = 0, size = 0.8) +
+  geom_point(size = 2) + 
+  scale_color_manual(values = news_pal) +
+  xlab("News outlet") +
+  ylab("Relative ideology of unfollowers") +
   theme_ctokita() +
-  facet_wrap(~news_source)
+  theme(legend.position = "right",
+        axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+  guides(color = FALSE)
+gg_unfollow_ideol
+ggsave(gg_unfollow_ideol, filename = paste0(outpath_tiebreaks, "relativeideology_newssource.pdf"), width = 45, height = 45, units = "mm")
 
