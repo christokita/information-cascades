@@ -58,7 +58,7 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
               fill = pal_type) +
   geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
-  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  ylab("Ideological assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
@@ -77,7 +77,7 @@ gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
               fill = pal_type) +
   geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
-  ylab(expression( paste(Delta, " assortativity ", italic(r[global])) )) +
+  ylab(expression( paste(Delta, " ideological assortativity")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assorttypeD #show plot before saving
@@ -98,7 +98,7 @@ gg_assortthresh <- ggplot(data = assort_thresh, aes(x = gamma, y = mean)) +
               fill = pal_thresh) +
   geom_line(size = 0.3, color = pal_thresh) +
   geom_point(size = 0.8, color = pal_thresh, shape = 21, fill = "white") +
-  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  ylab("Threshold assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   # scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
@@ -108,7 +108,7 @@ ggsave(plot = gg_assortthresh, filename = paste0(out_path, "assortativity_thresh
 # Plot against assortativity by type
 assort_comp <- rbind(assort_thresh, assort_type)
 pal_comp <- c(pal_thresh, pal_type)
-labs <- c("threshold", "political type")
+labs <- c("threshold", "ideology")
 gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = metric)) +
   geom_hline(aes(yintercept = 0), 
              size = 0.3, 
@@ -118,7 +118,7 @@ gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = met
   geom_line(aes(color = metric), 
             size = 0.3) +
   geom_point(aes(shape = metric, color = metric), size = 0.8, fill = "white") +
-  ylab(expression( paste("Assortativity ", italic(r[global])) )) +
+  ylab("Assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_color_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
   scale_fill_manual(values = pal_comp, name = "Assortativity by", labels = labs) + 
@@ -149,7 +149,7 @@ network_change_data <- do.call("rbind", network_change_data)
 
 #Summarize
 network_change_sum <- network_change_data %>% 
-  gather(metric, value, -gamma, -replicate, -individual, -type, -threshold)
+  gather(metric, value, -gamma, -replicate, -individual, -type, -threshold) %>% 
   select(-replicate, -individual, -type, -threshold) %>% 
   group_by(gamma, metric) %>% 
   summarise(mean = mean(value), 
@@ -184,10 +184,9 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
                     labels = c("Same ideology",
                                "Diff. ideology"),
                     name = "Connetion type") +
-  theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme_ctokita()
 gg_type_change #show plot before saving
-ggsave(plot = gg_type_change, filename = paste0(out_path, "tiechange", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_type_change, filename = paste0(out_path, "tie_netchange", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
 
 ####################
 # Plot: Breaks/new ties by gamma
@@ -221,8 +220,7 @@ gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
                                "New tie, diff. ideology",
                                "Broken tie, diff. ideology"),
                     name = "") +
-  theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme_ctokita()
 gg_ties #show plot before saving
 ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag, ".pdf"), width = 90, height = 45, units = "mm", dpi = 400)
 
@@ -249,32 +247,60 @@ gg_breaks <- ties_data %>%
                     labels = c("Same ideology",
                                "Diff. ideology"),
                     name = "") +
-  theme_ctokita() +
-  theme(aspect.ratio = 1)
+  theme_ctokita()
 gg_breaks #show plot before saving
-ggsave(plot = gg_breaks, filename = paste0(out_path, "tie_breaks", plot_tag, ".pdf"), width = 75, height = 45, units = "mm", dpi = 400)
+ggsave(plot = gg_breaks, filename = paste0(out_path, "tie_breaks", plot_tag, ".pdf"), width = 75, height = 30, units = "mm", dpi = 400)
 
 
 ####################
-# Plot: Diff. ideology tie breaks by gamme
+# Plot: For paper--net change and number of breaks
 ####################
-diff_ideol_breaks <- network_change_data %>% 
-  mutate(diffideol_breaks_freq = diff_type_breaks / (diff_type_breaks + same_type_breaks)) %>% 
-  group_by(gamma) %>% 
-  summarise(mean = mean(diffideol_breaks_freq, na.rm = TRUE),
-            sd = sd(diffideol_breaks_freq, na.rm = TRUE),
-            error = qnorm(0.975)*sd(diffideol_breaks_freq, na.rm = TRUE) / sqrt(sum(!is.na(diffideol_breaks_freq))))
-gg_breaks <- ggplot(diff_ideol_breaks, aes(x = gamma, y = mean)) +
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.2,
-              fill = pal) +
+# Net change in social ties (Figure set up)
+gg_type_change_FIG <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)) +
+  geom_hline(yintercept = 0, 
+             size = 0.3, 
+             linetype = "dotted") +
   geom_line(size = 0.3, color = pal) +
-  geom_point(size = 1, color = pal) +
-  ylab("Freq. broken ties, diff. ideology") +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 1, color = pal) +
+  ylab(expression( paste("Net ", Delta, " social ties")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
-  # scale_y_continuous(limits = c(0, 1.21), 
-  #                    breaks = seq(0, 2, 0.2),
-  #                    expand = c(0, 0)) +
+  scale_y_continuous(breaks = seq(-2, 2, 1),
+                     limits = c(-2, 2)) +
+  scale_x_continuous(breaks = seq(-1, 1, 1), labels = scales::number_format(accuracy = 0.1)) +
+  scale_shape_manual(values = c(19, 21),
+                     labels = c("Same ideology",
+                                "Diff. ideology")) +
+  scale_fill_manual(values = c(pal, "white"),
+                    labels = c("Same ideology",
+                               "Diff. ideology")) +
   theme_ctokita() +
-  theme(aspect.ratio = 1)
-gg_breaks #show plot before saving
+  theme(legend.position = "none")
+
+gg_breaks_FIG <- ties_data %>% 
+  filter(grepl("breaks", metric)) %>% 
+  ggplot(., aes(x = gamma, y = mean, group = metric)) +
+  geom_line(size = 0.3, color = pal) +
+  geom_point(aes(shape = metric, fill = metric),
+             size = 1, color = pal) +
+  ylab("Number of broken ties") +
+  xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
+  scale_y_continuous(limits = c(0, 3),
+                     breaks = seq(0, 3,1),
+                     expand = c(0, 0)) +
+  scale_x_continuous(breaks = seq(-1, 1, 1), labels = scales::number_format(accuracy = 0.1)) +
+  scale_shape_manual(values = c(16, 21),
+                     labels = c("Same ideology",
+                                "Diff. ideology")) +
+  scale_fill_manual(values = c("black", "white"),
+                    labels = c("Same ideology",
+                               "Diff. ideology")) +
+  theme_ctokita() +
+  theme(legend.position = "none")
+
+# Plot using ggpubr
+gg_network_change_summary_fig <- ggpubr::ggarrange(gg_type_change_FIG, gg_breaks_FIG, 
+                                           ncol = 1, nrow = 2)
+
+gg_network_change_summary_fig
+ggsave(gg_network_change_summary_fig, filename = paste0(out_path, "tie_change_summary", plot_tag, ".pdf"), width = 40, height = 75, units = "mm", dpi = 400)
