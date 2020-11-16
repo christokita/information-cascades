@@ -61,14 +61,18 @@ ideology_mix <- follower_ideologies %>%
          followers_ideology_skew = (follower_conservative_n - follower_liberal_n) / n_follower_samples)
 
 # Bayesian estimate of follower ideology
-prior_liberal <- ideology_mix %>%
-  ebbr::ebb_fit_prior(follower_liberal_n, n_follower_samples)
-prior_conserv <- ideology_mix %>%
-  ebbr::ebb_fit_prior(follower_conservative_n, n_follower_samples)
-a_L <- prior_liberal$parameters$alpha
-b_L <- prior_liberal$parameters$beta
-a_C <- prior_conserv$parameters$alpha
-b_C <- prior_conserv$parameters$beta
+# prior_liberal <- ideology_mix %>%
+#   ebbr::ebb_fit_prior(follower_liberal_n, n_follower_samples)
+# prior_conserv <- ideology_mix %>%
+#   ebbr::ebb_fit_prior(follower_conservative_n, n_follower_samples)
+# a_L <- prior_liberal$parameters$alpha
+# b_L <- prior_liberal$parameters$beta
+# a_C <- prior_conserv$parameters$alpha
+# b_C <- prior_conserv$parameters$beta
+a_L <- 1
+b_L <- 1
+a_C <- 1
+b_C <- 1
 ideology_mix <- ideology_mix %>% 
   mutate(followers_liberal_est = (follower_liberal_n + a_L) / (n_follower_samples + a_L + b_L),
          followers_conservative_est = (follower_conservative_n + a_C) / (n_follower_samples + a_C + b_C))
