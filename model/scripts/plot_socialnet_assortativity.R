@@ -266,7 +266,8 @@ gg_type_change_FIG <- ggplot(net_type_data, aes(x = gamma, y = mean, group = met
   ylab(expression( paste("Net ", Delta, " social ties")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(breaks = seq(-2, 2, 1),
-                     limits = c(-2, 2)) +
+                     limits = c(-2, 2), 
+                     expand = c(0, 0)) +
   scale_x_continuous(breaks = seq(-1, 1, 1), labels = scales::number_format(accuracy = 0.1)) +
   scale_shape_manual(values = c(19, 21),
                      labels = c("Same ideology",

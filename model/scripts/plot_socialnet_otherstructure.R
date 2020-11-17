@@ -365,7 +365,7 @@ gg_localnetmetrics <- fits %>%
              alpha = 0.05,
              stroke = 0,
              size = 0.2) +
-  geom_line(size = 0.3) +
+  geom_line(size = 0.4) +
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_fill_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   scale_x_continuous(breaks = seq(0, 1, 1)) +
@@ -375,15 +375,14 @@ gg_localnetmetrics <- fits %>%
              labeller = label_bquote(cols = gamma == .(gamma))) +
   theme_ctokita() +
   theme(strip.background = element_blank(),
-        # legend.margin = margin(c(0, 0, 0, 0)),
-        # legend.box.margin=margin(-5,-5,-5,-5),
         legend.position = "none",
         strip.placement = "outside",
         aspect.ratio = NULL, 
         axis.title.y = element_blank(),
-        strip.text.y = element_text(size = 6))
+        strip.text.y = element_text(size = 6),
+        plot.background = element_blank())
 gg_localnetmetrics
-ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".pdf"), width = 90, height = 60, units = "mm", dpi = 400)
+ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetworkmetrics", plot_tag, ".png"), bg = "transparent", width = 90, height = 60, units = "mm", dpi = 400)
 
 ####################
 # Plot linear component of fit by gamma (for each metric)
