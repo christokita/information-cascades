@@ -510,3 +510,35 @@ gg_unfollow_ideol <- ggplot(newssource_unfollow_ideology,
 gg_unfollow_ideol
 ggsave(gg_unfollow_ideol, filename = paste0(outpath_tiebreaks, "relativeideology_newssource.pdf"), width = 45, height = 45, units = "mm")
 
+
+
+######################### Analysis: Cross-ideology unfollows linear mixed model #########################
+
+####################
+# Analyze: Simple linear model of relative cross-ideology tiebreak occurence vs. information ecosystem
+####################
+# Create ideology extremity measure
+user_data <- user_data %>% 
+  mutate(ideology_extremity = abs(ideology_corresp)) %>% 
+  mutate(ideology_extremity_bin = ntile(ideology_extremity, 10))
+
+# Analyze by info ecosystem
+lm_infoecosystem <- lm(delta_tiebreak_freq ~ info_ecosystem, data = user_data)
+summary(lm_infoecosystem) # intercept is significant, info_ecosystem trends towards significance
+
+# Analyze by ideology extremity
+lm_ideolextreme <- lm(delta_tiebreak_freq ~ ideology_extremity, data = user_data)
+summary(lm_ideolextreme) # intercept not significant, ideology_extremity is significant
+
+# Analyze by info ecosystem and ideology extremity
+lm_infoideol <- lm(delta_tiebreak_freq ~ info_ecosystem*ideology_extremity, data = user_data)
+summary(lm_infoideol) # only ideology_extremity is significant
+
+
+####################
+# Analyze:Linear mixed model of relative cross-ideology tiebreak occurence vs. information ecosystem
+####################
+library(lme4)
+lmm_infoideol <- lmer(delta_tiebreak_freq ~ info_ecosystem + (1|ideology_extremity_bin), data = user_data)
+summary(lmm_infoideol)
+confint(lmm_infoideol)
