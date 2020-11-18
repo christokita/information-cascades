@@ -20,24 +20,34 @@ data_directory <- "/Volumes/CKT-DATA/information-cascades/observational/" #path 
 
 # File paths
 ideology_file <- paste0(data_directory, 'data_derived/monitored_users/monitored_users_ideology_scores.csv')
-user_file <- paste0(data_directory, 'data_derived/monitored_users/monitored_users_preliminary.csv')
+all_user_file <- paste0(data_directory, 'data_derived/monitored_users/monitored_users_preliminary.csv')
+monitored_user_file <- paste0(data_directory, 'data_derived/monitored_users/monitored_users_final.csv')
 outpath <- "observational/output/ideology/"
 
 # Load data
 users_ideology <- read.csv(ideology_file, colClasses = c("user_id"="character")) %>% 
   mutate(user_id = gsub("\"", "", user_id_str))
-users <- read.csv(user_file, colClasses = c("user_id"="character")) %>% 
+all_users <- read.csv(all_user_file, colClasses = c("user_id"="character")) %>% 
   mutate(user_id = gsub("\"", "", user_id_str))
-users_ideology <- merge(users_ideology, users[c("user_id", "news_source")], all = T) %>% 
+final_users <- read.csv(monitored_user_file, colClasses = c("user_id"="character")) %>% 
+  mutate(user_id = gsub("\"", "", user_id_str))
+all_users_ideology <- merge(users_ideology, all_users[c("user_id", "news_source")], all = T) %>% 
   mutate(ideology_category = ifelse(ideology_corresp < 0, "Liberal", 
-                                    ifelse(ideology_corresp > 0, "Conservative", NA))) #add categorical label based on C.A. ideology score
-rm(users)
-
+                                    ifelse(ideology_corresp > 0, "Conservative", NA)),  #add categorical label based on C.A. ideology score
+         news_source = factor(news_source, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
+final_users_ideology <- merge(final_users[c("user_id", "news_source")], users_ideology, all.x = T) %>% 
+  mutate(ideology_category = ifelse(ideology_corresp < 0, "Liberal", 
+                                    ifelse(ideology_corresp > 0, "Conservative", NA)),  #add categorical label based on C.A. ideology score
+         news_source = factor(news_source, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
+rm(users_ideology)
 
 # Parameters for plots
 plot_color <- "#1B3B6F"
 ideol_pal <- c("#006195", "#d9d9d9", "#d54c54")
 
+
+
+######################### Plot/Analyze: All sampled users #########################
 
 ####################
 # Compare old scores to new scores (we repulled ideology scores ~1 week later)
@@ -65,7 +75,7 @@ ggplot(score_check, aes(x = old_corresp, ideology_corresp)) +
   theme_ctokita()
 
 ####################
-# Compare two methods of ideology estimation
+# Compare two methods of ideology estimation (across all sampled users)
 ####################
 # Plot hitograms of each
 gg_ideology_mle <- ggplot(data = users_ideology, aes(x = ideology_mle, fill = ..x..)) +
@@ -102,10 +112,10 @@ ggsave(gg_compare_ideology_scores, filename = paste0(outpath, "compare_estimatio
 
 
 ####################
-# Compare user ideology by news source
+# Compare user ideology by news source and ideolgoy method (across all sampled users)
 ####################
 # Plot histograms
-gg_ideology_by_outlet <- users_ideology %>% 
+gg_ideology_by_outlet <- all_users_ideology %>% 
   select(user_id, ideology_mle, ideology_corresp, news_source) %>% 
   gather("metric", "ideology", -user_id, -news_source) %>% 
   mutate(metric = ifelse(metric == "ideology_mle", "Bayesian", "C.A.")) %>% 
@@ -118,24 +128,28 @@ gg_ideology_by_outlet
 ggsave(gg_ideology_by_outlet, filename = paste0(outpath, "method_vs_newssource.pdf"), width = 100, height = 60, units = "mm", dpi = 400)
 
 # Count up liberal and conservative users by new source and method
-ideology_count <- users_ideology %>% 
+# NOTE: After conversations with Andy Guess--who also consulted Pablo Barbera--we will use the correspondance analysis scores
+ideology_count <- all_users_ideology %>% 
   select(user_id, ideology_mle, ideology_corresp, news_source) %>% 
   gather("metric", "ideology", -user_id, -news_source) %>% 
   mutate(metric = ifelse(metric == "ideology_mle", "Bayesian", "C.A.")) %>% 
   group_by(news_source, metric) %>% 
-  summarise(liberals = length(ideology[ideology < 0]),
-            conservatives = length(ideology[ideology > 0])) %>% 
+  summarise(liberals = sum(ideology < 0, na.rm = TRUE),
+            conservatives = sum(ideology > 0, na.rm = TRUE)) %>% 
   arrange(metric, news_source)
 
 
-####################
-# Count users of each ideology category (based on C.A. ideology score)
-####################
-# After conversations with Andy Guess--who also consulted Pablo Barbera--we will use the correspondance analysis scores
-ideology_counts <- users_ideology %>% 
-  select(news_source, ideology_category) %>% 
-  group_by(news_source) %>% 
-  summarise(Liberals = sum(ideology_category == "Liberal", na.rm = TRUE),
-            Conservatives = sum(ideology_category == "Conservative", na.rm = TRUE))
+######################### Plot/Analyze: Final set of monitored users #########################
 
-
+####################
+# Plot: histogram of monitored user ideology
+####################
+gg_user_ideology <- ggplot(final_users_ideology, aes(x = ideology_corresp, fill = ..x..)) +
+  geom_histogram(binwidth = 0.2) +
+  scale_fill_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish, guide = FALSE) +
+  theme_ctokita() +
+  theme(legend.position = "none",
+        strip.text = element_text(size = 6)) +
+  facet_wrap(~news_source, dir = "v")
+gg_user_ideology
+ggsave(gg_user_ideology, filename = paste0(outpath, "user_ideology_bynewssource.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
