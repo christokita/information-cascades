@@ -137,11 +137,17 @@ gg_follower_ideol <- user_data %>%
   filter(n_tiebreaks > 0) %>% 
   ggplot(., aes(x = ideology_corresp, y = followers_conservative_freq, color = ideology_corresp)) +
   geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16) +
-  scale_color_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish) +
+  scale_y_continuous(limits = c(0, 1),
+                     breaks = seq(0, 1, 0.25),
+                     expand = c(0, 0)) +
+  scale_color_gradientn(colors = ideol_pal, 
+                        limits = c(-2, 2), 
+                        oob = scales::squish) +
   xlab("User ideology") +
-  ylab("Freq. conservative followers") +
+  ylab("\nFreq. conservative followers") +
   theme_ctokita() +
-  theme(legend.position = "none") 
+  theme(legend.position = "none") +
+  coord_cartesian(clip = "off")
 gg_follower_ideol
 ggsave(gg_follower_ideol, filename = paste0(outpath_ideology, "user_vs_follower_ideology.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 

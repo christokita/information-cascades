@@ -39,7 +39,6 @@ final_users_ideology <- merge(final_users[c("user_id", "news_source")], users_id
   mutate(ideology_category = ifelse(ideology_corresp < 0, "Liberal", 
                                     ifelse(ideology_corresp > 0, "Conservative", NA)),  #add categorical label based on C.A. ideology score
          news_source = factor(news_source, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
-rm(users_ideology)
 
 # Parameters for plots
 plot_color <- "#1B3B6F"
@@ -112,10 +111,10 @@ ggsave(gg_compare_ideology_scores, filename = paste0(outpath, "compare_estimatio
 
 
 ####################
-# Compare user ideology by news source and ideolgoy method (across all sampled users)
+# Compare user ideology by news source and ideology method (across all sampled users)
 ####################
 # Plot histograms
-gg_ideology_by_outlet <- all_users_ideology %>% 
+gg_ideology_by_outletmethod <- all_users_ideology %>% 
   select(user_id, ideology_mle, ideology_corresp, news_source) %>% 
   gather("metric", "ideology", -user_id, -news_source) %>% 
   mutate(metric = ifelse(metric == "ideology_mle", "Bayesian", "C.A.")) %>% 
@@ -124,8 +123,37 @@ gg_ideology_by_outlet <- all_users_ideology %>%
   scale_fill_gradientn(colors = ideol_pal, limits = c(-2, 2), oob = scales::squish, guide = FALSE) +
   theme_ctokita() +
   facet_grid(metric~news_source)
+gg_ideology_by_outletmethod
+ggsave(gg_ideology_by_outletmethod, filename = paste0(outpath, "method_vs_newssource.pdf"), width = 100, height = 60, units = "mm", dpi = 400)
+
+# Plot only correspondance analysis method (what we use in this study)
+gg_ideology_by_outlet <- all_users_ideology %>%
+  mutate(info_ecosystem = ifelse(news_source %in% c("cbsnews", "usatoday"), "High corr.", "Low corr."),
+         news_outlet_ideology = ifelse(news_source %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")) %>% 
+  mutate(news_outlet_ideology = factor(news_outlet_ideology, levels = c("Liberal", "Conservative"))) %>% 
+  ggplot(., aes(x = ideology_corresp, fill = ..x.., color = ..x..)) +
+  geom_histogram(binwidth = 0.2, size = 0.05) +
+  ylab("Count") +
+  xlab("User ideology") +
+  scale_fill_gradientn(name = "Twitter user ideology",
+                       colors = ideol_pal, 
+                       limits = c(-2, 2), 
+                       oob = scales::squish) +
+  scale_color_gradientn(name = "Twitter user ideology",
+                        colors = ideol_pal, 
+                        limits = c(-2, 2), 
+                        oob = scales::squish) +
+  scale_x_continuous(breaks = seq(-2, 2, 2)) +
+  scale_y_continuous(limits = c(0, 600),
+                     breaks = seq(0, 600, 200),
+                     expand = c(0, 0)) +
+  theme_ctokita() +
+  theme(strip.text.x = element_blank(),
+        legend.position = "none") +
+  facet_grid(info_ecosystem~news_outlet_ideology)
 gg_ideology_by_outlet
-ggsave(gg_ideology_by_outlet, filename = paste0(outpath, "method_vs_newssource.pdf"), width = 100, height = 60, units = "mm", dpi = 400)
+ggsave(gg_ideology_by_outlet, filename = paste0(outpath, "sampledusers_ideology_bynewssource.pdf"), width = 50, height = 40, units = "mm", dpi = 400)
+
 
 # Count up liberal and conservative users by new source and method
 # NOTE: After conversations with Andy Guess--who also consulted Pablo Barbera--we will use the correspondance analysis scores
@@ -136,6 +164,7 @@ ideology_count <- all_users_ideology %>%
   group_by(news_source, metric) %>% 
   summarise(liberals = sum(ideology < 0, na.rm = TRUE),
             conservatives = sum(ideology > 0, na.rm = TRUE)) %>% 
+  mutate(total_ideol_scores = liberals + conservatives) %>% 
   arrange(metric, news_source)
 
 
