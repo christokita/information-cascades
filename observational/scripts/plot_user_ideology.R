@@ -100,12 +100,19 @@ ggsave(gg_ideology_hists, filename = paste0(outpath, "ideology_distribution_by_m
 
 # Scatter plot against each other
 gg_compare_ideology_scores <- ggplot(data = users_ideology, aes(x = ideology_mle, y = ideology_corresp)) +
-  geom_point(size = 0.5, alpha = 0.3, stroke = 0, color = plot_color) +
+  geom_vline(xintercept = 0, size = 0.3, linetype = "dotted", color = "grey50") +
+  geom_hline(yintercept = 0, size = 0.3, linetype = "dotted", color = "grey50") +
   geom_abline(intercept = 0, slope = 1, size = 0.3, linetype = "dashed") + 
+  annotate("text", size = 1,
+    x = 2.25,
+    y = 2.25*0.9,
+    angle = atan(1.65) * 180/pi,
+    label = "perfect relationship") +
+  geom_point(size = 0.5, alpha = 0.3, stroke = 0, color = plot_color) +
   scale_x_continuous(limits = c(-4, 4)) +
   xlab("Ideology, bayesian ideal point") +
   ylab("Ideology, correspond. analysis") +
-  theme_ctokita()
+  theme_ctokita() 
 gg_compare_ideology_scores
 ggsave(gg_compare_ideology_scores, filename = paste0(outpath, "compare_estimation_methods.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
