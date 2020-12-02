@@ -3,7 +3,7 @@
 # @author: ChrisTokita
 #
 # SCRIPT
-# Plot and analyze the pattern of same- and opposite- ideology tie breaks
+# Plot pattern of same- and opposite- ideology tie breaks
 ########################################
 
 ####################
@@ -13,8 +13,9 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(Bolstad)
+library(brms)
 library(RColorBrewer)
-library(ebbr)
+library(lme4)
 source("_plot_themes/theme_ctokita.R")
 
 # High-level data directory
@@ -61,14 +62,6 @@ ideology_mix <- follower_ideologies %>%
          followers_ideology_skew = (follower_conservative_n - follower_liberal_n) / n_follower_samples)
 
 # Bayesian estimate of follower ideology
-# prior_liberal <- ideology_mix %>%
-#   ebbr::ebb_fit_prior(follower_liberal_n, n_follower_samples)
-# prior_conserv <- ideology_mix %>%
-#   ebbr::ebb_fit_prior(follower_conservative_n, n_follower_samples)
-# a_L <- prior_liberal$parameters$alpha
-# b_L <- prior_liberal$parameters$beta
-# a_C <- prior_conserv$parameters$alpha
-# b_C <- prior_conserv$parameters$beta
 a_L <- 1
 b_L <- 1
 a_C <- 1
@@ -102,7 +95,9 @@ user_data <- merge(monitored_users, ideology_mix) %>%
          followers_diffideol_est = NA,
          followers_sameideol_est = NA,
          tiebreak_diffideol_freq = NA,
-         tiebreak_diffideol_n = NA)
+         tiebreak_sameideol_freq = NA,
+         tiebreak_diffideol_n = NA,
+         tiebreak_sameideol_n = NA)
 user_data$n_tiebreaks[is.na(user_data$n_tiebreaks)] <- 0
   
 # Calculate same vs. opposite ideology freq of followers, tie breaks
@@ -121,10 +116,13 @@ user_data$followers_sameideol_est[conservative_users] <- user_data$followers_con
 
 user_data$tiebreak_diffideol_freq[liberal_users] <- user_data$tiebreak_conservative_freq[liberal_users]
 user_data$tiebreak_diffideol_freq[conservative_users] <- user_data$tiebreak_liberal_freq[conservative_users]
+user_data$tiebreak_sameideol_freq[liberal_users] <- user_data$tiebreak_liberal_freq[liberal_users]
+user_data$tiebreak_sameideol_freq[conservative_users] <- user_data$tiebreak_conservative_freq[conservative_users]
 
 user_data$tiebreak_diffideol_n[liberal_users] <- user_data$tiebreak_conservative_n[liberal_users]
 user_data$tiebreak_diffideol_n[conservative_users] <- user_data$tiebreak_liberal_n[conservative_users]
- 
+user_data$tiebreak_sameideol_n[liberal_users] <- user_data$tiebreak_liberal_n[liberal_users]
+user_data$tiebreak_sameideol_n[conservative_users] <- user_data$tiebreak_conservative_n[conservative_users]
 
 ####################
 # Prep data: calcualte expected frequency of diff ideology tie breaks (same ideology breaks will be mirror image)
@@ -515,30 +513,58 @@ ggsave(gg_unfollow_ideol, filename = paste0(outpath_tiebreaks, "relativeideology
 ######################### Analysis: Cross-ideology unfollows linear mixed model #########################
 
 ####################
-# Analyze: Simple linear model of relative cross-ideology tiebreak occurence vs. information ecosystem
+# Analyze: relative cross-ideology tiebreak occurence vs. information ecosystem
 ####################
-# Create ideology extremity measure
-user_data <- user_data %>% 
-  mutate(ideology_extremity = abs(ideology_corresp)) %>% 
-  mutate(ideology_extremity_bin = ntile(ideology_extremity, 10))
+# Simple fixed effects linear model (test whether different than zero)
+lm_infoecosystem <- lm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = user_data)
+summary(lm_infoecosystem) # low-correlation is significantly different than zero (but not different from high-correlation)
+anova(lm_infoecosystem)
 
-# Analyze by info ecosystem
-lm_infoecosystem <- lm(delta_tiebreak_freq ~ info_ecosystem, data = user_data)
-summary(lm_infoecosystem) # intercept is significant, info_ecosystem trends towards significance
+# Bayesian approach to T test
+prior <- c(set_prior("normal(0, 1)", class = "b"))
+blm_infoecosystem <- brm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = user_data, prior = prior, sample_prior = "yes")
+hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
+hypothesis_infoecosystem
+posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
+hist(posterior_infoecosystem$b_info_ecosystemHighcorrelation, col = rgb(0,0,1,0.5), xlim=c(-0.03, 0.06), breaks = seq(-0.03, 0.06, 0.0025), border = NA)
+hist(posterior_infoecosystem$b_info_ecosystemLowcorrelation, col = rgb(1,0,0,0.5), breaks = seq(-0.03, 0.06, 0.0025), border = NA, add = T)
+
+# Mixed effects model, treating ideological extremity as random effect
+lmm_infoideol <- lmer(delta_tiebreak_freq ~ info_ecosystem + (1|ideology_extremity_bin) - 1, data = user_data)
+summary(lmm_infoideol)
+confint(lmm_infoideol)
+
+####################
+# Analyze: relative cross-ideology tiebreak occurence vs. news source
+####################
+# Simple fixed effects linear model
+lm_newssource <- lm(delta_tiebreak_freq ~ news_source - 1, data = user_data)
+summary(lm_newssource) # vox siginfincalty positive, dc examiner approach significance
+anova(lm_newssource)
+
+# Mixed effects model, treating ideological extremity as random effect
+lmm_newsideol <- lmer(delta_tiebreak_freq ~ news_source + (1|ideology_extremity_bin) - 1, data = user_data)
+summary(lmm_newsideol)
+confint(lmm_newsideol)
+
+
+####################
+# Futher exploration for now...
+####################
+ggplot(data = user_data, aes(x = tiebreak_diffideol_expected, y = tiebreak_diffideol_n) ) +
+  geom_point(alpha = 0.4, stroke = 0) +
+  geom_abline(aes(intercept = 0, slope = 1)) +
+  theme_ctokita() +
+  facet_wrap(~info_ecosystem)
 
 # Analyze by ideology extremity
 lm_ideolextreme <- lm(delta_tiebreak_freq ~ ideology_extremity, data = user_data)
 summary(lm_ideolextreme) # intercept not significant, ideology_extremity is significant
+anova(lm_ideolextreme)
 
 # Analyze by info ecosystem and ideology extremity
-lm_infoideol <- lm(delta_tiebreak_freq ~ info_ecosystem*ideology_extremity, data = user_data)
-summary(lm_infoideol) # only ideology_extremity is significant
+lm_infoideol <- lm(delta_tiebreak_freq ~ info_ecosystem + ideology_extremity + ideology_extremity:info_ecosystem - 1, data = user_data)
+summary(lm_infoideol) # only i
 
 
-####################
-# Analyze:Linear mixed model of relative cross-ideology tiebreak occurence vs. information ecosystem
-####################
-library(lme4)
-lmm_infoideol <- lmer(delta_tiebreak_freq ~ info_ecosystem + (1|ideology_extremity_bin), data = user_data)
-summary(lmm_infoideol)
-confint(lmm_infoideol)
+
