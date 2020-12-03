@@ -78,7 +78,6 @@ infoeco_freq_estimates <- as.data.frame( posterior_summary(blm_infoeco_freq,
   mutate(info_ecosystem = gsub("b_info_ecosystem", "", info_ecosystem),
          info_ecosystem = gsub("correlation", "\ncorrelation", info_ecosystem),
          info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")))
-  mutate()
 
 # Plot: estimates, 90% CI, and posterior
 gg_infoeco_breaks_freq <- ggplot(infoeco_freq_estimates, aes(x = info_ecosystem, color = info_ecosystem)) +
@@ -92,7 +91,7 @@ gg_infoeco_breaks_freq <- ggplot(infoeco_freq_estimates, aes(x = info_ecosystem,
   geom_point(aes(y = Estimate), 
              size = 2) + 
   scale_y_continuous(breaks = round(seq(-0.10, 0.10, 0.01), 2), #cuts off edge breaks due to weird float calcualtion of sequence
-                     limits = c(-0.02, 0.05), 
+                     limits = c(-0.02, 0.05), #this cuts off very, very ends of posterior but makes plot more legible
                      expand = c(0, 0)) +
   scale_color_manual(values = info_corr_pal) +
   scale_fill_manual(values = info_corr_pal) +
