@@ -161,10 +161,11 @@ file_fit_infoeco <- paste0(dir_brms_fits, "infoeco_relfreq.rds")
 if (file.exists(file_fit_infoeco)) {
   blm_infoecosystem <- readRDS(file_fit_infoeco)
 } else {
-  prior <- c(set_prior("normal(0, 1)", class = "b"))
-  blm_infoecosystem <- brm(delta_tiebreak_freq ~ 0 + info_ecosystem, 
+  prior <- c(set_prior("normal(0, 0.3)", class = "b")) #population mean = 0.0156, sd = 0.3195
+  blm_infoecosystem <- brm(bf(delta_tiebreak_freq ~ 0 + info_ecosystem), 
                            data = tiebreak_data,
                            prior = prior, 
+                           family = gaussian(),
                            sample_prior = TRUE,
                            warmup = 1000, 
                            chains = 2, 
@@ -172,12 +173,21 @@ if (file.exists(file_fit_infoeco)) {
   saveRDS(blm_infoecosystem, file = file_fit_infoeco)
 }
 
+# Try contrast manually
+newdata = data.frame(info_ecosystem = levels(tiebreak_data$info_ecosystem))
+fit_infoeco = as.data.frame(fitted(
+  blm_infoecosystem,
+  newdata = newdata,
+  re_formula = NA,
+  summary = FALSE # extract the full MCMC
+))
+colnames(fit_infoeco) = newdata$info_ecosystem
+low_vs_high = fit_infoeco$`Low correlation` - fit_infoeco$`High correlation`
+mean(low_vs_high > 0)
 
-
-# Hypothesis test that Low_correlation > high_correlation ecoystem
+# Hypothesis test that each group's mean is different than zero
 hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0")
 hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0")
-
 
 # Hypothesis test that Low_correlation > high_correlation ecoystem
 hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
@@ -188,15 +198,16 @@ posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
 posterior_infoecosystem_estimates <- posterior_infoecosystem %>% 
   gather("info_ecosystem", "posterior_sample") %>% 
   filter(info_ecosystem %in% c("b_info_ecosystemLowcorrelation", "b_info_ecosystemHighcorrelation")) %>% 
-  mutate(info_ecosystem = gsub("b_info_ecosystem", "", info_ecosystem)) %>% 
-  mutate(info_ecosystem = gsub("correlation", " correlation", info_ecosystem)) %>% 
-  mutate(info_ecosystem = factor(info_ecosystem, levels = c("Low correlation", "High correlation")))
-gg_infoeco_post <- ggplot(posterior_infoecosystem_estimates, aes(x = posterior_sample, fill = info_ecosystem)) +
+  mutate(info_ecosystem = gsub("b_info_ecosystem", "", info_ecosystem),
+         info_ecosystem = gsub("correlation", " correlation", info_ecosystem),
+         info_ecosystem = factor(info_ecosystem, levels = c("Low correlation", "High correlation")))
+gg_infoeco_post <- ggplot(posterior_infoecosystem_estimates, aes(x = posterior_sample, fill = info_ecosystem, group = info_ecosystem)) +
   geom_density(alpha = 0.6, color = NA) +
-  # geom_histogram(position = "identity", alpha = 0.6, binwidth = 0.0025, stat = "density") +
+  # geom_histogram(position = "identity", alpha = 0.6, binwidth = 0.5, aes(y = stat(count) / sum(count))) +
   xlab("Relative frequency\ncross-ideology unfollows") +
-  ylab("Density of posterior estimate") +
-  scale_fill_manual(values = info_corr_pal) +
+  ylab("Posterior probability density") +
+  scale_fill_manual(name = "Information\necocystem",
+                    values = info_corr_pal) +
   theme_ctokita()
 gg_infoeco_post
 ggsave(gg_infoeco_post, filename = paste0(outpath_tiebreaks, "posteriorest_relativefreq_infoeco.pdf"), width = 70, height = 45, units = "mm")
