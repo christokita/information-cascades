@@ -152,6 +152,35 @@ lm_infoecosystem <- lm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = tiebreak
 summary(lm_infoecosystem) # low-correlation is significantly different than zero (but not different from high-correlation)
 anova(lm_infoecosystem)
 
+# Simple fixed effects linear model (compare information ecosystems to each other)
+lm_infoecosystem_comp <- lm(delta_tiebreak_freq ~ info_ecosystem, data = tiebreak_data)
+summary(lm_infoecosystem_comp) # low-correlation is significantly different than zero (but not different from high-correlation)
+
+# calculate effect size of group difference
+M_lowcorr <- lm_infoecosystem_comp$coefficients[1]
+M_highcorr <- lm_infoecosystem_comp$coefficients[1] + lm_infoecosystem_comp$coefficients[2]
+sd_pop <- sd(tiebreak_data$delta_tiebreak_freq, na.rm = T)
+effect_size <- (M_lowcorr - M_highcorr) / sd_pop
+library(pwr)
+n_groups <- tiebreak_data %>% 
+  filter(!is.na(delta_tiebreak_freq)) %>% 
+  group_by(info_ecosystem) %>% 
+  count()
+n_lowcorr <- n_groups$n[n_groups$info_ecosystem == "Low correlation"]
+n_highcorr <- n_groups$n[n_groups$info_ecosystem == "High correlation"]
+pwr.t2n.test(n1 = n_lowcorr,
+             n2 = n_highcorr,
+             d = effect_size,
+             sig.level = 0.05,
+             alternative = "greater")
+
+pwr.t.test(d = effect_size,
+           sig.level = 0.05,
+           power = 0.8,
+           alternative = "greater")
+
+
+
 
 ####################
 # Bayesian group mean estimation
@@ -167,9 +196,9 @@ if (file.exists(file_fit_infoeco)) {
                            prior = prior, 
                            family = gaussian(),
                            sample_prior = TRUE,
-                           warmup = 1000, 
-                           chains = 2, 
-                           iter = 4000)
+                           warmup = 5000, 
+                           chains = 4, 
+                           iter = 15000)
   saveRDS(blm_infoecosystem, file = file_fit_infoeco)
 }
 
@@ -189,11 +218,7 @@ mean(low_vs_high > 0)
 hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0")
 hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0")
 
-# Hypothesis test that Low_correlation > high_correlation ecoystem
-hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
-hypothesis_infoecosystem$hypothesis$Post.Prob
-
-# Plot posterior estimates
+# Plot posterior estimates of each group
 posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
 posterior_infoecosystem_estimates <- posterior_infoecosystem %>% 
   gather("info_ecosystem", "posterior_sample") %>% 
@@ -211,6 +236,37 @@ gg_infoeco_post <- ggplot(posterior_infoecosystem_estimates, aes(x = posterior_s
   theme_ctokita()
 gg_infoeco_post
 ggsave(gg_infoeco_post, filename = paste0(outpath_tiebreaks, "posteriorest_relativefreq_infoeco.pdf"), width = 70, height = 45, units = "mm")
+
+# Hypothesis test that Low_correlation > high_correlation ecoystem
+hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
+hypothesis_infoecosystem$hypothesis$Post.Prob
+
+# Plot posterior of group difference
+posterior_infoeco_contrast <- posterior_infoecosystem %>% 
+  rename(low_correlation = b_info_ecosystemLowcorrelation,
+         high_correlation = b_info_ecosystemHighcorrelation) %>% 
+  select(low_correlation, high_correlation) %>% 
+  mutate(group_contrast =  high_correlation - low_correlation,
+         greater_than_zero = group_contrast > 0)
+gg_infoeco_contrast <- ggplot(posterior_infoeco_contrast, aes(x = group_contrast, fill = greater_than_zero)) +
+  # geom_density(fill = "blue", color = NA) +
+  geom_histogram(aes(y=..count../sum(..count..)),
+                 breaks = seq(-0.075, 0.075, 0.0025),
+                 color = NA, alpha = 0.6) +
+  geom_vline(xintercept = 0, color = "white", size = 0.6) +
+  geom_vline(xintercept = 0, color = "grey70", size = 0.3, linetype = "dotted") +
+  xlab("Est. difference in group mean") +
+  ylab(expression(paste("Pr(", mu[high], " - ", mu[low], ")"))) +
+  scale_x_continuous(limits = c(-0.08, 0.08),
+                     breaks = seq(-0.12, 0.12, 0.04)) +
+  scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.2, 0.05)) +
+  scale_fill_manual(values = info_corr_pal) +
+  theme_ctokita() +
+  theme(legend.position = "none",
+        aspect.ratio = NULL)
+gg_infoeco_contrast
+ggsave(gg_infoeco_contrast, filename = paste0(outpath_tiebreaks, "posteriordiff_relativefreq_infoeco.pdf"), width = 45, height = 20, units = "mm")
+
 
 
 ######################### Analysis: Cross-ideology unfollows by NEWS SOURCE #########################
