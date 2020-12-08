@@ -88,7 +88,6 @@ for news_source in news_sources:
 ####################
 # Define custom function to load and parse JSON tweet data
 ####################
-
 def tweet_parser(filename):
     """
     Parse JSON tweet data and return a compiled dataset
@@ -244,7 +243,6 @@ for file in tweet_json_files:
     source_tweets = tweet_parser(filename = outpath + file)
     news_tweets = news_tweets.append(source_tweets, ignore_index = True)
     del source_tweets
-
-
-    
+    print("DONE: " + file)
+ 
 news_tweets.to_csv(outpath + 'news_source_tweets.csv', index = False)
