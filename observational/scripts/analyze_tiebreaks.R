@@ -180,8 +180,6 @@ pwr.t.test(d = effect_size,
            alternative = "greater")
 
 
-
-
 ####################
 # Bayesian group mean estimation
 ####################
@@ -202,21 +200,9 @@ if (file.exists(file_fit_infoeco)) {
   saveRDS(blm_infoecosystem, file = file_fit_infoeco)
 }
 
-# Try contrast manually
-newdata = data.frame(info_ecosystem = levels(tiebreak_data$info_ecosystem))
-fit_infoeco = as.data.frame(fitted(
-  blm_infoecosystem,
-  newdata = newdata,
-  re_formula = NA,
-  summary = FALSE # extract the full MCMC
-))
-colnames(fit_infoeco) = newdata$info_ecosystem
-low_vs_high = fit_infoeco$`Low correlation` - fit_infoeco$`High correlation`
-mean(low_vs_high > 0)
-
 # Hypothesis test that each group's mean is different than zero
-hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0")
-hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0")
+hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0") #prob = 1, BF = 887.89
+hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0") #prob = 0.78, BF = 3.45
 
 # Plot posterior estimates of each group
 posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
@@ -246,7 +232,7 @@ posterior_infoeco_contrast <- posterior_infoecosystem %>%
   rename(low_correlation = b_info_ecosystemLowcorrelation,
          high_correlation = b_info_ecosystemHighcorrelation) %>% 
   select(low_correlation, high_correlation) %>% 
-  mutate(group_contrast =  high_correlation - low_correlation,
+  mutate(group_contrast = low_correlation - high_correlation,
          greater_than_zero = group_contrast > 0)
 gg_infoeco_contrast <- ggplot(posterior_infoeco_contrast, aes(x = group_contrast, fill = greater_than_zero)) +
   # geom_density(fill = "blue", color = NA) +
@@ -260,12 +246,12 @@ gg_infoeco_contrast <- ggplot(posterior_infoeco_contrast, aes(x = group_contrast
   scale_x_continuous(limits = c(-0.08, 0.08),
                      breaks = seq(-0.12, 0.12, 0.04)) +
   scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.2, 0.05)) +
-  scale_fill_manual(values = info_corr_pal) +
+  scale_fill_manual(values = rev(info_corr_pal)) +
   theme_ctokita() +
   theme(legend.position = "none",
         aspect.ratio = NULL)
 gg_infoeco_contrast
-ggsave(gg_infoeco_contrast, filename = paste0(outpath_tiebreaks, "posteriordiff_relativefreq_infoeco.pdf"), width = 45, height = 20, units = "mm")
+ggsave(gg_infoeco_contrast, filename = paste0(outpath_tiebreaks, "posteriordiff_relativefreq_infoeco.pdf"), width = 45, height = 45, units = "mm")
 
 
 
@@ -273,7 +259,7 @@ ggsave(gg_infoeco_contrast, filename = paste0(outpath_tiebreaks, "posteriordiff_
 
 
 ####################
-# Analyze: relative cross-ideology tiebreak occurence vs. news source
+# Frequentist group mean estimation
 ####################
 # Simple fixed effects linear model
 lm_newssource <- lm(delta_tiebreak_freq ~ news_source - 1, data = tiebreak_data)
@@ -285,6 +271,52 @@ lmm_newsideol <- lmer(delta_tiebreak_freq ~ news_source + (1|ideology_extremity_
 summary(lmm_newsideol)
 confint(lmm_newsideol)
 
+
+####################
+# Bayesian group mean estimation
+####################
+# Compute bayesian estimation
+file_fit_newssource <- paste0(dir_brms_fits, "newssource_relfreq.rds")
+if (file.exists(file_fit_newssource)) {
+  blm_newssource <- readRDS(file_fit_newssource)
+} else {
+  prior <- c(set_prior("normal(0, 0.3)", class = "b")) #population mean = 0.0156, sd = 0.3195
+  blm_newssource <- brm(bf(delta_tiebreak_freq ~ 0 + news_source), 
+                           data = tiebreak_data,
+                           prior = prior, 
+                           family = gaussian(),
+                           sample_prior = TRUE,
+                           warmup = 5000, 
+                           chains = 4, 
+                           iter = 15000)
+  saveRDS(blm_newssource, file = file_fit_newssource)
+}
+
+# Hypothesis test that each group's mean is different than zero
+hypothesis(blm_newssource, "news_sourceusatoday > 0") #prob = 0.36, BF = 0.57
+hypothesis(blm_newssource, "news_sourcecbsnews > 0") #prob = 0.92, BF = 10.79
+hypothesis(blm_newssource, "news_sourcedcexaminer > 0") #prob = 0.97, BF = 29.86
+hypothesis(blm_newssource, "news_sourcevoxdotcom > 0") #prob = 0.99, BF = 148.25
+
+# Plot posterior estimates of each group
+posterior_newssource <- posterior_samples(blm_newssource)
+posterior_newssource_estimates <- posterior_newssource %>% 
+  gather("news_source", "posterior_sample") %>% 
+  filter(news_source %in% c("b_news_sourcevoxdotcom", "b_news_sourcecbsnews", "b_news_sourceusatoday", "b_news_sourcedcexaminer")) %>% 
+  mutate(news_source = gsub("b_news_source", "", news_source))
+gg_newssource_post <- ggplot(posterior_newssource_estimates, aes(x = posterior_sample, fill = news_source, group = news_source)) +
+  geom_density(alpha = 0.6, color = NA) +
+  # geom_histogram(position = "identity", alpha = 0.6, binwidth = 0.5, aes(y = stat(count) / sum(count))) +
+  xlab("Relative frequency\ncross-ideology unfollows") +
+  ylab("Posterior probability density") +
+  # scale_fill_manual(name = "Information\necocystem",
+  #                   values = info_corr_pal) +
+  theme_ctokita()
+gg_newssource_post
+
+# Hypothesis test that low corr is higher than higher corr for given ideology group
+hypothesis(blm_newssource, "news_sourcevoxdotcom > news_sourcecbsnews") #prob = 0.78, BF = 3.6
+hypothesis(blm_newssource, "news_sourcedcexaminer > news_sourceusatoday") #prob = 0.93, BF = 14.15
 
 ####################
 # Futher exploration for now...

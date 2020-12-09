@@ -183,39 +183,49 @@ ggsave(gg_newssource_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "rela
 ####################
 # Bayesian estimate  of relative FREQUENCY of cross-ideology tie breaks
 ####################
-# Estimate mean using bayesian inference
-newssource_freq_estimates <- data.frame()
-for (outlet in unique(tiebreak_data$news_source)) {
-  newssource_data <- tiebreak_data %>% 
-    filter(news_source == outlet,
-           n_tiebreaks > 0)
-  ideology <- ifelse(outlet %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative")
-  estimate <- estimate_mean(data = newssource_data$delta_tiebreak_freq, 
-                            mean_prior = 0,
-                            std_prior = 0.05, 
-                            info_ecosystem = unique(newssource_data$info_ecosystem), 
-                            ideology = ideology)
-  newssource_freq_estimates <- rbind(newssource_freq_estimates, estimate)
-  rm(newssource_data, ideology, estimate)
-}
-newssource_freq_estimates <- newssource_freq_estimates %>% 
-  mutate(info_ecosystem = gsub(" ", "\n", info_ecosystem)) %>% #add line break for plotting
-  mutate(info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation"))) #set plotting order
+# Load bayesian estimate
+blm_newssource_freq <- readRDS(paste0(dir_brms_fits, "newssource_relfreq.rds"))
+posterior_newssource_freq <- posterior_samples(blm_newssource_freq) %>% 
+  gather("news_source", "posterior_sample") %>% 
+  filter(news_source %in% c("b_news_sourcevoxdotcom", "b_news_sourcecbsnews", "b_news_sourceusatoday", "b_news_sourcedcexaminer")) %>% 
+  mutate(news_source = gsub("b_news_source", "", news_source),
+         info_ecosystem = ifelse(news_source %in% c("cbsnews", "usatoday"), "High\ncorrelation", "Low\ncorrelation"),
+         info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")),
+         ideology = ifelse(news_source %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative"),
+         ideology = factor(ideology, levels = c("Conservative", "Liberal")))
+
+# Get point estimates
+newssource_freq_estimates <- as.data.frame( posterior_summary(blm_newssource_freq, 
+                                                             probs = c(0.05, 0.95), #90% interval
+                                                             pars =  c("b_news_sourcevoxdotcom", "b_news_sourcecbsnews", "b_news_sourceusatoday", "b_news_sourcedcexaminer")) ) %>%  
+  tibble::rownames_to_column() %>% 
+  rename(news_source = rowname) %>% 
+  mutate(news_source = gsub("b_news_source", "", news_source),
+         info_ecosystem = ifelse(news_source %in% c("cbsnews", "usatoday"), "High\ncorrelation", "Low\ncorrelation"),
+         info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")),
+         ideology = ifelse(news_source %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative"),
+         ideology = factor(ideology, levels = c("Conservative", "Liberal")))
 
 # Plot estimates
-dodge_width <- 0.25
-gg_newssource_breaks_freq <- ggplot(newssource_freq_estimates, aes(x = info_ecosystem, color = ideology, group = ideology)) +
+dodge_width <- 0.5
+gg_newssource_breaks_freq <- ggplot(newssource_freq_estimates, aes(x = info_ecosystem, color = ideology)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
-  geom_errorbar(aes(ymin = ci_95_low, ymax = ci_95_high), 
-                position = position_dodge(dodge_width), width = 0, size = 0.5) +
-  geom_line(aes(y = est_mean), 
-            position = position_dodge(dodge_width), size = 0.3) +
-  geom_point(aes(y = est_mean), 
-             position = position_dodge(dodge_width), size = 2) + 
-  scale_y_continuous(limits = c(-0.04, 0.06), 
-                     breaks = seq(-0.04, 0.06, 0.02),
+  geom_violin(data = posterior_newssource_freq, 
+              aes(y = posterior_sample, fill = ideology), 
+              position = position_dodge(dodge_width),
+              color = NA, alpha = 0.15, width = 0.5) +
+  geom_errorbar(aes(ymin = Q5, ymax = Q95), 
+                position = position_dodge(dodge_width),
+                width = 0, 
+                size = 0.5) +
+  geom_point(aes(y = Estimate), 
+             position = position_dodge(dodge_width),
+             size = 2) + 
+  scale_y_continuous(limits = c(-0.03, 0.06),
+                     breaks = seq(-0.03, 0.06, 0.03),
                      expand = c(0, 0)) +
   scale_color_manual(values = ideol_pal[c(3, 1)]) +
+  scale_fill_manual(values = ideol_pal[c(3, 1)]) +
   xlab("Information ecosystem") +
   ylab("Relative freq.\ncross-ideology unfollows") +
   theme_ctokita() +
