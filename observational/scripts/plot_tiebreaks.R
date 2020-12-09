@@ -11,10 +11,11 @@
 # Load pacakges and data
 ####################
 library(ggplot2)
+library(RColorBrewer)
 library(dplyr)
 library(tidyr)
 library(brms)
-library(RColorBrewer)
+library(bayestestR)
 source("_plot_themes/theme_ctokita.R")
 
 # High-level data directory
@@ -69,9 +70,9 @@ posterior_infoeco_freq <- posterior_samples(blm_infoeco_freq) %>%
          info_ecosystem = gsub("correlation", "\ncorrelation", info_ecosystem),
          info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")))
 
-# Get point estimates
+# Get point estimates and quantile-based CI
 infoeco_freq_estimates <- as.data.frame( posterior_summary(blm_infoeco_freq, 
-                                                           probs = c(0.05, 0.95), #90% interval
+                                                           probs = c(0.05, 0.95), #90% interval (quantile based)
                                                            pars = c("b_info_ecosystemLowcorrelation", "b_info_ecosystemHighcorrelation")) ) %>%  
   tibble::rownames_to_column() %>% 
   rename(info_ecosystem = rowname) %>% 
@@ -79,13 +80,24 @@ infoeco_freq_estimates <- as.data.frame( posterior_summary(blm_infoeco_freq,
          info_ecosystem = gsub("correlation", "\ncorrelation", info_ecosystem),
          info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")))
 
+# Merge in HDI-based CI
+infoeco_freq_estimates <- posterior_samples(blm_infoeco_freq) %>% 
+  select(b_info_ecosystemLowcorrelation, b_info_ecosystemHighcorrelation) %>% 
+  bayestestR::hdi(., ci = 0.9) %>% 
+  as.data.frame() %>% 
+  rename(info_ecosystem = Parameter) %>% 
+  mutate(info_ecosystem = gsub("b_info_ecosystem", "", info_ecosystem),
+         info_ecosystem = gsub("correlation", "\ncorrelation", info_ecosystem),
+         info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation"))) %>% 
+  merge(infoeco_freq_estimates, ., by = "info_ecosystem")
+
 # Plot: estimates, 90% CI, and posterior
 gg_infoeco_breaks_freq <- ggplot(infoeco_freq_estimates, aes(x = info_ecosystem, color = info_ecosystem)) +
   geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
   geom_violin(data = posterior_infoeco_freq, 
               aes(y = posterior_sample, fill = info_ecosystem),
               color = NA, alpha = 0.15, width = 0.4) +
-  geom_errorbar(aes(ymin = Q5, ymax = Q95), 
+  geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
                 width = 0, 
                 size = 0.5) +
   geom_point(aes(y = Estimate), 
@@ -192,7 +204,7 @@ posterior_newssource_freq <- posterior_samples(blm_newssource_freq) %>%
          info_ecosystem = ifelse(news_source %in% c("cbsnews", "usatoday"), "High\ncorrelation", "Low\ncorrelation"),
          info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")),
          ideology = ifelse(news_source %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative"),
-         ideology = factor(ideology, levels = c("Conservative", "Liberal")))
+         ideology = factor(ideology, levels = c("Liberal", "Conservative")))
 
 # Get point estimates
 newssource_freq_estimates <- as.data.frame( posterior_summary(blm_newssource_freq, 
@@ -204,7 +216,16 @@ newssource_freq_estimates <- as.data.frame( posterior_summary(blm_newssource_fre
          info_ecosystem = ifelse(news_source %in% c("cbsnews", "usatoday"), "High\ncorrelation", "Low\ncorrelation"),
          info_ecosystem = factor(info_ecosystem, levels = c("Low\ncorrelation", "High\ncorrelation")),
          ideology = ifelse(news_source %in% c("cbsnews", "voxdotcom"), "Liberal", "Conservative"),
-         ideology = factor(ideology, levels = c("Conservative", "Liberal")))
+         ideology = factor(ideology, levels = c("Liberal", "Conservative")))
+
+# Merge in HDI-based CI
+newssource_freq_estimates <- posterior_samples(blm_newssource_freq) %>% 
+  select(b_news_sourcevoxdotcom, b_news_sourcecbsnews, b_news_sourceusatoday, b_news_sourcedcexaminer) %>% 
+  bayestestR::hdi(., ci = 0.9) %>% 
+  as.data.frame() %>% 
+  rename(news_source = Parameter) %>% 
+  mutate(news_source = gsub("b_news_source", "", news_source)) %>% 
+  merge(newssource_freq_estimates, ., by = "news_source")
 
 # Plot estimates
 dodge_width <- 0.5
@@ -224,8 +245,8 @@ gg_newssource_breaks_freq <- ggplot(newssource_freq_estimates, aes(x = info_ecos
   scale_y_continuous(limits = c(-0.03, 0.06),
                      breaks = seq(-0.03, 0.06, 0.03),
                      expand = c(0, 0)) +
-  scale_color_manual(values = ideol_pal[c(3, 1)]) +
-  scale_fill_manual(values = ideol_pal[c(3, 1)]) +
+  scale_color_manual(values = ideol_pal[c(1, 3)]) +
+  scale_fill_manual(values = ideol_pal[c(1, 3)]) +
   xlab("Information ecosystem") +
   ylab("Relative freq.\ncross-ideology unfollows") +
   theme_ctokita() +
