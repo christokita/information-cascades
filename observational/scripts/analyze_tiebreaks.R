@@ -156,6 +156,11 @@ anova(lm_infoecosystem)
 lm_infoecosystem_comp <- lm(delta_tiebreak_freq ~ info_ecosystem, data = tiebreak_data)
 summary(lm_infoecosystem_comp) # low-correlation is significantly different than zero (but not different from high-correlation)
 
+# T test
+low_corr <- tiebreak_data$delta_tiebreak_freq[tiebreak_data$info_ecosystem == "Low correlation"]
+high_corr <- tiebreak_data$delta_tiebreak_freq[tiebreak_data$info_ecosystem == "High correlation"]
+t.test(low_corr, high_corr, alternative = "greater")
+
 # calculate effect size of group difference
 M_lowcorr <- lm_infoecosystem_comp$coefficients[1]
 M_highcorr <- lm_infoecosystem_comp$coefficients[1] + lm_infoecosystem_comp$coefficients[2]
