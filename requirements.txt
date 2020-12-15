@@ -9,6 +9,7 @@ boto3
 
 # Packages for handling survey data (comment out if on ec2 linux instance)
 xlwings
+openpyxl
 dropbox
 
 # For analysis of tweets from news sources
