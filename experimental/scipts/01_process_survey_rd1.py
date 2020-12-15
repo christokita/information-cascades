@@ -230,7 +230,7 @@ user_crosswalk = user_crosswalk.drop(columns = ['survey_user_name'])
 # Create our final set of particpants
 ####################
 # Create dataset of relevant user info
-participants = user_crosswalk.merge(survey_data[['qid', 'hi_corr', 'ideology']], on = 'qid', how = 'left')
+participants = user_crosswalk.merge(survey_data[['qid', 'hi_corr', 'ideology', 'recruited_from']], on = 'qid', how = 'left')
 participants = participants.merge(twitter_info[['user_id', 'user_id_str', 'user_name', 'protected']], on = ['user_id', 'user_id_str'], how = 'left')
 
 # Flag who is in the final user pool based on our criteria of:
