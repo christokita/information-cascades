@@ -68,8 +68,8 @@ sheet_fb = wb_facebook.sheets['Sheet0']
 raw_survey_data_mturk = sheet_mturk.range('A1').options(pd.DataFrame, header = True, index = False, expand='table').value
 raw_survey_data_mturk = raw_survey_data_mturk.iloc[1:] #first row is question text
 raw_survey_data_mturk = raw_survey_data_mturk.reset_index(drop = True)
-raw_survey_data_mturk['email'] = '' #we didn't collect email in Mturk, but did in FB survey
-raw_survey_data_mturk['email_confirm'] = ''
+raw_survey_data_mturk['email'] = np.nan #we didn't collect email in Mturk, but did in FB survey
+raw_survey_data_mturk['email_confirm'] = np.nan #we didn't collect email in Mturk, but did in FB survey
 raw_survey_data_mturk['recruited_from'] = 'mturk'
 
 raw_survey_data_fb = sheet_fb.range('A1').options(pd.DataFrame, header = True, index = False, expand='table').value
@@ -120,7 +120,7 @@ treatment_counts = shared_username.groupby(['ideology', 'hi_corr']).size() #mode
 duplicated_usernames = shared_username['username_manual_compile'][shared_username.duplicated(subset = ['username_manual_compile'])]
 check_duplicates = shared_username[shared_username['username_manual_compile'].isin(duplicated_usernames)]
 check_duplicates = check_duplicates[['username_manual_compile', 'news_source', 'qid', 'recruited_from', 'username_source']]
-duplicates_to_drop = ['305894', '586007', '345488', '368149', '899029'] #these were manually checked. See lab notebook.
+duplicates_to_drop = ['305894', '586007', '345488', '368149', '899029', '165480',  '7848'] #these were manually checked. See lab notebook.
 shared_username = shared_username[~shared_username['qid'].isin(duplicates_to_drop)]
 
 # Create list of partipants that will form basis of our crosswalk
@@ -129,6 +129,17 @@ user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_comp
 user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_compile'].str.replace(" [^a-zA-Z0-9]+", "") #one person put a trailing marks at the end of the entry
 user_crosswalk['username_manual_compile'] = user_crosswalk['username_manual_compile'].str.strip() #remove trailing/leading space
 user_crosswalk = user_crosswalk.rename(columns = {'username_manual_compile': 'survey_user_name'})
+
+# Add Mturk worker info to user crosswalk
+mturk_worker_files = dbx.files_list_folder(path_to_survey_data + "MTurk_workers/")
+mturk_workers = pd.DataFrame()
+for file in mturk_worker_files.entries:
+    _, res = dbx.files_download(path_to_survey_data + "MTurk_workers/" + file.name)
+    workers = pd.read_csv(res.raw, dtype = {'Answer.surveycode': str})
+    mturk_workers = mturk_workers.append(workers, ignore_index = True)
+    del  _, res, workers
+mturk_workers = mturk_workers.rename(columns = {'Answer.surveycode': 'qid', 'WorkerId': 'mturk_worker_id'})
+user_crosswalk = user_crosswalk.merge(mturk_workers[['qid', 'mturk_worker_id']], on = 'qid', how = 'left')
 
 # Remove twitter identifying data & irrelevant columns from survey
 # This will be our set of survey data we can save for use later (after we filter to just the users of interest)
@@ -236,11 +247,11 @@ participants = participants.merge(twitter_info[['user_id', 'user_id_str', 'user_
 # Flag who is in the final user pool based on our criteria of:
 #     (1) provided real twitter username
 #     (2) provided a twitter account that is NOT private
-#     (3) provided us way to contact them, i.e., email for those we recruited from FB
+#     (3) provided us way to contact them, i.e., email for those we recruited from FB and Worker ID for those from MTurk
 valid_username = ~pd.isna(participants['user_id_str']) 
 protected_account = participants['protected'].astype(bool)
-fb_no_email = (participants.recruited_from == 'fb') & pd.isna(participants['email'])
-participants['final_user_pool'] = valid_username & ~fb_no_email & ~protected_account 
+no_way_to_contact = pd.isna(participants['email']) & pd.isna(participants['mturk_worker_id'])
+participants['final_user_pool'] = valid_username & ~protected_account & ~no_way_to_contact 
 
 # Narrow down our survey data, user_crosswalk, and participants to only those who are in the final pool
 final_participants = participants[participants.final_user_pool == True].copy()
@@ -282,6 +293,8 @@ final_twitter_info = final_twitter_info.merge(users_to_check[['user_id', 'user_i
                                               on = ['user_id', 'user_id_str'],
                                               how = 'left')
 
+check_compliance = final_participants.merge(final_twitter_info, on = ['user_id', 'user_id_str'])
+check_compliance[['hi_corr', 'ideology', 'following_newssource_postrd1']].value_counts()
 
 ####################
 # Batch out users for second wave
@@ -314,6 +327,11 @@ def create_survey_wave_lists(df):
 high_corr_waves = create_survey_wave_lists(high_corr_group)
 low_corr_waves = create_survey_wave_lists(low_corr_group)    
 
+# Create spreadsheet to track deployment of second round survey
+survey_waves_df = high_corr_group.append(low_corr_group, ignore_index = True)
+survey_waves_df = survey_waves_df.drop(columns = ['user_id', 'user_id_str', 'final_user_pool'])
+survey_waves_df = survey_waves_df.sort_values(['hi_corr', 'survey_wave', 'recruited_from'])
+
 
 ####################
 # Upload to dropbox
@@ -327,6 +345,8 @@ final_user_crosswalk.to_excel(tmp_dir + 'user_crosswalk.xlsx', index = False)
 do_not_pay.to_csv(tmp_dir + 'donotpay_rd1.csv', index = False)
 final_survey_data.to_csv(tmp_dir + 'survey_data_rd1.csv', index = False)
 final_twitter_info.to_csv(tmp_dir + 'participant_twitter_info.csv', index = False)
+survey_waves_df.to_excel(tmp_dir + 'survey_wave_tracker.xlsx', index = False)
+
 
 with open(tmp_dir + 'survey2_high_corr_waves.txt', 'w') as filehandle:
     filehandle.writelines("%s\n" % x for x in high_corr_waves)
@@ -335,7 +355,7 @@ with open(tmp_dir + 'survey2_low_corr_waves.txt', 'w') as filehandle:
 
 
 # Upload to dropbox
-for file in ['donotpay_rd1.csv', 'survey_data_rd1.csv', 'survey2_high_corr_waves.txt', 'survey2_low_corr_waves.txt']:
+for file in ['donotpay_rd1.csv', 'survey_data_rd1.csv', 'survey2_high_corr_waves.txt', 'survey2_low_corr_waves.txt', 'survey_wave_tracker.xlsx']:
     with open(tmp_dir + file, "rb") as f:
         dbx.files_upload(f.read(), path = path_to_survey_data + file, mode = dropbox.files.WriteMode.overwrite)
         
@@ -360,6 +380,7 @@ os.mkdir(tmp_dir)
 fb_participants = raw_survey_data[raw_survey_data.recruited_from == 'fb']
 n_giftcards = math.ceil(fb_participants.shape[0] / 25) #round up to nearest 25 to make sure people are paid more than not
 fb_participants_with_emails = fb_participants[~pd.isna(fb_participants.email)]
+fb_participants_with_emails = fb_participants_with_emails.drop_duplicates(subset = ['email']) #drop duplicate entries
 pay_these_participants = fb_participants_with_emails['email'].sample(n = n_giftcards, replace = False, random_state = 609)
 pay_these_participants = pd.DataFrame({'email': pay_these_participants})
 
