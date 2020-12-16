@@ -17,6 +17,9 @@ import dropbox
 import json
 import io
 import boto3
+import os
+import xlwings
+import shutil
 
 
 ####################
@@ -25,6 +28,9 @@ import boto3
 # Path to survey data on Dropbox
 dropbox_dir = '/Information Cascades Project/data/'
 path_to_survey_data = dropbox_dir + 'survey_data/'
+
+# Path to specific files
+wave_file = 'survey_wave_tracker.xlsx'
 
 # Get dropbox token
 with open('../api_keys/dropbox_token/dropbox_token.json') as f:
@@ -85,3 +91,53 @@ for worker_id in rd1_pt1_workers['WorkerId']:
 ###################
 # (2) Update qualifications so we send follow up survey to qualified MTurk workers
 ####################        
+'''
+We now need to deploy the round 2 survey in 3 waves. 
+To do that, we will assign six total qualifications--one for each of the three waves in each of the two treatment gruops.
+'''
+
+# Make temporary directory, download encrypted survey wave data sheet, read into pandas, and delete temporary files
+tmp_dir = "/Users/ChrisTokita/Documents/Research/Tarnita Lab/Information Cascades/information-cascades/experimental/data/tmp/"
+os.makedirs(tmp_dir, exist_ok = True)
+dbx = dropbox.Dropbox(dropbox_token)
+dbx.files_download_to_file(download_path = tmp_dir + wave_file, path = path_to_survey_data + wave_file)
+wb_waves = xlwings.Book(tmp_dir + wave_file) # this will prompt you to enter password in excel
+sheet_waves = wb_waves.sheets['Sheet1']
+wave_data = sheet_waves.range('A1').options(pd.DataFrame, header = True, index = False, expand='table').value
+del wb_waves, sheet_waves
+shutil.rmtree(tmp_dir)
+
+# Construct out set of qualifications by wave and treatment
+wave_quals = pd.DataFrame([['0', 1, '307M1J5IKZIHRH9CVRY04DY5DLREM8'],
+                           ['0', 2, '3LJ6LLBDMCSCC178S6PXJYBS26E6AV'],
+                           ['0', 3, '3LQV637WQC6HVBC0YKPTE9VYKOZ6BQ'],
+                           ['1', 1, '3PO9K4KN95EWCJJGRM85SYTV080Y7V'],
+                           ['1', 2, '3QY4EA3YB4FSP5S4FA1RTHMC5A23HX'],
+                           ['1', 3, '3RAGKB98R1X0CXOZ1R0B6YPQBS6Y8I']],
+                          columns = ['hi_corr', 'survey_wave', 'qualification_id'])
+
+# Determine which worker gets which qualification
+workers = wave_data[['mturk_worker_id', 'hi_corr', 'survey_wave']].copy()
+workers = workers[~pd.isna(workers.mturk_worker_id)].copy()
+workers = workers.merge(wave_quals, on = ['hi_corr', 'survey_wave'])
+
+workers[['survey_wave', 'hi_corr']].value_counts()
+
+# Connect to Mturk API    
+mturk = boto3.client('mturk', 
+                     aws_access_key_id = mturk_key['access_key_id'],
+                     aws_secret_access_key = mturk_key['access_secret_key'],
+                     region_name = 'us-east-1')
+
+# Update qualifications of follow-up survey workers
+error_users = []
+for index, row in workers.iterrows():
+    worker_id = row.mturk_worker_id
+    qual_id = row.qualification_id
+    response = mturk.associate_qualification_with_worker(QualificationTypeId = qual_id,
+                                                          WorkerId = worker_id,
+                                                          IntegerValue = 1,
+                                                          SendNotification = False)
+    if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+        print("ERROR for user " + worker_id)
+        error_users.append(worker_id)
