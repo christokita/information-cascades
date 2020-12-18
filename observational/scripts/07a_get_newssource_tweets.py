@@ -245,4 +245,6 @@ for file in tweet_json_files:
     del source_tweets
     print("DONE: " + file)
  
+# Drop duplicates (in case we pulled tweets from same exact time before)
+news_tweets = news_tweets.drop_duplicates(subset = ['user_id', 'tweet_id'])
 news_tweets.to_csv(outpath + 'news_source_tweets.csv', index = False)
