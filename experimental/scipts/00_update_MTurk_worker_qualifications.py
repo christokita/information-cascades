@@ -114,14 +114,20 @@ wave_quals = pd.DataFrame([['0', 1, '307M1J5IKZIHRH9CVRY04DY5DLREM8'],
                            ['1', 1, '3PO9K4KN95EWCJJGRM85SYTV080Y7V'],
                            ['1', 2, '3QY4EA3YB4FSP5S4FA1RTHMC5A23HX'],
                            ['1', 3, '3RAGKB98R1X0CXOZ1R0B6YPQBS6Y8I']],
-                          columns = ['hi_corr', 'survey_wave', 'qualification_id'])
+                          columns = ['hi_corr', 'survey_wave', 'wave_qualification_id'])
+
+treatment_quals = pd.DataFrame([['0', '3URP6LWYVRUJ9TN4WI9039EOZAFU97'],
+                                ['1', '3YUA2D3Z1TSULP0CPTJSHTMZXB0WUZ']], 
+                               columns = ['hi_corr', 'treatment_qualification_id'])
 
 # Determine which worker gets which qualification
 workers = wave_data[['mturk_worker_id', 'hi_corr', 'survey_wave']].copy()
 workers = workers[~pd.isna(workers.mturk_worker_id)].copy()
 workers = workers.merge(wave_quals, on = ['hi_corr', 'survey_wave'])
+workers = workers.merge(treatment_quals, on = ['hi_corr'])
 
 workers[['survey_wave', 'hi_corr']].value_counts()
+workers[['treatment_qualification_id', 'hi_corr']].value_counts()
 
 # Connect to Mturk API    
 mturk = boto3.client('mturk', 
@@ -133,11 +139,63 @@ mturk = boto3.client('mturk',
 error_users = []
 for index, row in workers.iterrows():
     worker_id = row.mturk_worker_id
-    qual_id = row.qualification_id
-    response = mturk.associate_qualification_with_worker(QualificationTypeId = qual_id,
+    wave_qual_id = row.wave_qualification_id
+    treat_qual_id = row.treatment_qualification_id
+    hi_corr = row.hi_corr
+    response1 = mturk.associate_qualification_with_worker(QualificationTypeId = wave_qual_id, #wave-specific ID
                                                           WorkerId = worker_id,
                                                           IntegerValue = 1,
                                                           SendNotification = False)
+    response2 = mturk.associate_qualification_with_worker(QualificationTypeId = treat_qual_id, #treatment-specific ID
+                                                          WorkerId = worker_id,
+                                                          IntegerValue = 1,
+                                                          SendNotification = False)
+    response3 = mturk.associate_qualification_with_worker(QualificationTypeId = '3ASQQ0AAXJVMI9AX5XSWFERQ2DWSBY', #elgible for follow-up survey
+                                                            WorkerId = worker_id,
+                                                            IntegerValue = 1,
+                                                            SendNotification = False)
+    if (response1['ResponseMetadata']['HTTPStatusCode'] != 200) or (response2['ResponseMetadata']['HTTPStatusCode'] != 200) or (response3['ResponseMetadata']['HTTPStatusCode'] != 200):
+        print("ERROR for user " + worker_id)
+        error_users.append(worker_id)
+        
+        
+        
+###################
+# (3) Update qualifications to mark workers who have already taken the follow-up survey
+####################        
+
+# Read in list of previous workers
+worker_rd2_files = ['survey_data/MTurk_workers/workers_rd2_highcorr1a.csv',
+                    'survey_data/MTurk_workers/workers_rd2_lowcorr1a.csv',
+                    'survey_data/MTurk_workers/workers_rd2_highcorr1b.csv',
+                    'survey_data/MTurk_workers/workers_rd2_lowcorr1b.csv',
+                    'survey_data/MTurk_workers/workers_rd2_highcorr2.csv',
+                    'survey_data/MTurk_workers/workers_rd2_lowcorr2.csv']
+
+rd2_workers = []
+for file in worker_rd2_files:
+    _, res = dbx.files_download(dropbox_dir + file)
+    with io.BytesIO(res.content) as stream:
+        workers = pd.read_csv(stream)
+        rd2_workers.append(workers)
+        del workers
+rd2_workers = pd.concat(rd2_workers)
+
+
+# Connect to Mturk API    
+mturk = boto3.client('mturk', 
+                     aws_access_key_id = mturk_key['access_key_id'],
+                     aws_secret_access_key = mturk_key['access_secret_key'],
+                     region_name = 'us-east-1')
+
+# Update qualifications of these workers
+error_users = []
+for worker_id in rd2_workers['WorkerId']:
+    response = mturk.associate_qualification_with_worker(QualificationTypeId = '3DUIEQIYL6JPQIMALARAW7CNPSFY2G', #qualification: "Took Rd 2"
+                                                         WorkerId = worker_id,
+                                                         IntegerValue = 1,
+                                                         SendNotification = False)
     if response['ResponseMetadata']['HTTPStatusCode'] != 200:
         print("ERROR for user " + worker_id)
         error_users.append(worker_id)
+        
