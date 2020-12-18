@@ -188,6 +188,40 @@ def rate_limit_check(API, all_tokens, logger):
     else:
         return False
     
+    
+def rate_limit_check_specific(API, all_tokens, logger, query_of_interest):
+    """
+    Function to test whether or not we need to cycle to the next
+    api token/key.
+    
+    """
+    
+    access_token = API.auth.access_token
+    rate_limits = API.rate_limit_status()
+    rate_limits = rate_limits['resources']
+    
+    if query_of_interest == "friends":
+        requests_left = rate_limits['friends']['/friends/ids']['remaining']
+        max_requests = rate_limits['friends']['/friends/ids']['limit']
+    
+    if query_of_interest == "followers":
+        requests_left = rate_limits['followers']['/followers/ids']['remaining']
+        max_requests = rate_limits['followers']['/followers/ids']['limit']
+
+    
+    if requests_left == 0:
+        logger.info(f"We have hit our rate limit, so we will now switch tokens.")
+        
+        # Print/Log details of this check...
+        print(f"    Remaining Timeline Requests : {requests_left} / {max_requests}")
+        print(f"    Access Token                : {access_token}")
+        logger.info(f"    Remaining Timeline Requests : {requests_left} / {max_requests}")
+        logger.info(f"    Access Token                : {access_token}")
+        return True
+
+    else:
+        return False
+    
 
 def rate_limit_check_og(API, all_tokens, logger):
     """
