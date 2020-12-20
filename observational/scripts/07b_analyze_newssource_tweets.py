@@ -81,39 +81,60 @@ news_words = tweets[['user_name', 'tweet_period', 'time_period_words']].drop_dup
 
 
 ####################
-# Calcualte baseline similarity of AP against itself
+# Calcualte baseline similarity of AP/Reuters against itself
 ####################
 '''
 We will randomly split each set of tweets from the same time period into two sets. 
-We will then compare the same time period against itselt.
+We will then compare the same time period against itself.
 '''
-
-# Grab AP tweets and split into two samples
-AP_tweets = tweets[tweets.user_name == "AP"].copy()
-AP_tweets['sub_sample'] = AP_tweets.groupby(['tweet_period'])['user_name'].transform(lambda x: np.random.choice([0, 1], size = len(x), replace = True))
-
-# Gather by time period of tweet
-AP_tweets['time_period_words'] = AP_tweets.groupby(['tweet_period', 'sub_sample'])['cleaned_words'].transform(lambda x: ' '.join(x))
-AP_words = AP_tweets[['user_name', 'tweet_period', 'sub_sample', 'time_period_words']].drop_duplicates()
-AP_words = AP_words.sort_values('tweet_period')
-
-# Vectorise the data, calculate similarity
-words = AP_words['time_period_words']
-vec = fe.text.TfidfVectorizer()
-X = vec.fit_transform(words)
-similarity_AP = met.pairwise.cosine_similarity(X)
-
 # Function to determine similarity of AP against itself 
-def grab_same_time_similairty_AP(similarity_matrix, tweet_data):
+def grab_same_time_similairty_self(similarity_matrix, tweet_data):
     similairty_scores = np.array([])
     for period in tweet_data['tweet_period'].unique():
         source_0_row = np.where( (tweet_data['sub_sample'] == 0) & (tweet_data['tweet_period'] == period) )[0]
         source_1_row = np.where( (tweet_data['sub_sample'] == 1) & (tweet_data['tweet_period'] == period) )[0]
         similairty_scores = np.append(similairty_scores, similarity_matrix[source_0_row, source_1_row])
     return similairty_scores
+
+# Function to run many iterations of splitting up sample against itself, returning the mean self-similarity of AP against itself across all tweet time periods of interest.
+def calculate_self_similarity(news_source_tweets, n_iterations):
+    
+    # Loop through iterations 
+    similarity_scores = np.array([])
+    for i in np.arange(n_iterations):
         
-# Determine baseline similairity
-baseline_similarity = grab_same_time_similairty_AP(similarity_AP, AP_words)
+        # Split up sample
+        iteration_tweets = news_source_tweets.copy()
+        iteration_tweets['sub_sample'] = iteration_tweets.groupby(['tweet_period'])['user_name'].transform(lambda x: np.random.choice([0, 1], size = len(x), replace = True))
+        
+        # Gather by time period of tweet
+        iteration_tweets['time_period_words'] = iteration_tweets.groupby(['tweet_period', 'sub_sample'])['cleaned_words'].transform(lambda x: ' '.join(x))
+        iteration_tweets = iteration_tweets[['user_name', 'tweet_period', 'sub_sample', 'time_period_words']].drop_duplicates()
+        iteration_tweets = iteration_tweets.sort_values('tweet_period')
+        
+        # Vectorise the data, calculate similarity
+        words = iteration_tweets['time_period_words']
+        vec = fe.text.TfidfVectorizer()
+        X = vec.fit_transform(words)
+        similarity = met.pairwise.cosine_similarity(X)
+                
+        # Determine baseline similairity
+        baseline_similarity = grab_same_time_similairty_self(similarity, iteration_tweets)
+        similarity_scores = np.append(similarity_scores, np.mean(baseline_similarity))
+        
+    return similarity_scores
+        
+
+
+# Grab AP tweets and calculate self similairty
+tweets_AP = tweets[tweets.user_name == "AP"].copy()
+np.random.seed(323)
+baseline_similarity_AP = calculate_self_similarity(news_source_tweets = tweets_AP, n_iterations = 200)
+
+# Grab Reuters tweets and calculate self similairty
+# tweets_reuters = tweets[tweets.user_name == "Reuters"].copy()
+# baseline_similarity_reuters = calculate_self_similarity(news_source_tweets = tweets_reuters, n_iterations = 100)
+
 
 ####################
 # Calcualte cosine similarity between day of coverage for each news source
@@ -155,6 +176,10 @@ plt.hist(cbs_similarity, bins = 30, color = "green", alpha = 0.5)
 ####################
 # Attempt to determine correlation
 ####################
+# For now we are taking the maximum self-similiarity of the AP against itself
+# Becuase self-similarity depends on how tweets within the day are split, we will take the maximum as the highest possible similarity in the data set.
+max_similarity_AP = max(baseline_similarity_AP)
+
 # Function to convert cosine similarity into our correlation metric
 def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
     mean_similarity = np.mean(similarity_scores)
@@ -164,19 +189,20 @@ def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
     return correlation_metric
 
 # Calculate gammas 
-gamma_reuters = calculate_gamma_correlation(reuters_similarity, baseline_similarity)
-gamma_usatoday = calculate_gamma_correlation(usatoday_similarity, baseline_similarity)
-gamma_cbs = calculate_gamma_correlation(cbs_similarity, baseline_similarity)
-gamma_dcexaminer = calculate_gamma_correlation(dcexaminer_similarity, baseline_similarity)
-gamma_vox = calculate_gamma_correlation(vox_similarity, baseline_similarity)
+gamma_reuters = calculate_gamma_correlation(reuters_similarity, max_similarity_AP)
+gamma_usatoday = calculate_gamma_correlation(usatoday_similarity, max_similarity_AP)
+gamma_cbs = calculate_gamma_correlation(cbs_similarity, max_similarity_AP)
+gamma_dcexaminer = calculate_gamma_correlation(dcexaminer_similarity, max_similarity_AP)
+gamma_vox = calculate_gamma_correlation(vox_similarity, max_similarity_AP)
 
 # Output similarity scores
-news_correlations = pd.DataFrame([['AP', 'AP', np.mean(baseline_similarity), 1.0],
+news_correlations = pd.DataFrame([['AP', 'AP', np.mean(max_similarity_AP), 1.0],
                                  ['Reuters', 'AP', np.mean(reuters_similarity), gamma_reuters],
                                  ['USATODAY', 'AP', np.mean(usatoday_similarity), gamma_usatoday],
                                  ['CBSNews', 'AP', np.mean(cbs_similarity), gamma_cbs],
                                  ['dcexaminer', 'AP', np.mean(dcexaminer_similarity), gamma_dcexaminer],
                                  ['voxdotcom', 'AP', np.mean(vox_similarity), gamma_vox]],
                                  columns = ['news_source', 'reference_news_source', 'mean_cos_similarity', 'estimated_gamma'])
+print(news_correlations)
 news_correlations.to_csv(outpath + 'estimated_gamma_cosinesim.csv', index = False)
 
