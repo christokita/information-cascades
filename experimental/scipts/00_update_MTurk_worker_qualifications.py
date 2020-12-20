@@ -170,7 +170,9 @@ worker_rd2_files = ['survey_data/MTurk_workers/workers_rd2_highcorr1a.csv',
                     'survey_data/MTurk_workers/workers_rd2_highcorr1b.csv',
                     'survey_data/MTurk_workers/workers_rd2_lowcorr1b.csv',
                     'survey_data/MTurk_workers/workers_rd2_highcorr2.csv',
-                    'survey_data/MTurk_workers/workers_rd2_lowcorr2.csv']
+                    'survey_data/MTurk_workers/workers_rd2_lowcorr2.csv',
+                    'survey_data/MTurk_workers/workers_rd2_highcorr_final.csv',
+                    'survey_data/MTurk_workers/workers_rd2_lowcorr_final.csv']
 
 rd2_workers = []
 for file in worker_rd2_files:
@@ -181,6 +183,22 @@ for file in worker_rd2_files:
         del workers
 rd2_workers = pd.concat(rd2_workers)
 
+
+# Make temporary directory, download encrypted survey wave data sheet, read into pandas, and delete temporary files
+tmp_dir = "/Users/ChrisTokita/Documents/Research/Tarnita Lab/Information Cascades/information-cascades/experimental/data/tmp/"
+os.makedirs(tmp_dir, exist_ok = True)
+dbx = dropbox.Dropbox(dropbox_token)
+dbx.files_download_to_file(download_path = tmp_dir + wave_file, path = path_to_survey_data + wave_file)
+wb_waves = xlwings.Book(tmp_dir + wave_file) # this will prompt you to enter password in excel
+sheet_waves = wb_waves.sheets['Sheet1']
+wave_data = sheet_waves.range('A1').options(pd.DataFrame, header = True, index = False, expand='table').value
+del wb_waves, sheet_waves
+shutil.rmtree(tmp_dir)
+
+# Determine how many workers we have left to get to take survey
+workers_left = wave_data[~pd.isna(wave_data.mturk_worker_id)]
+workers_left = workers_left[~workers_left['mturk_worker_id'].isin(rd2_workers.WorkerId)]
+workers_left['hi_corr'].value_counts()
 
 # Connect to Mturk API    
 mturk = boto3.client('mturk', 
@@ -199,3 +217,33 @@ for worker_id in rd2_workers['WorkerId']:
         print("ERROR for user " + worker_id)
         error_users.append(worker_id)
         
+        
+        
+        
+# TEMP - to prod those who haven't responded yet from our FB group
+data_directory = '/Volumes/CKT-DATA/information-cascades/experimental/'
+low_corr = pd.read_excel(data_directory + 'low_corr.xlsx')
+low_corr = low_corr.iloc[1:,:]
+high_corr = pd.read_excel(data_directory + 'high_corr.xlsx')
+high_corr = high_corr.iloc[1:,:]
+
+
+already_responded = low_corr.append(high_corr, ignore_index = True)
+already_responded = already_responded[['email', 'twitterhandle']].copy()
+already_responded['twitterhandle'] = already_responded['twitterhandle'].str.replace('@', '')
+already_responded['twitterhandle'] = already_responded['twitterhandle'].str.replace(' ', '')
+already_responded['twitterhandle'] = already_responded['twitterhandle'].str.lower()
+already_responded['email'] = already_responded['email'].str.replace(' ', '')
+already_responded['email'] = already_responded['email'].str.lower()
+
+
+waves = wave_data[['user_name', 'email', 'hi_corr']].copy()
+waves = waves[~pd.isna(waves.email)].copy()
+waves['email'] = waves['email'].str.lower()
+waves['user_name'] = waves['user_name'].str.lower()
+
+email_done = waves['email'].isin(already_responded.email)
+twitter_done = waves['user_name'].isin(already_responded.twitterhandle)
+
+needs_follow_up = waves[~email_done & ~twitter_done]
+needs_follow_up.to_csv(data_directory + 'needs_follow_up.csv', index = False)
