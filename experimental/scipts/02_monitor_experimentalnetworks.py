@@ -180,3 +180,6 @@ for user_id in users_to_check:
         print("Error with getting followers of user %s. Skipping..." % user_id)
 
 
+error_users = np.unique(error_users)
+error_users = pd.DataFrame({'user_id': error_users, 'user_id_str': ["\"" + str(x) + "\"" for x in error_users]})
+error_users.to_csv(outpath + 'error_users/error_users_{}.csv'.format(retrieval_date), index = False)
