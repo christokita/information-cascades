@@ -86,6 +86,8 @@ gg_est_gamma <- monitored_news %>%
                      expand = c(0, 0)) +
   scale_color_manual(values = news_pal[c(1, 4, 2, 3)],
                      guide = FALSE) +
+  ylab("News source") +
+  xlab(expression( paste("Estimated ", italic(gamma)) )) +
   theme_ctokita()
 gg_est_gamma
 

@@ -18,6 +18,7 @@ import nltk
 import sklearn.feature_extraction as fe
 import sklearn.metrics as met
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 
 # High-level data directory and outpath
@@ -120,7 +121,10 @@ def calculate_self_similarity(news_source_tweets, n_iterations):
                 
         # Determine baseline similairity
         baseline_similarity = grab_same_time_similairty_self(similarity, iteration_tweets)
-        similarity_scores = np.append(similarity_scores, np.mean(baseline_similarity))
+        # a, b, c, d = stats.beta.fit(baseline_similarity, floc = 0, fscale = 1)
+        # mean_baseline_similarity = a / (a + b)
+        mean_baseline_similarity = np.mean(baseline_similarity)
+        similarity_scores = np.append(similarity_scores, mean_baseline_similarity)
         
     return similarity_scores
         
@@ -167,10 +171,13 @@ vox_similarity = grab_same_time_similairty(S, news_words, news_source_1 = "AP", 
 cbs_similarity = grab_same_time_similairty(S, news_words, news_source_1 = "AP", news_source_2 = "CBSNews")
 
 # Plot similarity scores
-plt.hist(dcexaminer_similarity, bins = 30, color = "red", alpha = 0.5)
-plt.hist(vox_similarity, bins = 30, color = "blue", alpha = 0.5)
-plt.hist(usatoday_similarity, bins = 30, color = "orange", alpha = 0.5)
-plt.hist(cbs_similarity, bins = 30, color = "green", alpha = 0.5)
+lower_edge = 0.05
+upper_edge = 0.7
+bin_width = 0.05
+plt.hist(dcexaminer_similarity, bins = np.arange(lower_edge, upper_edge, bin_width), color = "red", alpha = 0.5)
+plt.hist(vox_similarity, bins = np.arange(lower_edge, upper_edge, bin_width), color = "blue", alpha = 0.5)
+plt.hist(usatoday_similarity, bins = np.arange(lower_edge, upper_edge, bin_width), color = "orange", alpha = 0.5)
+plt.hist(cbs_similarity, bins = np.arange(lower_edge, upper_edge, bin_width), color = "green", alpha = 0.5)
 
 
 ####################
@@ -181,8 +188,18 @@ plt.hist(cbs_similarity, bins = 30, color = "green", alpha = 0.5)
 max_similarity_AP = max(baseline_similarity_AP)
 
 # Function to convert cosine similarity into our correlation metric
+# def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
+#     mean_similarity = np.mean(similarity_scores)
+#     mean_baseline = np.mean(baseline_similarity_scores)
+#     normed_scores = mean_similarity / mean_baseline
+#     correlation_metric = 2*normed_scores - 1
+#     return correlation_metric
+
+
 def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
-    mean_similarity = np.mean(similarity_scores)
+    beta_fit = stats.beta.fit(similarity_scores, floc = 0, fscale = 1)
+    mean_similarity = beta_fit[0] / (beta_fit[0] +beta_fit[1])
+    print(mean_similarity)
     mean_baseline = np.mean(baseline_similarity_scores)
     normed_scores = mean_similarity / mean_baseline
     correlation_metric = 2*normed_scores - 1
@@ -196,7 +213,7 @@ gamma_dcexaminer = calculate_gamma_correlation(dcexaminer_similarity, max_simila
 gamma_vox = calculate_gamma_correlation(vox_similarity, max_similarity_AP)
 
 # Output similarity scores
-news_correlations = pd.DataFrame([['AP', 'AP', np.mean(max_similarity_AP), 1.0],
+news_correlations = pd.DataFrame([['AP', 'AP', max_similarity_AP, 1.0],
                                  ['Reuters', 'AP', np.mean(reuters_similarity), gamma_reuters],
                                  ['USATODAY', 'AP', np.mean(usatoday_similarity), gamma_usatoday],
                                  ['CBSNews', 'AP', np.mean(cbs_similarity), gamma_cbs],

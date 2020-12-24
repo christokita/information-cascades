@@ -233,11 +233,10 @@ def parse_urls(url_collection):
         url = ""
         url_expanded = ""
     return url, url_expanded, url_count
-    
 
 # Parse tweets
 tweet_json_files = os.listdir(outpath)
-tweet_json_files = [file for file in tweet_json_files if re.match('.*\.json', file)]
+tweet_json_files = [file for file in tweet_json_files if re.match('.*\.json', file)] #this will include tweets pulled down earlier
 news_tweets = pd.DataFrame()
 for file in tweet_json_files:
     source_tweets = tweet_parser(filename = outpath + file)
