@@ -78,20 +78,24 @@ assort_sum <- assort_data %>%
 gg_est_gamma <- monitored_news %>% 
   mutate(news_source = factor(news_source, levels = c("voxdotcom", "dcexaminer", "cbsnews", "usatoday"))) %>% 
   ggplot(., aes(y = news_source, x = estimated_gamma, color = news_source)) +
+  geom_vline(aes(xintercept = 0), size = 0.3, linetype = "dotted") +
   geom_segment(aes(yend = news_source, xend = 0), size = 0.3) +
   geom_point(size = 1.5) +
   # geom_bar(stat = "identity") +
   scale_x_continuous(breaks = seq(-1, 1, 0.2), 
-                     limits = c(0, 1),
+                     limits = c(-1, 1),
                      expand = c(0, 0)) +
+  scale_y_discrete(labels = c("Vox", "Washington Examiner", "CBS News", "USA Today")) +
   scale_color_manual(values = news_pal[c(1, 4, 2, 3)],
                      guide = FALSE) +
   ylab("News source") +
   xlab(expression( paste("Estimated ", italic(gamma)) )) +
-  theme_ctokita()
+  theme_ctokita() +
+  theme(aspect.ratio = NULL,
+        axis.title.y = element_blank())
 gg_est_gamma
 
-ggsave(gg_est_gamma, filename = paste0(outpath, "estimated_gamma.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(gg_est_gamma, filename = paste0(outpath, "estimated_gamma.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
 
 
 ####################

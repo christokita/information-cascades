@@ -222,7 +222,7 @@ gg_infoeco_post <- ggplot(posterior_infoecosystem_estimates, aes(x = posterior_s
   # geom_histogram(position = "identity", alpha = 0.6, binwidth = 0.5, aes(y = stat(count) / sum(count))) +
   xlab("Relative frequency\ncross-ideology unfollows") +
   ylab("Posterior probability density") +
-  scale_fill_manual(name = "Information\necocystem",
+  scale_fill_manual(name = "Information\necosystem",
                     values = info_corr_pal) +
   theme_ctokita()
 gg_infoeco_post
@@ -237,10 +237,10 @@ posterior_infoeco_contrast <- posterior_infoecosystem %>%
   rename(low_correlation = b_info_ecosystemLowcorrelation,
          high_correlation = b_info_ecosystemHighcorrelation) %>% 
   select(low_correlation, high_correlation) %>% 
-  mutate(group_contrast = low_correlation - high_correlation,
+  mutate(group_contrast = high_correlation - low_correlation,
          greater_than_zero = group_contrast > 0)
 gg_infoeco_contrast <- ggplot(posterior_infoeco_contrast, aes(x = group_contrast, fill = greater_than_zero)) +
-  # geom_density(fill = "blue", color = NA) +
+  # geom_density(aes(y=..count../sum(..count..)), ) +
   geom_histogram(aes(y=..count../sum(..count..)),
                  breaks = seq(-0.075, 0.075, 0.0025),
                  color = NA, alpha = 0.6) +
@@ -251,7 +251,7 @@ gg_infoeco_contrast <- ggplot(posterior_infoeco_contrast, aes(x = group_contrast
   scale_x_continuous(limits = c(-0.08, 0.08),
                      breaks = seq(-0.12, 0.12, 0.04)) +
   scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.2, 0.05)) +
-  scale_fill_manual(values = rev(info_corr_pal)) +
+  scale_fill_manual(values = info_corr_pal) +
   theme_ctokita() +
   theme(legend.position = "none",
         aspect.ratio = NULL)
