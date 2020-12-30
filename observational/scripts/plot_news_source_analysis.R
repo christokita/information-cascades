@@ -12,6 +12,7 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(RColorBrewer)
 source("_plot_themes/theme_ctokita.R")
 
 # High-level data directory

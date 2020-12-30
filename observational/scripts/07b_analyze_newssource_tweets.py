@@ -188,22 +188,22 @@ plt.hist(cbs_similarity, bins = np.arange(lower_edge, upper_edge, bin_width), co
 max_similarity_AP = max(baseline_similarity_AP)
 
 # Function to convert cosine similarity into our correlation metric
-# def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
-#     mean_similarity = np.mean(similarity_scores)
-#     mean_baseline = np.mean(baseline_similarity_scores)
-#     normed_scores = mean_similarity / mean_baseline
-#     correlation_metric = 2*normed_scores - 1
-#     return correlation_metric
-
-
 def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
-    beta_fit = stats.beta.fit(similarity_scores, floc = 0, fscale = 1)
-    mean_similarity = beta_fit[0] / (beta_fit[0] +beta_fit[1])
-    print(mean_similarity)
+    mean_similarity = np.mean(similarity_scores)
     mean_baseline = np.mean(baseline_similarity_scores)
     normed_scores = mean_similarity / mean_baseline
     correlation_metric = 2*normed_scores - 1
     return correlation_metric
+
+
+# def calculate_gamma_correlation(similarity_scores, baseline_similarity_scores):
+#     beta_fit = stats.beta.fit(similarity_scores, floc = 0, fscale = 1)
+#     mean_similarity = beta_fit[0] / (beta_fit[0] + beta_fit[1])
+#     print(mean_similarity)
+#     mean_baseline = np.mean(baseline_similarity_scores)
+#     normed_scores = mean_similarity / mean_baseline
+#     correlation_metric = 2*normed_scores - 1
+#     return correlation_metric
 
 # Calculate gammas 
 gamma_reuters = calculate_gamma_correlation(reuters_similarity, max_similarity_AP)
