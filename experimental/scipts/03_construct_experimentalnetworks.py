@@ -145,8 +145,8 @@ highcorr_initial_network, highcorr_initial_follower_network = construct_initial_
 # Determine which users we do not have lists for (for accounts that were Protected when we collected friend/follower lists)
 unique_users_with_data = [re.search("[a-z]+_([0-9]+)_.*", x).group(1) for x in initial_friendfollower_files]
 unique_users_with_data = np.unique(unique_users_with_data)
-lowcorr_users_without_list = [x for x in low_corr_users['user_id'] if x not in unique_users_with_data]
-highcorr_users_without_list =  [x for x in high_corr_users['user_id'] if x not in unique_users_with_data]
+lowcorr_users_without_list = [x for x in low_corr_users['user_id'] if x not in unique_users_with_data] #only one user
+highcorr_users_without_list =  [x for x in high_corr_users['user_id'] if x not in unique_users_with_data] #only one user
 
 # Fill in missing data
 lowcorr_initial_network.loc[lowcorr_users_without_list[0], :] = lowcorr_initial_follower_network[lowcorr_users_without_list[0]]
