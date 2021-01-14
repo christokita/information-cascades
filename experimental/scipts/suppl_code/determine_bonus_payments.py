@@ -20,6 +20,7 @@ import os
 import shutil
 import io
 import boto3
+import math
 
 
 ####################
@@ -92,12 +93,12 @@ follow_counts['user_id'] = follow_counts['user_id'].astype(str)
 user_crosswalk = user_crosswalk.merge(follow_counts, on = 'user_id')
 
 # Split into separate pools
-mturk_participants = user_crosswalk[~pd.isnull(user_crosswalk.mturk_worker_id)]
-fb_particpants = user_crosswalk[~pd.isnull(user_crosswalk.email)]
+mturk_participants = user_crosswalk[~pd.isnull(user_crosswalk.mturk_worker_id)].copy()
+fb_participants = user_crosswalk[~pd.isnull(user_crosswalk.email)].copy()
 
 
 ####################
-# Pay our Rd2 workers
+# Pay our Rd2 workers from MTurk
 ####################
 # Read in list of previous workers
 worker_rd2_files = ['MTurk_workers/workers_rd2_lowcorr1a.csv',
@@ -153,3 +154,65 @@ NOTE: No errors among users. Do not uncomment below under any circumstance!
 #     if response['ResponseMetadata']['HTTPStatusCode'] != 200:
 #         print("ERROR for user " + row['mturk_worker_id'])
 #         error_users.append(row['mturk_worker_id'])
+
+
+####################
+# Pay our workers from FB
+####################
+# Read in our surveys that were deployed to FB-recruited participants
+fb_survey_data = []
+tmp_dir = "/Users/ChrisTokita/Documents/Research/Tarnita Lab/Information Cascades/information-cascades/experimental/data/tmp/"
+os.makedirs(tmp_dir, exist_ok = True)
+for file in ['fb_lowcorr_rd2_raw.xlsx', 'fb_highcorr_rd2_raw.xlsx']:
+    dbx.files_download_to_file(download_path = tmp_dir + file, path = path_to_survey_data + file)
+    wb_survey = xlwings.Book(tmp_dir + file) # this will prompt you to enter password in excel
+    sheet_survey = wb_survey.sheets['Sheet0']
+    survey_data = sheet_survey.range('A1').options(pd.DataFrame, header = True, index = False, expand='table').value
+    survey_data = survey_data.iloc[1:, :].copy() #first row is headers
+    fb_survey_data.append(survey_data)
+    del wb_survey, sheet_survey, survey_data
+shutil.rmtree(tmp_dir)
+fb_survey_data = pd.concat(fb_survey_data, ignore_index = True)
+
+# Prep our twitter info on participants
+_, res = dbx.files_download(path_to_twitter_data + 'participant_twitter_info.csv')
+twitter_info = pd.read_csv(res.raw, dtype = {'user_id': object})
+del _, res
+fb_participants = fb_participants.merge(twitter_info[['user_id', 'user_name']], on = 'user_id') #should be 157 rows
+fb_participants['username_lower'] = fb_participants['user_name'].str.lower()
+fb_participants['email_lower'] = fb_participants['email'].str.lower()
+
+# Match up participants based on email first
+fb_survey_data['email_lower'] = fb_survey_data['email'].str.lower()
+confirmed_fb_participants = fb_participants[fb_participants['email_lower'].isin(fb_survey_data.email_lower)].copy()
+
+# Match up participants based on twitter username
+fb_survey_data['username_lower'] = fb_survey_data['twitter_username'].str.lower()
+fb_survey_data['username_lower'] = fb_survey_data['username_lower'].str.replace("@", "")
+fb_survey_data['username_lower'] = fb_survey_data['username_lower'].str.replace(" ", "")
+confirmed_fb_participants2 = fb_participants[fb_participants['username_lower'].isin(fb_survey_data.username_lower)].copy()
+confirmed_fb_participants = confirmed_fb_participants.append(confirmed_fb_participants2, ignore_index = True)
+confirmed_fb_participants = confirmed_fb_participants.drop_duplicates()
+confirmed_fb_participants = confirmed_fb_participants.reset_index(drop = True)
+del confirmed_fb_participants2
+
+# Figure out unconfirmed participants
+"""
+NOTE: The remaining three rows of unconfirmed survey data all appear to be the same person, whose email nor username can be found in our participant database.
+Therefore, they will be excluded from earning the prize.
+"""
+unmatched_fb_participants = fb_survey_data[~fb_survey_data['email_lower'].isin(confirmed_fb_participants.email_lower) & ~fb_survey_data['username_lower'].isin(confirmed_fb_participants.username_lower)]
+
+# Determine who gets $50 cards (giving out to 1-out-of-every-20 participants)
+n_giftcards = math.ceil((confirmed_fb_participants.shape[0] + 1) / 20) #be generous in giving them out (I add one incase we are on the cusp of the next 20-person batch)
+confirmed_fb_participants['raffle_tickets'] = confirmed_fb_participants['participants_followed'] + 1 #participants get one ticket just for taking the survey, even if they don't follow anyone
+confirmed_fb_participants.loc[confirmed_fb_participants.raffle_tickets > 6, 'raffle_tickets'] = 6 #can only get up to 6 tickets, one for survey and one for each of up to 5 follows
+pay_these_participants = confirmed_fb_participants['email'].sample(n = n_giftcards, weights = confirmed_fb_participants['raffle_tickets'], replace = False, random_state = 609)
+pay_these_participants = pd.DataFrame({'email': pay_these_participants})
+
+tmp_dir = "/Users/ChrisTokita/Documents/Research/Tarnita Lab/Information Cascades/information-cascades/experimental/data/tmp/"
+os.mkdir(tmp_dir)
+pay_these_participants.to_csv(tmp_dir + 'TO_PAY_fb_participants_rd2.csv', index = False)
+with open(tmp_dir + 'TO_PAY_fb_participants_rd2.csv', "rb") as f:
+    dbx.files_upload(f.read(), path = path_to_survey_data + 'TO_PAY_fb_participants_rd2.csv', mode = dropbox.files.WriteMode.overwrite)
+shutil.rmtree(tmp_dir)     

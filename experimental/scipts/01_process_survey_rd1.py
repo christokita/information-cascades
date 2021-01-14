@@ -385,9 +385,9 @@ pay_these_participants = fb_participants_with_emails['email'].sample(n = n_giftc
 pay_these_participants = pd.DataFrame({'email': pay_these_participants})
 
 # Uplod to Dropbox
-pay_these_participants.to_csv(tmp_dir + 'TO_PAY_fb_participants.csv', index = False)
-with open(tmp_dir + 'TO_PAY_fb_participants.csv', "rb") as f:
-    dbx.files_upload(f.read(), path = path_to_survey_data + 'TO_PAY_fb_participants.csv', mode = dropbox.files.WriteMode.overwrite)
+pay_these_participants.to_csv(tmp_dir + 'TO_PAY_fb_participants_rd1.csv', index = False)
+with open(tmp_dir + 'TO_PAY_fb_participants_rd1.csv', "rb") as f:
+    dbx.files_upload(f.read(), path = path_to_survey_data + 'TO_PAY_fb_participants_rd1.csv', mode = dropbox.files.WriteMode.overwrite)
     
 # Delete files
 shutil.rmtree(tmp_dir)     
