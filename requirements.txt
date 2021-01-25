@@ -2,7 +2,7 @@
 numpy
 pandas
 scipy
-igraph
+python-igraph
 networkx
 tweepy
 boto3
