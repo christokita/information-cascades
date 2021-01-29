@@ -19,10 +19,6 @@ import dropbox
 import xlwings
 import os
 import shutil
-import matplotlib.pyplot as plt
-
-# Decide which one
-import networkx as nx
 import igraph as ig
 
 
@@ -33,7 +29,8 @@ import igraph as ig
 dropbox_dir = '/Information Cascades Project/data/'
 path_to_survey_data = dropbox_dir + 'survey_data/'
 path_to_twitter_data = dropbox_dir + 'twitter_data/'
-
+outpath = '/Volumes/CKT-DATA/information-cascades/experimental/' #external HD
+ 
 # File names of data files on DropBox
 crosswalk_file = 'user_crosswalk.xlsx'
 survey_file = 'survey_data_rd1.csv'
@@ -93,7 +90,7 @@ del  _, res
 # Remove nodes that we were unable to access in the final round of data collection (t = ~4 weeks)
 ####################
 # Load list of users we couldn't find
-users_to_remove = pd.read_csv('/Volumes/CKT-DATA/information-cascades/experimental/data/error_users/error_users_2021-01-20-withtagging.csv', dtype = {'user_id': object, 'protected': bool})
+users_to_remove = pd.read_csv(outpath + 'data/error_users/error_users_2021-01-20-withtagging.csv', dtype = {'user_id': object, 'protected': bool})
 users_to_remove['user_id'] = users_to_remove['user_id_str'].str.replace("\"", "")
 
 # IMPORTANT: decide if we will include protected accounts and only excluded suspended/deleted accounts
@@ -162,18 +159,52 @@ assort_lowcorr_initial = g_lowcorr_initial.assortativity_nominal(types = g_lowco
 assort_lowcorr_final = g_lowcorr_final.assortativity_nominal(types = g_lowcorr_final.vs['ideology_numeric'], directed = True)
 
 # Calculate shift in ideology
-assortativity_change = pd.DataFrame({'treatment': ['high_corr', 'low_corr'],
+assortativity_change = pd.DataFrame({'info_ecosystem': ['high_correlation', 'low_correlation'],
                                      'assort_initial': [assort_highcorr_initial, assort_lowcorr_initial],
                                      'assort_final': [assort_highcorr_final, assort_lowcorr_final],
                                      'assort_shift': [assort_highcorr_final - assort_highcorr_initial, assort_lowcorr_final - assort_lowcorr_initial]})
 
+del g_highcorr_initial, g_highcorr_final, g_lowcorr_initial, g_lowcorr_final
 
 ####################
-# Analyze tie breaks
+# Analyze ideological assortativity, with only tie breaks or new ties considered
 ####################
 # Determine changes in network structure
 highcorr_network_diff = highcorr_network_final - highcorr_network_initial
 lowcorr_network_diff = lowcorr_network_final - lowcorr_network_initial
+
+# Create final networks with only broken ties or new ties taken into account
+def calculate_assort_with_breaksnews_only(initial_network, diff_network, user_data):
+    
+    # Replace new ties with zero
+    network_breaksonly = diff_network.mask(diff_network == 1).fillna(0)
+    g_breaksonly = create_network_object(network = initial_network + network_breaksonly, user_data = user_data)
+    assort_breaksonly = g_breaksonly.assortativity_nominal(g_breaksonly.vs['ideology_numeric'], directed = True)
+
+    # Don't remove broken ties
+    network_newtiesonly = diff_network.mask(diff_network == -1).fillna(0)
+    g_newtiesonly = create_network_object(network = initial_network + network_newtiesonly, user_data = user_data)
+    assort_newtiesonly = g_newtiesonly.assortativity_nominal(g_newtiesonly.vs['ideology_numeric'], directed = True)
+
+    return assort_breaksonly, assort_newtiesonly
+
+    
+# Calculate assortativity only accounting for new or broken ties, and add to summary dataframe
+assort_highcorr_breaksonly, assort_highcorr_newtiesonly = calculate_assort_with_breaksnews_only(highcorr_network_initial, highcorr_network_diff, users)
+assort_lowcorr_breaksonly, assort_lowcorr_newtiesonly = calculate_assort_with_breaksnews_only(lowcorr_network_initial, lowcorr_network_diff, users)
+
+assortativity_change['assort_final_breaksonly'] = [assort_highcorr_breaksonly, assort_lowcorr_breaksonly]
+assortativity_change['assort_final_newtiesonly'] = [assort_highcorr_newtiesonly, assort_lowcorr_newtiesonly]
+assortativity_change['assort_shift_breaksonly'] = assortativity_change['assort_final_breaksonly'] - assortativity_change['assort_initial']
+assortativity_change['assort_shift_newtiesonly'] = assortativity_change['assort_final_newtiesonly'] - assortativity_change['assort_initial']
+
+# Write to file
+assortativity_change.to_csv(outpath + 'data_derived/assortativity_data.csv', index = False,)
+
+
+####################
+# Analyze tie breaks at treatment group level
+####################
 
 # Find tie breaks/adds
 def compile_tie_changes(network_diff_matrix, user_data):
@@ -224,3 +255,139 @@ tiechange_summary = pd.DataFrame({'treatment': ['high_corr', 'low_corr'],
                                  'adds_same_ideol': [highcorr_adds_same, lowcorr_adds_same],
                                  'adds_diff_ideol': [highcorr_adds_diff, lowcorr_adds_diff]})
 
+del highcorr_breaks_same, lowcorr_breaks_same, highcorr_breaks_diff, lowcorr_breaks_diff, highcorr_adds_same, highcorr_adds_diff, lowcorr_adds_same, lowcorr_adds_diff
+
+####################
+# Functions to determine tie breaks at individual level
+####################
+# Calculate baseline composition of followers
+def baseline_ideological_composition(initial_network, user_data):
+    """
+    This funciton will determine the number/fraction of same- and different-ideology of friends/followers in the initial network.
+    Friends/followers depends on the orientation of the matrix initial_network. If given normally, it will calculate composition of friends. If transposed, it will calculate composition of followers.
+    We will loop over columns, since the column will indicate who is following the user listed at the top of the column
+    The network matrix is directed from row -> column, meaning a value indicates that the row individual is following the column individual
+    """
+    baseline_composition = pd.DataFrame(columns = ['user_id', 'ideology', 'initial_same_n', 'initial_diff_n', 'initial_same_freq', 'initial_diff_freq'])
+    for user_id, row in initial_network.iterrows():
+        ties = row[row == 1]
+        ties_ideology = pd.DataFrame({'user_id': ties.index})
+        ties_ideology = ties_ideology.merge(user_data[['user_id', 'ideology']], on = 'user_id', how = 'left')
+        user_ideology = user_data.ideology[user_data.user_id == user_id].iloc[0]
+        n_same_ideology = sum(ties_ideology.ideology == user_ideology)
+        n_diff_ideology = sum(ties_ideology.ideology != user_ideology)
+        if len(ties) > 0:
+            freq_same_ideology = n_same_ideology / (n_same_ideology + n_diff_ideology)
+            freq_diff_ideology = n_diff_ideology / (n_same_ideology + n_diff_ideology)
+        else: 
+            freq_same_ideology = freq_diff_ideology = np.nan
+        baseline_composition = baseline_composition.append({'user_id': user_id,
+                                                            'ideology': user_ideology,
+                                                            'initial_same_n': n_same_ideology, 
+                                                            'initial_diff_n': n_diff_ideology, 
+                                                            'initial_same_freq': freq_same_ideology, 
+                                                            'initial_diff_freq': freq_diff_ideology},
+                                                           ignore_index = True)
+    return baseline_composition
+
+# Calculate relative cross-ideology unfollows
+def relative_crossideol_unfollows(diff_network, initial_network, user_data, social_connections = None):
+    
+    # Grab users, prepare data to analyze friends or followers, and calculate baseline composition of those connections
+    user_data = user_data[user_data['user_id'].isin(initial_network.columns)]
+    if social_connections == 'friends':
+        pass
+    elif social_connections == 'followers':
+        initial_network = initial_network.transpose()
+        diff_network = diff_network.transpose()
+    else:
+        ValueError("You must specify if you want to analyze friends or followers of particpants.") 
+    baseline_follower_composition = baseline_ideological_composition(initial_network, user_data)
+
+    
+    tie_change_stats = pd.DataFrame(columns = ['user_id', 'tiebreak_sameideol_n', 'tiebreak_diffideol_n', 'newtie_sameideol_n', 'newtie_diffideol_n', 'tiebreak_sameideol_freq', 'tiebreak_diffideol_freq'])
+    for user_id,row in diff_network.iterrows():
+        # Determine new/broken ties
+        tie_breaks = pd.DataFrame({'user_id': row.index[row == -1]})
+        new_ties = pd.DataFrame({'user_id': row.index[row == 1]})
+        tie_breaks = tie_breaks.merge(user_data[['user_id', 'ideology']], on = 'user_id', how = 'left')
+        new_ties = new_ties.merge(user_data[['user_id', 'ideology']], on = 'user_id', how = 'left')
+        n_tiebreaks = tie_breaks.shape[0]
+        n_newties = new_ties.shape[0]
+        
+        # Deterime if same/diff ideology
+        user_ideology = user_data.ideology[user_data.user_id == user_id].iloc[0]
+        n_tiebreaks_same = sum(tie_breaks.ideology == user_ideology)
+        n_tiebreaks_diff = sum(tie_breaks.ideology != user_ideology)
+        n_newties_same = sum(new_ties.ideology == user_ideology) 
+        n_newties_diff = sum(new_ties.ideology != user_ideology) 
+        
+        # Determine fraction of ideol tie breaks
+        if n_tiebreaks > 0:
+            freq_tiebreaks_same = n_tiebreaks_same / (n_tiebreaks_same + n_tiebreaks_diff)
+            freq_tiebreaks_diff = n_tiebreaks_diff / (n_tiebreaks_same + n_tiebreaks_diff)
+        else: 
+            freq_tiebreaks_same = freq_tiebreaks_diff = np.nan
+            
+        # Append
+        tie_change_stats = tie_change_stats.append({'user_id': user_id, 
+                                                    'n_tiebreaks': n_tiebreaks,
+                                                    'n_newties': n_newties,
+                                                    'tiebreak_sameideol_n': n_tiebreaks_same, 
+                                                    'tiebreak_diffideol_n': n_tiebreaks_diff, 
+                                                    'newtie_sameideol_n': n_newties_same, 
+                                                    'newtie_diffideol_n': n_newties_diff, 
+                                                    'tiebreak_sameideol_freq': freq_tiebreaks_same, 
+                                                    'tiebreak_diffideol_freq': freq_tiebreaks_diff},
+                                                   ignore_index = True)
+    # Combine and return
+    full_data_set = baseline_follower_composition.merge(tie_change_stats, on = 'user_id')
+    return full_data_set
+
+
+####################
+# Analyze rate tie changes (loss of followers, i.e., being unfollowed)
+####################
+# Calculate relative rate of cross-ideology tie breaks
+highcorr_followerchange_stats = relative_crossideol_unfollows(diff_network = highcorr_network_diff, 
+                                                         initial_network = highcorr_network_initial, 
+                                                         user_data = users,
+                                                         social_connections = "followers")
+highcorr_followerchange_stats['delta_tiebreak_diff'] = highcorr_followerchange_stats['tiebreak_diffideol_freq'] - highcorr_followerchange_stats['initial_diff_freq']
+
+lowcorr_followerchange_stats = relative_crossideol_unfollows(diff_network = lowcorr_network_diff, 
+                                                        initial_network = lowcorr_network_initial, 
+                                                        user_data = users,
+                                                        social_connections = "followers")
+lowcorr_followerchange_stats['delta_tiebreak_diff'] = lowcorr_followerchange_stats['tiebreak_diffideol_freq'] - lowcorr_followerchange_stats['initial_diff_freq']
+
+# Join together and output
+highcorr_followerchange_stats['info_ecosystem'] = 'high_correlation'
+lowcorr_followerchange_stats['info_ecosystem'] = 'low_correlation'
+followerchange_stats = highcorr_followerchange_stats.append(lowcorr_followerchange_stats, ignore_index = True)
+followerchange_stats = followerchange_stats.drop(columns = ['ideology']) #drop ideology for anonymity
+followerchange_stats.to_csv(outpath + 'data_derived/follower_change_data.csv', index = False)
+
+
+####################
+# Analyze rate tie changes (loss of friends, i.e., act of unfollowing)
+####################
+# Calculate relative rate of cross-ideology tie breaks
+highcorr_friendchange_stats = relative_crossideol_unfollows(diff_network = highcorr_network_diff, 
+                                                         initial_network = highcorr_network_initial, 
+                                                         user_data = users,
+                                                         social_connections = "friends")
+highcorr_friendchange_stats['delta_tiebreak_diff'] = highcorr_friendchange_stats['tiebreak_diffideol_freq'] - highcorr_friendchange_stats['initial_diff_freq']
+
+lowcorr_friendchange_stats = relative_crossideol_unfollows(diff_network = lowcorr_network_diff, 
+                                                        initial_network = lowcorr_network_initial, 
+                                                        user_data = users,
+                                                        social_connections = "friends")
+lowcorr_friendchange_stats['delta_tiebreak_diff'] = lowcorr_friendchange_stats['tiebreak_diffideol_freq'] - lowcorr_friendchange_stats['initial_diff_freq']
+
+# Join together and output
+highcorr_friendchange_stats['info_ecosystem'] = 'high_correlation'
+lowcorr_friendchange_stats['info_ecosystem'] = 'low_correlation'
+friendchange_stats = highcorr_friendchange_stats.append(lowcorr_friendchange_stats, ignore_index = True)
+friendchange_stats = friendchange_stats.drop(columns = ['ideology']) #drop ideology for anonymity
+friendchange_stats.to_csv(outpath + 'data_derived/friend_change_data.csv', index = False)
