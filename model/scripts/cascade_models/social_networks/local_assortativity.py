@@ -36,7 +36,7 @@ def local_assortativity(network, types, alpha):
     # Calculate local assortativity
     categorized_connections = connections_by_type(normalized_network, types)
     proportion_same_type = categorized_connections[np.arange(network.shape[0]), types] #for each individual, the proportion of connections that are to same-type individuals
-    weights = personanlized_page_rank(network, alpha)
+    weights = personalized_page_rank(network, alpha)
     local_assort = np.array([])
     for i in range(network.shape[0]): #loop over individuals
         # If individual has degree of zero, they have no local assortativity
@@ -112,7 +112,7 @@ def calculate_distance(network):
     return distance_matrix
 
 
-def personanlized_page_rank(network, alpha):
+def personalized_page_rank(network, alpha):
     # Function to calcualte the personalized page rank for each individual.
     # Returns a matrix the same dimensions as the network, where each row will have the page rank for that individual.
     #
