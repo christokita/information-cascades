@@ -1,6 +1,6 @@
 ########################################
 #
-# PLOT: Effect of initial social network structure on ending network structure
+# PLOT: Effect of the information ecosystem (gamma) on other elements of network structure (e.g. centrality, degree, local assortativity)
 #
 ########################################
 
