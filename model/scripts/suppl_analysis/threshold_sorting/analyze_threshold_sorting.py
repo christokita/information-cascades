@@ -54,6 +54,7 @@ def calculate_threshold_difference(thresholds, network):
     threshold_neighbor = np.array([])
     threshold_diff = np.array([])
     threshold_dist = np.array([])
+    threshold_sim = np.array([])
     
     # Loop through individuals in social system
     for i in np.arange(n_thresholds):
@@ -64,14 +65,17 @@ def calculate_threshold_difference(thresholds, network):
         # Calculate pariwise difference and distance in network
         diff = thresholds[neighbors] - thresholds[i]
         dist = abs(thresholds[neighbors] - thresholds[i])
+        sim = 1 - dist
         mean_neighor_thresh = np.mean(thresholds[neighbors])
         mean_diff = np.mean(diff)
         mean_dist = np.mean(dist)
+        mean_sim = np.mean(sim)
         threshold_neighbor = np.append(threshold_neighbor, mean_neighor_thresh)
         threshold_diff = np.append(threshold_diff, mean_diff)
         threshold_dist = np.append(threshold_dist, mean_dist)
+        threshold_sim = np.append(threshold_sim, mean_sim)
         
-    return threshold_neighbor, threshold_diff, threshold_dist
+    return threshold_neighbor, threshold_diff, threshold_dist, threshold_sim
 
 
 ####################
@@ -81,8 +85,9 @@ def calculate_threshold_difference(thresholds, network):
 threshold_diff_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
                                               'type', 'threshold',
                                               'initial_mean_neighbor', 'final_mean_neighbor',
-                                              'initial_thresh_diff', 'initial_thresh_dist',
-                                              'final_thresh_diff', 'final_thresh_dist'])
+                                              'initial_thresh_diff', 'final_thresh_diff',
+                                              'initial_thresh_dist', 'final_thresh_dist',
+                                              'initial_thresh_sim', 'final_thresh_sim'])
 
 # Loop through runs
 for run in runs:
@@ -113,16 +118,17 @@ for run in runs:
         types = np.argmax(types == 1 , axis = 1) #get categorical types of individuals
         
         # Calculate difference with network neighbors' thresholds
-        initial_mean_neighbor, initial_thresh_diff, initial_thresh_dist = calculate_threshold_difference(thresholds, adjacency_initial)
-        final_mean_neighbor, final_thresh_diff, final_thresh_dist = calculate_threshold_difference(thresholds, adjacency)
+        initial_mean_neighbor, initial_thresh_diff, initial_thresh_dist, initial_thresh_sim = calculate_threshold_difference(thresholds, adjacency_initial)
+        final_mean_neighbor, final_thresh_diff, final_thresh_dist, final_thresh_sim = calculate_threshold_difference(thresholds, adjacency)
         
         # Compile into dataframe and append to master dataframe
         n = len(thresholds)
         replicate_data = pd.DataFrame(np.column_stack((np.repeat(gamma, n), np.repeat(replicate, n), np.arange(0, n), 
                                                        types, thresholds,
                                                        initial_mean_neighbor, final_mean_neighbor,
-                                                       initial_thresh_diff, initial_thresh_dist,
-                                                       final_thresh_diff, final_thresh_dist)),
+                                                       initial_thresh_diff, final_thresh_diff,
+                                                       initial_thresh_dist, final_thresh_dist,
+                                                       initial_thresh_sim, final_thresh_sim)),
                                     columns = threshold_diff_data.columns)
         threshold_diff_data = threshold_diff_data.append(replicate_data, ignore_index = True)
         
