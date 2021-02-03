@@ -54,12 +54,12 @@ gg_neighborthresh <-
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   theme_ctokita() +
   theme(legend.position = "none",
-        plot.background = element_rect(fill = "transparent")) +
+        plot.background = element_blank()) +
   facet_grid(metric~gamma,
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_neighborthresh
 
-ggsave(gg_neighborthresh, filename = paste0(out_path, "avg_neighbor_threshold.png"), width = 90, height = 90, units = "mm", dpi = 400)
+ggsave(gg_neighborthresh, filename = paste0(out_path, "avg_neighbor_threshold.png"), width = 90, height = 90, units = "mm", dpi = 400, bg = "transparent")
 
 
 ####################
@@ -111,7 +111,7 @@ gg_change_neighbor_sim <-
              stroke = 0, 
              fill = plot_color) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
-  ylab(expression( paste(Delta, " avg. neighbor\nthreshold similarity")  )) +
+  ylab(expression( atop(paste(Delta, " avg. neighbor"), "threshold similarity")  )) +
   scale_y_continuous(limits = c(-0.2, 0.1)) +
   scale_shape_manual(name = "", 
                      values = c(24, 25)) +
