@@ -38,11 +38,83 @@ runs.sort()
 
 
 ####################
-# Function for analysis
+# Functions for analysis
 ####################
-def calculate_threshold_difference(thresholds, network):
+# Calculate difference in threshold between neighbors and focal individual
+def calculate_neighor_threshold_stats(thresholds, network, types):
     """
     This function measure the average threshold difference and distance between individuals and their neighbors.
+    
+    INPUTS:
+    - thresholds:   array of threshold values for all individuals in the network (numpy array).
+    - network:      the network connecting individuals (numpy array).
+    - types:        array of individual political types (numpy array).
+    """
+    
+    # Prep data collection
+    n_individuals = len(thresholds)
+    neighbor_thresh_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
+                                                   'type', 'threshold', 'n_neighbors',
+                                                   'mean_neighbor_thresh',
+                                                   'mean_thresh_diff', 'mean_thresh_dist', 'mean_thresh_sim',
+                                                   'n_low_thresh', 'n_high_thresh', 
+                                                   'min_neighbor_thresh', 'max_neighbor_thresh',
+                                                   'n_lower', 'n_higher'])
+    
+    # Loop through individuals in social system
+    for i in np.arange(n_individuals):
+        
+        # Determine who are actual neighbors in network
+        neighbors = network[i,:] > 0
+        neighbor_thresholds = thresholds[neighbors]
+        n_neighbors = len(neighbor_thresholds)
+        
+        # Calculate pariwise difference and distance in network
+        diff = neighbor_thresholds - thresholds[i]
+        dist = abs(neighbor_thresholds - thresholds[i])
+        sim = 1 - dist
+        mean_neighor_thresh = np.mean(neighbor_thresholds)
+        mean_diff = np.mean(diff)
+        mean_dist = np.mean(dist)
+        mean_sim = np.mean(sim)
+        
+        # Calculate freq of low/high threshold neighbors
+        n_lowthresh = sum(neighbor_thresholds < 0.25)
+        n_highthresh = sum(neighbor_thresholds > 0.75)
+        n_lower = sum(neighbor_thresholds < thresholds[i])
+        n_higher = sum(neighbor_thresholds > thresholds[i])
+        if n_neighbors > 0:
+            min_thresh = np.min(neighbor_thresholds)
+            max_thresh = np.max(neighbor_thresholds)
+        else:
+            min_thresh = max_thresh = np.nan
+            
+        # Append
+        neighbor_thresh_data = neighbor_thresh_data.append({'gamma': gamma,
+                                                            'replicate': replicate, 
+                                                            'individual': i, 
+                                                            'type': types[i], 
+                                                            'threshold': thresholds[i], 
+                                                            'n_neighbors': n_neighbors,
+                                                            'mean_neighbor_thresh': mean_neighor_thresh,
+                                                            'mean_thresh_diff': mean_diff, 
+                                                            'mean_thresh_dist': mean_dist, 
+                                                            'mean_thresh_sim': mean_sim,
+                                                            'n_low_thresh': n_lowthresh, 
+                                                            'n_high_thresh': n_highthresh, 
+                                                            'min_neighbor_thresh': min_thresh,
+                                                            'max_neighbor_thresh': max_thresh,
+                                                            'n_lower': n_lower,
+                                                            'n_higher': n_higher}, 
+                                                           ignore_index = True)
+    # Return dataframe
+    return neighbor_thresh_data
+
+
+# Calculate difference in threshold between neighbors and focal individual
+def gather_neighbor_thresholds(thresholds, network):
+    """
+    This creates a pairwise list of all individuals and the thresholds of each of their neighbors in the network
     
     INPUTS:
     - thresholds:   array of threshold values for all individuals in the network (numpy array).
@@ -50,45 +122,38 @@ def calculate_threshold_difference(thresholds, network):
     """
     
     # Prep data collection
-    n_thresholds = len(thresholds)
-    threshold_neighbor = np.array([])
-    threshold_diff = np.array([])
-    threshold_dist = np.array([])
-    threshold_sim = np.array([])
+    n_individuals = len(thresholds)
+    individual_id = np.array([])
+    individual_threshold = np.array([])
+    neighbor_threshold = np.array([])
     
     # Loop through individuals in social system
-    for i in np.arange(n_thresholds):
+    for i in np.arange(n_individuals):
         
         # Determine who are actual neighbors in network
         neighbors = network[i,:] > 0
         
-        # Calculate pariwise difference and distance in network
-        diff = thresholds[neighbors] - thresholds[i]
-        dist = abs(thresholds[neighbors] - thresholds[i])
-        sim = 1 - dist
-        mean_neighor_thresh = np.mean(thresholds[neighbors])
-        mean_diff = np.mean(diff)
-        mean_dist = np.mean(dist)
-        mean_sim = np.mean(sim)
-        threshold_neighbor = np.append(threshold_neighbor, mean_neighor_thresh)
-        threshold_diff = np.append(threshold_diff, mean_diff)
-        threshold_dist = np.append(threshold_dist, mean_dist)
-        threshold_sim = np.append(threshold_sim, mean_sim)
+        # Add individual info
+        neighbor_thresh = thresholds[neighbors]
+        ind_id = np.repeat(i, len(neighbor_thresh))
+        ind_thesh = np.repeat(thresholds[i], len(neighbor_thresh))
+        individual_id = np.append(individual_id, ind_id)
+        individual_threshold = np.append(individual_threshold, ind_thesh)
+        neighbor_threshold = np.append(neighbor_threshold, neighbor_thresh)
         
-    return threshold_neighbor, threshold_diff, threshold_dist, threshold_sim
+        
+    # Return dataframe
+    network_threshold_data = pd.DataFrame({'individual': individual_id,
+                                           'threshold': individual_threshold,
+                                           'neighbor_threshold': neighbor_threshold})
+    return network_threshold_data
+
+
 
 
 ####################
-# Calculate thresholds differences among individuals in initial and final networks
+# Calculate thresholds differences and high/lower threshold individuals among individual's neighbors
 ####################
-# Dataframe to hold data
-threshold_diff_data = pd.DataFrame(columns = ['gamma', 'replicate', 'individual', 
-                                              'type', 'threshold',
-                                              'initial_mean_neighbor', 'final_mean_neighbor',
-                                              'initial_thresh_diff', 'final_thresh_diff',
-                                              'initial_thresh_dist', 'final_thresh_dist',
-                                              'initial_thresh_sim', 'final_thresh_sim'])
-
 # Loop through runs
 for run in runs:
     
@@ -118,19 +183,69 @@ for run in runs:
         types = np.argmax(types == 1 , axis = 1) #get categorical types of individuals
         
         # Calculate difference with network neighbors' thresholds
-        initial_mean_neighbor, initial_thresh_diff, initial_thresh_dist, initial_thresh_sim = calculate_threshold_difference(thresholds, adjacency_initial)
-        final_mean_neighbor, final_thresh_diff, final_thresh_dist, final_thresh_sim = calculate_threshold_difference(thresholds, adjacency)
+        replicate_data_initial = calculate_neighor_threshold_stats(thresholds, adjacency_initial, types)
+        replicate_data_final = calculate_neighor_threshold_stats(thresholds, adjacency, types)
         
-        # Compile into dataframe and append to master dataframe
-        n = len(thresholds)
-        replicate_data = pd.DataFrame(np.column_stack((np.repeat(gamma, n), np.repeat(replicate, n), np.arange(0, n), 
-                                                       types, thresholds,
-                                                       initial_mean_neighbor, final_mean_neighbor,
-                                                       initial_thresh_diff, final_thresh_diff,
-                                                       initial_thresh_dist, final_thresh_dist,
-                                                       initial_thresh_sim, final_thresh_sim)),
-                                    columns = threshold_diff_data.columns)
-        threshold_diff_data = threshold_diff_data.append(replicate_data, ignore_index = True)
+        # Add to main dataframe
+        if 'neighbor_threshold_stats_initial' not in globals():
+            neighbor_threshold_stats_initial = replicate_data_initial.copy()
+        else: 
+            neighbor_threshold_stats_initial = neighbor_threshold_stats_initial.append(replicate_data_initial, ignore_index = False)
+            
+        if 'neighbor_threshold_stats_final' not in globals():
+            neighbor_threshold_stats_final = replicate_data_final.copy()
+        else: 
+            neighbor_threshold_stats_final = neighbor_threshold_stats_final.append(replicate_data_final, ignore_index = False)
         
         
-threshold_diff_data.to_csv(outpath + 'threshold_distance_data.csv', index = False)
+neighbor_threshold_stats_initial.to_csv(outpath + 'initial_neighbor_thresh_data.csv', index = False)
+neighbor_threshold_stats_final.to_csv(outpath + 'final_neighbor_thresh_data.csv', index = False)
+
+
+
+####################
+# Focus in on gamma = 1 scenario to really get at threshold sorting dynamics, absent polarized information ecosystem.
+####################
+# Get gamma value
+gamma = 1
+   
+# List social network files in that run's data folder
+sn_files = os.listdir(sn_dir + 'gamma1.0/')
+sn_final = sorted( [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] )
+sn_initial =  sorted( [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] )
+   
+# List type and threshold data files in that run's data folder
+type_files = sorted( os.listdir(type_dir + 'gamma1.0/') )
+thresh_files = sorted( os.listdir(thresh_dir + 'gamma1.0/') )
+   
+
+# Loop through individual replicates and calculate changes in network
+for replicate in np.arange(len(sn_final)):
+   
+   # Load network and threshold matrices
+   adjacency = np.load(sn_dir + 'gamma1.0/' + sn_final[replicate])
+   adjacency_initial = np.load(sn_dir + 'gamma1.0/' + sn_initial[replicate])
+   thresholds = np.load(thresh_dir + 'gamma1.0/' + thresh_files[replicate]).flatten() #make 1d
+   types = np.load(type_dir +  'gamma1.0/' + type_files[replicate])
+   types = np.argmax(types == 1 , axis = 1) #get categorical types of individuals
+   
+   # Calculate difference with network neighbors' thresholds
+   initial_threshold_network = gather_neighbor_thresholds(thresholds, adjacency_initial)
+   final_threshold_network = gather_neighbor_thresholds(thresholds, adjacency)
+   
+   initial_lowhigh_thresh_data = analyze_lowhighthresh_neighbor(thresholds, adjacency_initial)
+   final_lowhigh_thresh_data = analyze_lowhighthresh_neighbor(thresholds, adjacency_initial)
+   
+   # Compile into dataframe and append to master dataframe
+   if 'neighbor_thresholds_initial' not in globals():
+       neighbor_thresholds_initial = initial_threshold_network.copy()
+   else:
+       neighbor_thresholds_initial = neighbor_thresholds_initial.append(initial_threshold_network, ignore_index = True)
+   del initial_threshold_network
+       
+   if 'neighbor_thresholds_final' not in globals():
+       neighbor_thresholds_final = final_threshold_network.copy()
+   else:
+       neighbor_thresholds_final = neighbor_thresholds_final.append(final_threshold_network, ignore_index = True)
+   del final_threshold_network
+        
