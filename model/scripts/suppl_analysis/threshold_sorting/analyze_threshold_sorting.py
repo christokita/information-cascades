@@ -26,7 +26,7 @@ thresh_dir = '../../../data_sim/network_break/thresh_data/' #threshold data
 tags = 'gamma' #file tags that designate runs from a particular simulation
 
 # For output
-outpath = '../../../data_derived/network_break/social_networks/'
+outpath = '../../../data_derived/network_break/social_networks/threshold_sorting/'
 filetags = '' #added info after 'assortativity'
 if len(filetags) > 0:
     filetags = '_' + filetags
@@ -217,7 +217,6 @@ sn_initial =  sorted( [file for file in sn_files if re.findall('sn_initial_rep[0
 # List type and threshold data files in that run's data folder
 type_files = sorted( os.listdir(type_dir + 'gamma1.0/') )
 thresh_files = sorted( os.listdir(thresh_dir + 'gamma1.0/') )
-   
 
 # Loop through individual replicates and calculate changes in network
 for replicate in np.arange(len(sn_final)):
@@ -233,9 +232,6 @@ for replicate in np.arange(len(sn_final)):
    initial_threshold_network = gather_neighbor_thresholds(thresholds, adjacency_initial)
    final_threshold_network = gather_neighbor_thresholds(thresholds, adjacency)
    
-   initial_lowhigh_thresh_data = analyze_lowhighthresh_neighbor(thresholds, adjacency_initial)
-   final_lowhigh_thresh_data = analyze_lowhighthresh_neighbor(thresholds, adjacency_initial)
-   
    # Compile into dataframe and append to master dataframe
    if 'neighbor_thresholds_initial' not in globals():
        neighbor_thresholds_initial = initial_threshold_network.copy()
@@ -248,4 +244,14 @@ for replicate in np.arange(len(sn_final)):
    else:
        neighbor_thresholds_final = neighbor_thresholds_final.append(final_threshold_network, ignore_index = True)
    del final_threshold_network
-        
+      
+
+# Add bin data
+bin_edges = np.linspace(0, 1, 11)
+bin_labels = [ round((bin_edges[i] + bin_edges[i+1]) / 2, 2) for i in np.arange(len(bin_edges)-1)]
+neighbor_thresholds_initial['threshold_bin'] = pd.cut(neighbor_thresholds_initial['threshold'], bins = bin_edges, labels = bin_labels)
+neighbor_thresholds_final['threshold_bin'] = pd.cut(neighbor_thresholds_final['threshold'], bins = bin_edges, labels = bin_labels)
+
+# Save
+neighbor_thresholds_initial.to_csv(outpath + 'initial_raw_neighbor_thresholds.csv', index = False)
+neighbor_thresholds_final.to_csv(outpath + 'final_raw_neighbor_thresholds.csv', index = False)
