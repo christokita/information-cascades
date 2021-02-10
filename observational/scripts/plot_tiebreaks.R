@@ -63,6 +63,8 @@ ggsave(gg_infoeco_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "relativ
 ####################
 # Load bayesian estimate
 blm_infoeco_freq <- readRDS(paste0(dir_brms_fits, "infoeco_relfreq.rds"))
+
+# Get posterior samples
 posterior_infoeco_freq <- posterior_samples(blm_infoeco_freq) %>% 
   gather("info_ecosystem", "posterior_sample") %>% 
   filter(info_ecosystem %in% c("b_info_ecosystemLowcorrelation", "b_info_ecosystemHighcorrelation")) %>% 
@@ -197,6 +199,8 @@ ggsave(gg_newssource_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "rela
 ####################
 # Load bayesian estimate
 blm_newssource_freq <- readRDS(paste0(dir_brms_fits, "newssource_relfreq.rds"))
+
+# Get posterior samples
 posterior_newssource_freq <- posterior_samples(blm_newssource_freq) %>% 
   gather("news_source", "posterior_sample") %>% 
   filter(news_source %in% c("b_news_sourcevoxdotcom", "b_news_sourcecbsnews", "b_news_sourceusatoday", "b_news_sourcedcexaminer")) %>% 
@@ -235,7 +239,7 @@ gg_newssource_breaks_freq <- ggplot(newssource_freq_estimates, aes(x = info_ecos
               aes(y = posterior_sample, fill = ideology), 
               position = position_dodge(dodge_width),
               color = NA, alpha = 0.15, width = 0.5) +
-  geom_errorbar(aes(ymin = Q5, ymax = Q95), 
+  geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
                 position = position_dodge(dodge_width),
                 width = 0, 
                 size = 0.5) +
