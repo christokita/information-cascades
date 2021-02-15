@@ -8,14 +8,14 @@ Created on Thu May 28 10:13:46 2020
 
 import numpy as np
 import networkx as nx
-from scipy import stats
 import copy
 
 
 def local_assortativity(network, types, alpha):
     """
     This function measures local assortativity according to recent methods (based on Peel, Delvenne, Lambiotte 2018).
-    It will return a local assortativity value for each individual int he network.
+    This is for categorical traits (e.g., political type).
+    It will return a local assortativity value for each individual in the network.
     
     INPUTS:
     - network:   the network connecting individuals (numpy array).
@@ -35,7 +35,6 @@ def local_assortativity(network, types, alpha):
     
     # Calculate local assortativity
     categorized_connections = connections_by_type(normalized_network, types)
-    proportion_same_type = categorized_connections[np.arange(network.shape[0]), types] #for each individual, the proportion of connections that are to same-type individuals
     weights = personalized_page_rank(network, alpha)
     local_assort = np.array([])
     for i in range(network.shape[0]): #loop over individuals
@@ -134,3 +133,56 @@ def personalized_page_rank(network, alpha):
         page_rank_values[i,:] = np.array(pagerank_vals)
     return page_rank_values
        
+
+def local_assortativity_continuous(network, thresholds, alpha):
+    """
+    This function measures local assortativity according to recent methods (based on Peel, Delvenne, Lambiotte 2018; specficially see the supplement for using this metric on scalar attributes).
+    This is for continuous traits (e.g., thresholds).
+    It will return a local assortativity value for each individual in the network.
+    
+    The forumla is:
+        local_assortativity = SUM_ij [ weight_random_walk (A_ij / k_i) xhat_i * xhat_j ]
+        
+        where xhat_i is the standardized value of x_i, i.e., xhat_i = (x_i - mean(x)) / std(x)
+    
+    INPUTS:
+    - network:      the network connecting individuals (numpy array).
+    - threhsolds:   the threshold of each individual (numpy array).
+    - alpha:        the size of the neighborhood when calculating assortativity. 0 is entirely local, 1 is entirely global (float).
+    """
+    
+    # Get degree and probability transition matrix (adjacency matrix normalized by degree)
+    # The latter will get used in random walk algorithm to determine graph kernel for each node.
+    degree = network.sum(axis = 1, keepdims = True)
+    nonzero_entries = (degree > 0).flatten() #boolean index on where zero-degree individuals are
+    normalized_network = copy.deepcopy(network.astype(float)) #create normalized network, and convert to float for division
+    normalized_network[nonzero_entries] = normalized_network[nonzero_entries] / degree[nonzero_entries] #divide row by degree to get proportion of edges for each individual
+    
+    # Standardize thresholds      
+    # threshold_mean = np.mean(thresholds)
+    threshold_std = np.std(thresholds) 
+    threshold_mean = np.average(thresholds, weights = degree.flatten(), axis = 0)
+    # threshold_std = np.sqrt( np.average((thresholds - threshold_mean)**2, weights = degree.flatten(), axis = 0) )
+    
+    threshold_deviation = (thresholds - threshold_mean).flatten()
+    threshold_deviation = threshold_deviation
+    
+    # Calculate each individual's correlation with immediate neighbors
+    local_thresh_corr = np.array([])
+    for i in range(network.shape[0]): #select focal individual to calculate local assort for 
+        pearson_corr = (threshold_deviation[i] * threshold_deviation)  / threshold_std
+        corr_weighed_by_network = normalized_network[i,:] @ pearson_corr
+        local_thresh_corr = np.append(local_thresh_corr, corr_weighed_by_network)
+    
+    # Calculate local assortativity by weighing the neighbors (and neighbors of neighbors) correlation with their respective neighbors
+    # according to local walk (probability of this represented by personalized page rank)
+    weights = personalized_page_rank(network, alpha)
+    local_assort = weights @ local_thresh_corr
+
+    # Individuals without any neighbors cannot have local assortativity by definition
+    zero_degree = np.where(degree == 0)[0]
+    local_assort[zero_degree] = np.nan
+        
+    #Return values
+    return local_assort
+    

@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import os
 import re
+from cascade_models.social_networks.local_assortativity import local_assortativity_continuous
 
 
 ####################
@@ -198,7 +199,7 @@ for run in runs:
             neighbor_threshold_stats_final = neighbor_threshold_stats_final.append(replicate_data_final, ignore_index = False)
         
         
-neighbor_threshold_stats_initial.to_csv(outpath + 'initial_neighbor_thresh_data.csv', index = False)
+# neighbor_threshold_stats_initial.to_csv(outpath + 'initial_neighbor_thresh_data.csv', index = False)
 neighbor_threshold_stats_final.to_csv(outpath + 'final_neighbor_thresh_data.csv', index = False)
 
 
@@ -206,9 +207,6 @@ neighbor_threshold_stats_final.to_csv(outpath + 'final_neighbor_thresh_data.csv'
 ####################
 # Focus in on gamma = 1 scenario to really get at threshold sorting dynamics, absent polarized information ecosystem.
 ####################
-# Get gamma value
-gamma = 1
-   
 # List social network files in that run's data folder
 sn_files = os.listdir(sn_dir + 'gamma1.0/')
 sn_final = sorted( [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] )
@@ -253,5 +251,52 @@ neighbor_thresholds_initial['threshold_bin'] = pd.cut(neighbor_thresholds_initia
 neighbor_thresholds_final['threshold_bin'] = pd.cut(neighbor_thresholds_final['threshold'], bins = bin_edges, labels = bin_labels)
 
 # Save
-neighbor_thresholds_initial.to_csv(outpath + 'initial_raw_neighbor_thresholds.csv', index = False)
-neighbor_thresholds_final.to_csv(outpath + 'final_raw_neighbor_thresholds.csv', index = False)
+# neighbor_thresholds_initial.to_csv(outpath + 'initial_raw_neighbor_thresholds.csv', index = False)
+# neighbor_thresholds_final.to_csv(outpath + 'final_raw_neighbor_thresholds.csv', index = False)
+
+####################
+# Focus in on gamma = 1 and gamma = -1 scenario look at local assortativity of thresholds
+####################
+# Get gamma value
+focus_runs = ['gamma1.0', 'gamma-1.0']
+   
+for run in focus_runs:
+    
+    # List social network files in that run's data folder
+    gamma = int( re.search('gamma(.*[0-9]{1})\.0', run).group(1) )
+    sn_files = os.listdir(sn_dir + run + '/')
+    sn_final = sorted( [file for file in sn_files if re.findall('sn_final_rep[0-9]+.npy', file)] )
+    sn_initial =  sorted( [file for file in sn_files if re.findall('sn_initial_rep[0-9]+.npy', file)] )
+       
+    # List type and threshold data files in that run's data folder
+    type_files = sorted( os.listdir(type_dir + run + '/') )
+    thresh_files = sorted( os.listdir(thresh_dir + run + '/') )
+    
+    # Loop through individual replicates and calculate local assortativity
+    for replicate in np.arange(len(sn_final)):
+        
+        # Print progress
+        if (replicate % 10) == 0:
+            print("gamma = {}:\n    {}% done...".format(str(gamma), str(replicate)))
+        
+        # Load network and threshold matrices
+        adjacency = np.load(sn_dir + run + '/' + sn_final[replicate])
+        thresholds = np.load(thresh_dir + run + '/' + thresh_files[replicate]).flatten() #make 1d
+     
+        # Calculate local assortativity of nodes with regard to threshold
+        alpha = 0
+        local_assort_thresh = local_assortativity_continuous(network = adjacency, thresholds = thresholds, alpha = alpha)
+        rep_data = pd.DataFrame({'gamma': np.repeat(gamma, len(local_assort_thresh)),
+                                 'replicate': np.repeat(replicate, len(local_assort_thresh)),
+                                 'threshold': thresholds,
+                                 'local_assort_thresolds': local_assort_thresh})
+        
+        # Compile into dataframe and append to master dataframe
+        if 'local_threshold_assort_data' not in globals():
+            local_threshold_assort_data = rep_data.copy()
+        else:
+            local_threshold_assort_data = local_threshold_assort_data.append(rep_data, ignore_index = True)
+        del rep_data
+            
+local_threshold_assort_data.to_csv(outpath + 'local_assort_thresholds.csv', index = False)
+
