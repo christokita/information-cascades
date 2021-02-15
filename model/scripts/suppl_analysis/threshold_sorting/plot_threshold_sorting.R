@@ -29,14 +29,14 @@ pal <- brewer.pal(4, "PuOr")
 # Load and prep data
 ####################
 # Read in data
-initial_threshold_data <- read.csv('model/data_derived/network_break/social_networks/initial_neighbor_thresh_data.csv') %>% 
+initial_threshold_data <- read.csv('model/data_derived/network_break/social_networks/threshold_sorting/initial_neighbor_thresh_data.csv') %>% 
   pivot_longer(cols = n_neighbors:n_higher,
                names_to = "metric") %>% 
   mutate(metric = paste0(metric, "_initial")) %>% 
   pivot_wider(names_from = metric, 
               values_from = value)
 
-final_threshold_data <- read.csv('model/data_derived/network_break/social_networks/final_neighbor_thresh_data.csv') %>% 
+final_threshold_data <- read.csv('model/data_derived/network_break/social_networks/threshold_sorting/final_neighbor_thresh_data.csv') %>% 
   pivot_longer(cols = n_neighbors:n_higher,
                names_to = "metric") %>% 
   mutate(metric = paste0(metric, "_final")) %>% 
@@ -47,6 +47,7 @@ final_threshold_data <- read.csv('model/data_derived/network_break/social_networ
 threshold_data <- merge(initial_threshold_data, final_threshold_data, by = c("gamma", "replicate", "individual", "type", "threshold")) 
 rm(initial_threshold_data, final_threshold_data)
 
+
 ####################
 # Plot: threshold vs mean neighbor threshold
 ####################
@@ -56,13 +57,13 @@ gg_neighborthresh <-
   select(gamma, threshold, mean_neighbor_thresh_initial, mean_neighbor_thresh_final) %>% 
   rename(Initial_network = mean_neighbor_thresh_initial, Final_network = mean_neighbor_thresh_final) %>% 
   pivot_longer(cols = c(Initial_network, Final_network), names_to = "metric") %>% 
-  mutate(metric = gsub("_", " ", metric),
-         metric = factor(metric, levels = c("Initial network", "Final network"))) %>% 
+  mutate(metric = gsub("_", "\n", metric),
+         metric = factor(metric, levels = c("Initial\nnetwork", "Final\nnetwork"))) %>% 
   filter(gamma %in% seq(-1, 1, 1)) %>% 
   # Plot
   ggplot(., aes(x = threshold, y = value, color = gamma)) +
   geom_hline(aes(yintercept = 0.5), size = 0.3, linetype = "dotted") +
-  geom_point(size = 0.4, alpha = 0.1, stroke = 0) +
+  geom_point(size = 0.4, alpha = 0.05, stroke = 0) +
   xlab(expression( paste("Threshold ", theta[i]) )) +
   ylab("Avg. neighbor threshold") +
   scale_x_continuous(breaks = seq(0, 1, 0.5)) +
@@ -70,12 +71,47 @@ gg_neighborthresh <-
   scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
   theme_ctokita() +
   theme(legend.position = "none",
-        plot.background = element_blank()) +
+        plot.background = element_blank(),
+        strip.text.x = element_text(vjust = -2),
+        aspect.ratio = NULL) +
   facet_grid(metric~gamma,
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_neighborthresh
 
-ggsave(gg_neighborthresh, filename = paste0(out_path, "avg_neighbor_threshold.png"), width = 90, height = 90, units = "mm", dpi = 400, bg = "transparent")
+ggsave(gg_neighborthresh, filename = paste0(out_path, "avg_neighbor_threshold.png"), width = 65, height = 50, units = "mm", dpi = 400, bg = "transparent")
+
+
+####################
+# Plot: thresholds vs mean threshold similarity 
+####################
+gg_neighborsim <- 
+  # Prep data
+  threshold_data %>% 
+  select(gamma, threshold, mean_thresh_sim_initial, mean_thresh_sim_final) %>% 
+  rename(Initial_network = mean_thresh_sim_initial, Final_network = mean_thresh_sim_final) %>% 
+  pivot_longer(cols = c(Initial_network, Final_network), names_to = "metric") %>% 
+  mutate(metric = gsub("_", "\n", metric),
+         metric = factor(metric, levels = c("Initial\nnetwork", "Final\nnetwork"))) %>% 
+  filter(gamma %in% seq(-1, 1, 1)) %>% 
+  # Plot
+  ggplot(., aes(x = threshold, y = value, color = gamma)) + 
+  geom_hline(aes(yintercept = 0.5), size = 0.3, linetype = "dotted") +
+  geom_point(size = 0.4, alpha = 0.05, stroke = 0) +
+  xlab(expression( paste("Threshold ", theta[i]) )) +
+  ylab("Avg. neighbor\nthreshold similarity") +
+  scale_x_continuous(breaks = seq(0, 1, 1)) +
+  scale_y_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1)) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+  theme_ctokita() +
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text.x = element_text(vjust = -2),
+        aspect.ratio = NULL) +
+  facet_grid(metric~gamma,
+             labeller = label_bquote(cols = gamma == .(gamma)))
+gg_neighborsim
+
+ggsave(gg_neighborsim, filename = paste0(out_path, "avg_neighbor_similarity.png"), width = 67.5, height = 50, units = "mm", dpi = 400, bg = "transparent")
 
 
 ####################
@@ -191,3 +227,24 @@ gg_neighbor_thresholds <-
 gg_neighbor_thresholds
 
 ggsave(gg_neighbor_thresholds, filename = paste0(out_path, "gamma1_neighbor_thresholds.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
+
+
+####################
+# Plot: Thresholds vs Mean Threshold similarity 
+####################
+gg_gamma1_sim <- threshold_data %>% 
+  filter(gamma %in% c(-1, 0, 1)) %>% 
+  ggplot(., aes(x = threshold, y = mean_thresh_sim_final, color = gamma)) +
+  geom_hline(aes(yintercept = 0.5), size = 0.3, linetype = "dotted") +
+  geom_point(size = 0.4, alpha = 0.1, stroke = 0) +
+  xlab(expression( paste("Threshold ", theta[i]) )) +
+  ylab("Avg. neighbor\nthreshold similarity") +
+  scale_x_continuous(breaks = seq(0, 1, 0.5)) +
+  scale_y_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1)) +
+  scale_color_gradientn(colors = pal, name = expression(paste("Information\necosystem", gamma))) +
+  theme_ctokita() +
+  theme(legend.position = "none",
+        plot.background = element_blank()) +
+  facet_grid(metric~gamma,
+             labeller = label_bquote(cols = gamma == .(gamma)))
+gg_gamma1_sim
