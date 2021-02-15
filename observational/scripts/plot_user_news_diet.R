@@ -123,6 +123,62 @@ if (file.exists(file_fit_newsdiet)) {
   saveRDS(blm_newsdiet, file = file_fit_newsdiet)
 }
 
+####################
+# Histogram of news source ideologies in dataset
+####################
+# Prep data
+news_source_ideologies <- read.csv(news_source_ideology_file, colClasses = c("id.y" = "character")) %>% 
+  rename(user_id = id.y,
+         description = description.y,
+         media_organization = media.organization,
+         user_name = screenName,
+         follower_count = followersCount.y)
+mean_news_sources_ideol <- mean(news_source_ideologies$ideology)
+
+# Plot
+gg_news_ideology <- ggplot(news_source_ideologies, aes(x = ideology)) +
+  geom_vline(xintercept = 0, 
+             linetype = "dotted", 
+             size = 0.3) +
+  geom_histogram(binwidth = 0.25, 
+                 alpha = 0.7, 
+                 color = "white",
+                 size = 0.6) +
+  scale_y_continuous(breaks = seq(0, 20, 5),
+                     limits = c(0, 20),
+                     expand = c(0, 0)) +
+  xlab("News outlet ideology") +
+  ylab("Count") +
+  theme_ctokita()
+gg_news_ideology
+
+ggsave(gg_news_ideology, filename = paste0(out_path, "news_ideology_histogram.pdf"), width = 45, height = 45, units = "mm")
+
+
+####################
+# Plot news diet data
+####################
+gg_newsdiet_raw <- user_news_diet_means %>% 
+  mutate(news_source_group = factor(news_source_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer"))) %>% 
+  ggplot(., aes(x = news_source_group, y = mean_news_ideology, color = news_source_group)) +
+  geom_hline(yintercept = 0, 
+             linetype = "dotted", 
+             size = 0.3) +
+  geom_point(size = 0.5,
+             stroke = 0,
+             alpha = 0.4,
+             position = position_jitter(width = 0.05)) +
+  scale_color_manual(values = news_pal) +
+  scale_x_discrete(labels = c("Vox", "CBS", "USA\nToday", "Wash.\nExam.")) +
+  scale_y_continuous(breaks = seq(-2, 2, 1)) +
+  xlab("Twitter followers of") +
+  ylab("News diet ideology") +
+  theme_ctokita() +
+  theme(legend.position = "none")
+gg_newsdiet_raw
+
+ggsave(gg_newsdiet_raw, filename = paste0(out_path, "raw_user_news_diet.pdf"), width = 45, height = 50, units = "mm")
+
 
 ####################
 # Plot estimates
@@ -151,7 +207,6 @@ estimates <- posterior_samples(blm_newsdiet) %>%
   merge(estimates, ., by = "user_group") %>% 
   mutate(user_group = factor(user_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
         
-
 # Plot
 gg_newsdiet <- ggplot(estimates, 
                       aes(x = user_group, y = Estimate, color = user_group)) +
@@ -181,57 +236,3 @@ gg_newsdiet
 ggsave(gg_newsdiet, filename = paste0(out_path, "estimated_user_news_diet.pdf"), width = 45, height = 90, units = "mm")
 
 
-####################
-# Plot raw data
-####################
-gg_newsdiet_raw <- user_news_diet_means %>% 
-  mutate(news_source_group = factor(news_source_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer"))) %>% 
-  ggplot(., aes(x = news_source_group, y = mean_news_ideology, color = news_source_group)) +
-  geom_hline(yintercept = 0, 
-             linetype = "dotted", 
-             size = 0.3) +
-  geom_point(size = 0.5,
-             stroke = 0,
-             alpha = 0.4,
-             position = position_jitter(width = 0.05)) +
-  scale_color_manual(values = news_pal) +
-  scale_x_discrete(labels = c("Vox", "CBS", "USA\nToday", "Wash.\nExam.")) +
-  scale_y_continuous(breaks = seq(-2, 2, 1)) +
-  xlab("Twitter followers of") +
-  ylab("News diet ideology") +
-  theme_ctokita() +
-  theme(legend.position = "none")
-gg_newsdiet_raw
-
-ggsave(gg_newsdiet_raw, filename = paste0(out_path, "raw_user_news_diet.pdf"), width = 45, height = 50, units = "mm")
-
-
-####################
-# Histogram of news source ideologies in dataset
-####################
-# Prep data
-news_source_ideologies <- read.csv(news_source_ideology_file, colClasses = c("id.y" = "character")) %>% 
-  rename(user_id = id.y,
-         description = description.y,
-         media_organization = media.organization,
-         user_name = screenName,
-         follower_count = followersCount.y)
-
-# Plot
-gg_news_ideology <- ggplot(news_source_ideologies, aes(x = ideology)) +
-  geom_vline(xintercept = 0, 
-             linetype = "dotted", 
-             size = 0.3) +
-  geom_histogram(binwidth = 0.25, 
-                 alpha = 0.7, 
-                 color = "white",
-                 size = 0.6) +
-  scale_y_continuous(breaks = seq(0, 20, 5),
-                     limits = c(0, 20),
-                     expand = c(0, 0)) +
-  xlab("News outlet ideology") +
-  ylab("Count") +
-  theme_ctokita()
-gg_news_ideology
-
-ggsave(gg_news_ideology, filename = paste0(out_path, "news_ideology_histogram.pdf"), width = 45, height = 45, units = "mm")
