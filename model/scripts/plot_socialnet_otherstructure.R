@@ -389,10 +389,14 @@ ggsave(gg_localnetmetrics, filename = paste0(out_path, "threshold-individualnetw
 ####################
 # Function to extract linear coefficient from our quadratic regressions
 extract_coeffs <- function(regressions, gamma_values, metric) {
-  coeffs <- data.frame(gamma = NULL, slope = NULL, metric = NULL)
+  coeffs <- data.frame(gamma = NULL, slope = NULL, Q2.5 = NULL, Q97.5 = NULL, metric = NULL)
   for (i in 1:length(regressions)) {
     fixed_effects <- fixef(regressions[[i]])
-    new_row <- data.frame(gamma = gamma_values[i], slope = fixed_effects[2], metric = metric) #intercept is 1st, then linear slope, then quadratic coeff
+    new_row <- data.frame(gamma = gamma_values[i], 
+                          slope = fixed_effects[2], #intercept is 1st, then linear slope, then quadratic coeff
+                          Q2.5 =  fixed_effects[6], 
+                          Q97.5 =  fixed_effects[8],
+                          metric = metric) 
     coeffs <- rbind(coeffs, new_row)
   }
   return(coeffs)
@@ -407,8 +411,8 @@ rm(coeffs_cent, coeffs_deg, ceoffs_localassort)
 
 # Plot
 gg_coeffs <- ggplot(coeffs_all, aes(x = gamma, y = slope, color = gamma)) +
-  # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = gamma), color = NA, alpha = 0.3) +
-  geom_line(size = 0.3) +
+  # geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5, fill = plot_color), color = NA, alpha = 0.3) +
+  # geom_line(size = 0.3) +
   geom_point(stroke = 0) +
   scale_x_continuous(breaks = seq(-1, 1, 1)) +
   scale_y_continuous(expand = c(0.3, 0)) +

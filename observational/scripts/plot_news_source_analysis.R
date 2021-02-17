@@ -115,7 +115,7 @@ gg_assort_with_news <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal_type) +
-  geom_line(size = 0.3, color = pal_type) +
+  # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
   # Plot parameters
   ylab("Ideological assortativity") +
@@ -166,10 +166,7 @@ gg_breaks <- ties_data %>%
   geom_vline(data = monitored_news, aes(xintercept = estimated_gamma, color = news_source), 
              size = 0.6, alpha = 0.8) +
   # Plot tie break data
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.2,
-              fill = pal_type) +
-  geom_line(size = 0.3, color = pal_type) +
+  # geom_line(size = 0.3, color = pal_type) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal_type) +
   # Plot parameters

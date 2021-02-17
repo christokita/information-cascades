@@ -56,7 +56,7 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal_type) +
-  geom_line(size = 0.3, color = pal_type) +
+  # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
   ylab("Ideological assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
@@ -75,7 +75,7 @@ gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal_type) +
-  geom_line(size = 0.3, color = pal_type) +
+  # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
   ylab(expression( paste(Delta, " ideological assortativity")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
@@ -96,7 +96,7 @@ gg_assortthresh <- ggplot(data = assort_thresh, aes(x = gamma, y = mean)) +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd),
               alpha = 0.4,
               fill = pal_thresh) +
-  geom_line(size = 0.3, color = pal_thresh) +
+  # geom_line(size = 0.3, color = pal_thresh) +
   geom_point(size = 0.8, color = pal_thresh, shape = 21, fill = "white") +
   ylab("Threshold assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
@@ -115,8 +115,8 @@ gg_assortcomp <- ggplot(data = assort_comp, aes(x = gamma, y = mean, group = met
              linetype = "dotted") +
   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd, fill = metric),
               alpha = 0.4) +
-  geom_line(aes(color = metric), 
-            size = 0.3) +
+  # geom_line(aes(color = metric), 
+  #           size = 0.3) +
   geom_point(aes(shape = metric, color = metric), size = 0.8, fill = "white") +
   ylab("Assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
@@ -167,10 +167,7 @@ gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)
   geom_hline(yintercept = 0, 
              size = 0.3, 
              linetype = "dotted") +
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.2,
-              fill = pal) +
-  geom_line(size = 0.3, color = pal) +
+  # geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab(expression( paste("Net ", Delta, " social ties")) ) +
@@ -197,10 +194,7 @@ ties_data <- network_change_sum %>%
 
 # All ties
 gg_ties <- ggplot(ties_data, aes(x = gamma, y = mean, group = metric)) +
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.2,
-              fill = pal) +
-  geom_line(size = 0.3, color = pal) +
+  # geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab("Count") +
@@ -228,10 +222,7 @@ ggsave(plot = gg_ties, filename = paste0(out_path, "tie_breaksandadds", plot_tag
 gg_breaks <- ties_data %>% 
   filter(grepl("breaks", metric)) %>% 
   ggplot(., aes(x = gamma, y = mean, group = metric)) +
-  geom_ribbon(aes(ymax = mean + error, ymin = mean - error), 
-              alpha = 0.2,
-              fill = pal) +
-  geom_line(size = 0.3, color = pal) +
+  # geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab("Number of broken ties") +
@@ -260,7 +251,7 @@ gg_type_change_FIG <- ggplot(net_type_data, aes(x = gamma, y = mean, group = met
   geom_hline(yintercept = 0, 
              size = 0.3, 
              linetype = "dotted") +
-  geom_line(size = 0.3, color = pal) +
+  # geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab(expression( paste("Net ", Delta, " social ties")) ) +
@@ -281,7 +272,7 @@ gg_type_change_FIG <- ggplot(net_type_data, aes(x = gamma, y = mean, group = met
 gg_breaks_FIG <- ties_data %>% 
   filter(grepl("breaks", metric)) %>% 
   ggplot(., aes(x = gamma, y = mean, group = metric)) +
-  geom_line(size = 0.3, color = pal) +
+  # geom_line(size = 0.3, color = pal) +
   geom_point(aes(shape = metric, fill = metric),
              size = 1, color = pal) +
   ylab("Number of broken ties") +
