@@ -176,7 +176,44 @@ gg_change_neighbor_sim
 ggsave(gg_change_neighbor_sim, filename = paste0(out_path, "change_in_neighbor_similarity.pdf"), width = 50, height = 45, units = "mm", dpi = 400)
 
 
-######################################## Focusing in on gamma == 1 ####################
+
+######################################## Local assortativity of thresholds ######################################## 
+
+####################
+# Load and prep data
+####################
+local_assort_data <- read.csv('model/data_derived/network_break/social_networks/threshold_sorting/local_assort_thresholds.csv') %>% 
+  mutate(threshold_bin = cut(threshold, breaks = seq(0, 1, 0.05), labels = seq(0.025, 0.975, 0.05)),
+         threshold_bin = as.numeric( as.character( threshold_bin ) ) )  %>% 
+  group_by(gamma, threshold_bin) %>% 
+  summarise(mean = mean(local_assort_thresholds, na.rm = TRUE),
+            sd = sd(local_assort_thresholds, na.rm = TRUE))
+  
+
+####################
+# Plot: local assortativity by threshold value
+####################
+gg_localassort_thresh <- ggplot(local_assort_data, aes(x = threshold_bin, y = mean, color = gamma, fill = gamma)) + 
+  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), 
+              alpha = 0.4, color = NA) +
+  geom_point(stroke = 0) +
+  scale_color_gradientn(colors = pal) +
+  scale_fill_gradientn(colors = pal) +
+  scale_x_continuous(breaks = seq(0, 1, 0.5)) +
+  xlab(expression( paste("Threshold", theta[i]) )) +
+  ylab("Local threshold assort.") +
+  theme_ctokita() +
+  theme(legend.position = "none") +
+  facet_grid(~gamma,
+             labeller = label_bquote(cols = gamma == .(gamma)))
+
+gg_localassort_thresh  
+
+ggsave(gg_localassort_thresh, filename = paste0(out_path, "local_threshold_assort.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+
+
+######################################## Focusing in on gamma == 1 ######################################## 
 
 # Prep high-level stat data
 threshold_gamma1_data <- threshold_data %>% 
@@ -248,3 +285,5 @@ gg_gamma1_sim <- threshold_data %>%
   facet_grid(metric~gamma,
              labeller = label_bquote(cols = gamma == .(gamma)))
 gg_gamma1_sim
+
+

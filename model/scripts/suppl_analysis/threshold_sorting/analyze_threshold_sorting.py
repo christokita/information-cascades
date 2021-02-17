@@ -14,6 +14,10 @@ import numpy as np
 import pandas as pd
 import os
 import re
+
+import sys 
+sys.path.append('../../') #add scripts folder so we can import our cacades_model module
+
 from cascade_models.social_networks.local_assortativity import local_assortativity_continuous
 
 
@@ -289,7 +293,7 @@ for run in focus_runs:
         rep_data = pd.DataFrame({'gamma': np.repeat(gamma, len(local_assort_thresh)),
                                  'replicate': np.repeat(replicate, len(local_assort_thresh)),
                                  'threshold': thresholds,
-                                 'local_assort_thresolds': local_assort_thresh})
+                                 'local_assort_thresholds': local_assort_thresh})
         
         # Compile into dataframe and append to master dataframe
         if 'local_threshold_assort_data' not in globals():

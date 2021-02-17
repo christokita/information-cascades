@@ -162,15 +162,14 @@ def local_assortativity_continuous(network, thresholds, alpha):
     # threshold_mean = np.mean(thresholds)
     threshold_std = np.std(thresholds) 
     threshold_mean = np.average(thresholds, weights = degree.flatten(), axis = 0)
-    # threshold_std = np.sqrt( np.average((thresholds - threshold_mean)**2, weights = degree.flatten(), axis = 0) )
+    threshold_std = np.sqrt( np.average((thresholds - threshold_mean)**2, weights = degree.flatten(), axis = 0) )
     
-    threshold_deviation = (thresholds - threshold_mean).flatten()
-    threshold_deviation = threshold_deviation
+    threshold_deviation = (thresholds - threshold_mean).flatten() / threshold_std
     
     # Calculate each individual's correlation with immediate neighbors
     local_thresh_corr = np.array([])
     for i in range(network.shape[0]): #select focal individual to calculate local assort for 
-        pearson_corr = (threshold_deviation[i] * threshold_deviation)  / threshold_std
+        pearson_corr = (threshold_deviation[i] * threshold_deviation)
         corr_weighed_by_network = normalized_network[i,:] @ pearson_corr
         local_thresh_corr = np.append(local_thresh_corr, corr_weighed_by_network)
     
