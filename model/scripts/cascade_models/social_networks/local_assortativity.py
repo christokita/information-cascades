@@ -4,6 +4,10 @@
 Created on Thu May 28 10:13:46 2020
 
 @author: ChrisTokita
+
+NOTE: The code below uses newer 3.5+ python math operators for linear algebra:
+    - @:   matrix mutliplication
+    - *:   element-wise multiplication
 """
 
 import numpy as np
