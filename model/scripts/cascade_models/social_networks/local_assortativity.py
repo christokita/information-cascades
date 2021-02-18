@@ -46,7 +46,7 @@ def local_assortativity(network, types, alpha):
             deviation_from_global = 0 #portion in the sum of equation [6] in paper
             for t in np.unique(types):
                 this_type = types == t
-                e_gg = np.dot(weights[i, this_type], categorized_connections[this_type, t]) #e_gg(l) value
+                e_gg = weights[i, this_type] @ categorized_connections[this_type, t] #e_gg(l) value
                 deviation_from_global += e_gg - a_g[t]**2
             # Normalize by Q_max per equation [6] in paper
             r_l = deviation_from_global / Q_max
@@ -170,13 +170,13 @@ def local_assortativity_continuous(network, thresholds, alpha):
     local_thresh_corr = np.array([])
     for i in range(network.shape[0]): #select focal individual to calculate local assort for 
         pearson_corr = (threshold_deviation[i] * threshold_deviation)
-        corr_weighed_by_network = np.dot(normalized_network[i,:] pearson_corr)
+        corr_weighed_by_network = normalized_network[i,:] @ pearson_corr
         local_thresh_corr = np.append(local_thresh_corr, corr_weighed_by_network)
     
     # Calculate local assortativity by weighing the neighbors (and neighbors of neighbors) correlation with their respective neighbors
     # according to local walk (probability of this represented by personalized page rank)
     weights = personalized_page_rank(network, alpha)
-    local_assort = np.dot(weights, local_thresh_corr)
+    local_assort = weights @ local_thresh_corr
 
     # Individuals without any neighbors cannot have local assortativity by definition
     zero_degree = np.where(degree == 0)[0]
