@@ -40,22 +40,27 @@ load(compiled_data_file)
 ######################### Analysis: Cross-ideology unfollows (tie breaks) by INFORMATION ECOSYSTEM #########################
 
 ####################
-# Plot: Scatter plot of relative FREQUENCY of cross-ideology breaks (relative to expected by random chance)
+# Plot: Histogram of relative FREQUENCY of cross-ideology breaks (relative to expected by random chance)
 ####################
-gg_infoeco_breaks_freq_raw <- tiebreak_data %>% 
-  filter(n_tiebreaks > 0) %>% 
-  ggplot(., aes(x = info_ecosystem, y = delta_tiebreak_freq, color = info_ecosystem)) +
-  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
-  geom_point(size = 1, stroke = 0, alpha = 0.4, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
-  # geom_violin() +
-  scale_y_continuous(limits = c(-1, 1)) +
-  scale_color_manual(values = info_corr_pal) +
+gg_infoeco_breaks_freq_hist <- tiebreak_data %>% 
+  filter(!is.na(delta_tiebreak_freq)) %>% 
+  mutate(info_ecosystem = gsub("correlation", "corr.", info_ecosystem),
+         info_ecosystem = factor(info_ecosystem, levels = c("High corr.", "Low corr."))) %>% 
+  ggplot(., aes(x = delta_tiebreak_freq, fill = info_ecosystem)) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_histogram(alpha = 0.8, position = "identity", binwidth = 0.1) +
+  scale_x_continuous(limits = c(-1, 1),
+                     breaks = seq(-1, 1, 0.5)) +
+  scale_y_continuous(breaks = seq(0, 400, 200)) +
+  scale_fill_manual(values = rev(info_corr_pal)) +
+  xlab("Relative frequency\ncross-ideology unfollows") +
+  ylab("Count") +
   theme_ctokita() +
-  theme(legend.position = "none") +
-  xlab("Information ecosystem") +
-  ylab("Relative freq. of opposite-ideology unfollows")
-gg_infoeco_breaks_freq_raw
-ggsave(gg_infoeco_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "relativefreq_infoeco_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
+  theme(legend.position = "none",
+        aspect.ratio = NULL) +
+  facet_grid(info_ecosystem~.)
+gg_infoeco_breaks_freq_hist
+ggsave(gg_infoeco_breaks_freq_hist, filename = paste0(outpath_tiebreaks, "raw_relativefreq_infoeco.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
 
 
 ####################
@@ -119,20 +124,27 @@ ggsave(gg_infoeco_breaks_freq, filename = paste0(outpath_tiebreaks, "relativefre
 
 
 ####################
-# Plot: Scatter plot of relative NUMBER of cross-ideology breaks
+# Plot: Histogram of relative NUMBER of cross-ideology breaks
 ####################
-gg_infoeco_breaks_n_raw <- tiebreak_data %>% 
-  filter(n_tiebreaks > 0) %>% 
-  ggplot(., aes(x = info_ecosystem, y = delta_tiebreak_n, color = info_ecosystem)) +
-  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
-  geom_point(size = 1, stroke = 0, alpha = 0.4, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
-  scale_color_manual(values = info_corr_pal) +
+gg_infoeco_breaks_n_hist <- tiebreak_data %>% 
+  filter(!is.na(delta_tiebreak_freq)) %>% 
+  mutate(info_ecosystem = gsub("correlation", "corr.", info_ecosystem),
+         info_ecosystem = factor(info_ecosystem, levels = c("High corr.", "Low corr."))) %>% 
+  ggplot(., aes(x = delta_tiebreak_n, fill = info_ecosystem)) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_histogram(alpha = 0.8, position = "identity", binwidth = 0.5) +
+  scale_y_continuous(breaks = seq(0, 600, 200),
+                     limits = c(0, 600)) +
+  scale_fill_manual(values = rev(info_corr_pal)) +
+  xlab("Relative number\ncross-ideology unfollows") +
+  ylab("Count") +
   theme_ctokita() +
-  theme(legend.position = "none") +
-  xlab("Information ecosystem") +
-  ylab("Relative number of opposite-ideology unfollows")
-gg_infoeco_breaks_n_raw
-ggsave(gg_infoeco_breaks_n_raw, filename = paste0(outpath_tiebreaks, "relativenumber_infoeco_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
+  theme(legend.position = "none",
+        aspect.ratio = NULL) +
+  facet_grid(info_ecosystem~.)
+gg_infoeco_breaks_n_hist
+ggsave(gg_infoeco_breaks_n_hist, filename = paste0(outpath_tiebreaks, "raw_relativenumber_infoeco.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
+
 
 ####################
 # Plot: Estimates of relative NUMBER of cross-ideology breaks
@@ -178,21 +190,31 @@ ggsave(gg_infoeco_breaks_n, filename = paste0(outpath_tiebreaks, "relativenumber
 ######################### Analysis: Cross-ideology unfollows (tie breaks) by NEWS SOURCE #########################
 
 ####################
-# Plot: Scatter plot of FREQUENCY of cross-ideology breaks (relative to expected by random chance)
-####################.
-gg_newssource_breaks_freq_raw <- tiebreak_data %>% 
-  filter(n_tiebreaks > 0) %>% 
-  ggplot(., aes(x = news_source, y = delta_tiebreak_freq, color = news_source)) +
-  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
-  geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
-  scale_y_continuous(limits = c(-1, 1)) +
-  scale_color_manual(values = news_pal) +
+# Plot: Histogram plot of FREQUENCY of cross-ideology breaks (relative to expected by random chance)
+####################
+gg_newssource_breaks_freq_hist <- tiebreak_data %>% 
+  filter(!is.na(delta_tiebreak_freq)) %>% 
+  mutate(news_source = factor(news_source, levels = c("cbsnews", "voxdotcom", "usatoday", "dcexaminer"))) %>% 
+  ggplot(., aes(x = delta_tiebreak_freq, fill = news_source)) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_histogram(alpha = 0.8, position = "identity", binwidth = 0.1) +
+  scale_x_continuous(limits = c(-1, 1),
+                     breaks = seq(-1, 1, 0.5)) +
+  scale_y_continuous(breaks = seq(0, 400, 100)) +
+  scale_fill_manual(values = news_pal[c(2, 1, 3, 4)]) +
+  xlab("Relative frequency\ncross-ideology unfollows") +
+  ylab("Count") +
   theme_ctokita() +
-  theme(legend.position = "none") +
-  xlab("News outlet") +
-  ylab("Relative freq.cross-ideology unfollows")
-gg_newssource_breaks_freq_raw
-ggsave(gg_newssource_breaks_freq_raw, filename = paste0(outpath_tiebreaks, "relativefreq_newssource_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
+  theme(legend.position = "none",
+        aspect.ratio = NULL,
+        strip.text = element_text(size = 5)) +
+  facet_wrap(news_source~., 
+             ncol = 2, 
+             dir = "v", 
+             strip.position = "right")
+gg_newssource_breaks_freq_hist
+ggsave(gg_newssource_breaks_freq_hist, filename = paste0(outpath_tiebreaks, "raw_relativefreq_newssource.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+
 
 ####################
 # Bayesian estimate  of relative FREQUENCY of cross-ideology tie breaks
@@ -261,21 +283,29 @@ ggsave(gg_newssource_breaks_freq, filename = paste0(outpath_tiebreaks, "relative
 
 
 ####################
-# Plot: Scatter plot of NUMBER of cross-ideology breaks
-####################.
-gg_newssource_breaks_n_raw <- tiebreak_data %>% 
-  filter(n_tiebreaks > 0) %>% 
-  ggplot(., aes(x = news_source, y = delta_tiebreak_n, color = news_source)) +
-  geom_hline(yintercept = 0, linetype = "dotted", size = 0.3) +
-  geom_point(size = 1, stroke = 0, alpha = 0.5, shape = 16, position = position_jitter(width = 0.05, height = 0.02)) +
-  scale_y_continuous(limits = c(-15, 15), breaks = seq(-15, 15, 5)) +
-  scale_color_manual(values = news_pal) +
+# Plot: Histogram plot of NUMBER of cross-ideology breaks
+####################
+gg_newssource_breaks_n_hist <- tiebreak_data %>% 
+  filter(!is.na(delta_tiebreak_freq)) %>% 
+  mutate(news_source = factor(news_source, levels = c("cbsnews", "voxdotcom", "usatoday", "dcexaminer"))) %>% 
+  ggplot(., aes(x = delta_tiebreak_n, fill = news_source)) +
+  geom_vline(xintercept = 0, linetype = "dotted", size = 0.3) +
+  geom_histogram(alpha = 0.8, position = "identity", binwidth = 0.5) +
+  scale_y_continuous(breaks = seq(0, 400, 100)) +
+  scale_fill_manual(values = news_pal[c(2, 1, 3, 4)]) +
+  xlab("Relative frequency\ncross-ideology unfollows") +
+  ylab("Count") +
   theme_ctokita() +
-  theme(legend.position = "none") +
-  xlab("News outlet") +
-  ylab("Relative number cross-ideology unfollows")
-gg_newssource_breaks_n_raw
-ggsave(gg_newssource_breaks_n_raw, filename = paste0(outpath_tiebreaks, "relativenumber_newssource_raw.pdf"), width = 90, height = 90, units = "mm", dpi = 400)
+  theme(legend.position = "none",
+        aspect.ratio = NULL,
+        strip.text = element_text(size = 5)) +
+  facet_wrap(news_source~., 
+             ncol = 2, 
+             dir = "v", 
+             strip.position = "right")
+gg_newssource_breaks_n_hist
+ggsave(gg_newssource_breaks_n_hist, filename = paste0(outpath_tiebreaks, "raw_relativenumber_newssource.pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+
 
 ####################
 # Bayesian estimate of relative NUMBER of cross-ideology tie breaks
@@ -425,64 +455,4 @@ gg_unfollow_ideol <- ggplot(newssource_unfollow_ideology,
   guides(color = FALSE)
 gg_unfollow_ideol
 ggsave(gg_unfollow_ideol, filename = paste0(outpath_tiebreaks, "relativeideology_newssource.pdf"), width = 45, height = 45, units = "mm")
-
-
-
-######################### Analysis: Cross-ideology unfollows linear mixed model #########################
-
-####################
-# Analyze: relative cross-ideology tiebreak occurence vs. information ecosystem
-####################
-# Simple fixed effects linear model (test whether different than zero)
-lm_infoecosystem <- lm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = tiebreak_data)
-summary(lm_infoecosystem) # low-correlation is significantly different than zero (but not different from high-correlation)
-anova(lm_infoecosystem)
-
-# Bayesian approach to T test
-prior <- c(set_prior("normal(0, 1)", class = "b"))
-blm_infoecosystem <- brm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = tiebreak_data, prior = prior, sample_prior = "yes")
-hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
-hypothesis_infoecosystem
-posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
-hist(posterior_infoecosystem$b_info_ecosystemHighcorrelation, col = rgb(0,0,1,0.5), xlim=c(-0.03, 0.06), breaks = seq(-0.03, 0.06, 0.0025), border = NA)
-hist(posterior_infoecosystem$b_info_ecosystemLowcorrelation, col = rgb(1,0,0,0.5), breaks = seq(-0.03, 0.06, 0.0025), border = NA, add = T)
-
-# Mixed effects model, treating ideological extremity as random effect
-lmm_infoideol <- lmer(delta_tiebreak_freq ~ info_ecosystem + (1|ideology_extremity_bin) - 1, data = tiebreak_data)
-summary(lmm_infoideol)
-confint(lmm_infoideol)
-
-####################
-# Analyze: relative cross-ideology tiebreak occurence vs. news source
-####################
-# Simple fixed effects linear model
-lm_newssource <- lm(delta_tiebreak_freq ~ news_source - 1, data = tiebreak_data)
-summary(lm_newssource) # vox siginfincalty positive, dc examiner approach significance
-anova(lm_newssource)
-
-# Mixed effects model, treating ideological extremity as random effect
-lmm_newsideol <- lmer(delta_tiebreak_freq ~ news_source + (1|ideology_extremity_bin) - 1, data = tiebreak_data)
-summary(lmm_newsideol)
-confint(lmm_newsideol)
-
-
-####################
-# Futher exploration for now...
-####################
-ggplot(data = tiebreak_data, aes(x = tiebreak_diffideol_expected, y = tiebreak_diffideol_n) ) +
-  geom_point(alpha = 0.4, stroke = 0) +
-  geom_abline(aes(intercept = 0, slope = 1)) +
-  theme_ctokita() +
-  facet_wrap(~info_ecosystem)
-
-# Analyze by ideology extremity
-lm_ideolextreme <- lm(delta_tiebreak_freq ~ ideology_extremity, data = tiebreak_data)
-summary(lm_ideolextreme) # intercept not significant, ideology_extremity is significant
-anova(lm_ideolextreme)
-
-# Analyze by info ecosystem and ideology extremity
-lm_infoideol <- lm(delta_tiebreak_freq ~ info_ecosystem + ideology_extremity + ideology_extremity:info_ecosystem - 1, data = tiebreak_data)
-summary(lm_infoideol) # only i
-
-
 

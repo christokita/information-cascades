@@ -61,15 +61,6 @@ ideology_mix <- follower_ideologies %>%
   mutate(followers_liberal_freq = follower_liberal_n / n_follower_samples, #MLE estimate
          followers_conservative_freq = follower_conservative_n / n_follower_samples) #MLE estimate
 
-# Bayesian estimate of follower ideology
-a_L <- 1
-b_L <- 1
-a_C <- 1
-b_C <- 1
-ideology_mix <- ideology_mix %>% 
-  mutate(followers_liberal_est = (follower_liberal_n + a_L) / (n_follower_samples + a_L + b_L),
-         followers_conservative_est = (follower_conservative_n + a_C) / (n_follower_samples + a_C + b_C))
-
 # Calculate freq of breaks by ideology
 tie_change_summary <- tie_changes %>%
   filter(tie_change == "broken",
@@ -92,8 +83,6 @@ tiebreak_data <- merge(monitored_users, ideology_mix) %>%
   #create columns for classification of data by same/diff ideology
   mutate(followers_diffideol_freq = NA,
          followers_sameideol_freq = NA,
-         followers_diffideol_est = NA,
-         followers_sameideol_est = NA,
          tiebreak_diffideol_freq = NA,
          tiebreak_sameideol_freq = NA,
          tiebreak_diffideol_n = NA,
@@ -108,11 +97,6 @@ tiebreak_data$followers_diffideol_freq[liberal_users] <- tiebreak_data$followers
 tiebreak_data$followers_sameideol_freq[liberal_users] <- tiebreak_data$followers_liberal_freq[liberal_users]
 tiebreak_data$followers_diffideol_freq[conservative_users] <- tiebreak_data$followers_liberal_freq[conservative_users]
 tiebreak_data$followers_sameideol_freq[conservative_users] <- tiebreak_data$followers_conservative_freq[conservative_users]
-
-tiebreak_data$followers_diffideol_est[liberal_users] <- tiebreak_data$followers_conservative_est[liberal_users]
-tiebreak_data$followers_sameideol_est[liberal_users] <- tiebreak_data$followers_liberal_est[liberal_users]
-tiebreak_data$followers_diffideol_est[conservative_users] <- tiebreak_data$followers_liberal_est[conservative_users]
-tiebreak_data$followers_sameideol_est[conservative_users] <- tiebreak_data$followers_conservative_est[conservative_users]
 
 tiebreak_data$tiebreak_diffideol_freq[liberal_users] <- tiebreak_data$tiebreak_conservative_freq[liberal_users]
 tiebreak_data$tiebreak_diffideol_freq[conservative_users] <- tiebreak_data$tiebreak_liberal_freq[conservative_users]
@@ -129,13 +113,10 @@ tiebreak_data$tiebreak_sameideol_n[conservative_users] <- tiebreak_data$tiebreak
 #################### 
 tiebreak_data <- tiebreak_data %>% 
   # Calcualte expected number of breaks given follower ideol composition (raw or bayesian estiamte)
-  mutate(tiebreak_diffideol_expected = followers_diffideol_freq * n_tiebreaks,
-         tiebreak_diffideol_expected_est = followers_diffideol_est * n_tiebreaks) %>% 
+  mutate(tiebreak_diffideol_expected = followers_diffideol_freq * n_tiebreaks) %>% 
   # Calcualte delta between expected and actual tie break number/frequency
   mutate(delta_tiebreak_n = tiebreak_diffideol_n - tiebreak_diffideol_expected,
-         delta_tiebreak_n_est = tiebreak_diffideol_n - tiebreak_diffideol_expected_est,
-         delta_tiebreak_freq = tiebreak_diffideol_freq - followers_diffideol_freq,
-         delta_tiebreak_freq_est = tiebreak_diffideol_freq - followers_diffideol_est)
+         delta_tiebreak_freq = tiebreak_diffideol_freq - followers_diffideol_freq)
 
 # SAVE
 save(tiebreak_data, file = paste0(dir_compiled_data, "tiebreak_data.Rdata"))
@@ -323,25 +304,44 @@ gg_newssource_post
 hypothesis(blm_newssource, "news_sourcevoxdotcom > news_sourcecbsnews") #prob = 0.78, BF = 3.6
 hypothesis(blm_newssource, "news_sourcedcexaminer > news_sourceusatoday") #prob = 0.93, BF = 14.15
 
+
+
+######################### Analysis: Cross-ideology unfollows linear mixed model #########################
+
 ####################
-# Futher exploration for now...
+# Analyze: relative cross-ideology tiebreak occurence vs. information ecosystem
 ####################
-ggplot(data = tiebreak_data, aes(x = tiebreak_diffideol_expected, y = tiebreak_diffideol_n) ) +
-  geom_point(alpha = 0.4, stroke = 0) +
-  geom_abline(aes(intercept = 0, slope = 1)) +
-  theme_ctokita() +
-  facet_wrap(~info_ecosystem)
+# Simple fixed effects linear model (test whether different than zero)
+lm_infoecosystem <- lm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = tiebreak_data)
+summary(lm_infoecosystem) # low-correlation is significantly different than zero (but not different from high-correlation)
+anova(lm_infoecosystem)
 
-# Analyze by ideology extremity
-lm_ideolextreme <- lm(delta_tiebreak_freq ~ ideology_extremity, data = tiebreak_data)
-summary(lm_ideolextreme) # intercept not significant, ideology_extremity is significant
-anova(lm_ideolextreme)
+# Bayesian approach to T test
+prior <- c(set_prior("normal(0, 1)", class = "b"))
+blm_infoecosystem <- brm(delta_tiebreak_freq ~ 0 + info_ecosystem, data = tiebreak_data, prior = prior, sample_prior = "yes")
+hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
+hypothesis_infoecosystem
+posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
+hist(posterior_infoecosystem$b_info_ecosystemHighcorrelation, col = rgb(0,0,1,0.5), xlim=c(-0.03, 0.06), breaks = seq(-0.03, 0.06, 0.0025), border = NA)
+hist(posterior_infoecosystem$b_info_ecosystemLowcorrelation, col = rgb(1,0,0,0.5), breaks = seq(-0.03, 0.06, 0.0025), border = NA, add = T)
 
-# Analyze by info ecosystem and ideology extremity
-lm_infoideol <- lm(delta_tiebreak_freq ~ info_ecosystem + ideology_extremity + ideology_extremity:info_ecosystem - 1, data = tiebreak_data)
-summary(lm_infoideol) # only i
+# Mixed effects model, treating ideological extremity as random effect
+lmm_infoideol <- lmer(delta_tiebreak_freq ~ info_ecosystem + (1|ideology_extremity_bin) - 1, data = tiebreak_data)
+summary(lmm_infoideol)
+confint(lmm_infoideol)
 
+####################
+# Analyze: relative cross-ideology tiebreak occurence vs. news source
+####################
+# Simple fixed effects linear model
+lm_newssource <- lm(delta_tiebreak_freq ~ news_source - 1, data = tiebreak_data)
+summary(lm_newssource) # vox siginfincalty positive, dc examiner approach significance
+anova(lm_newssource)
 
+# Mixed effects model, treating ideological extremity as random effect
+lmm_newsideol <- lmer(delta_tiebreak_freq ~ news_source + (1|ideology_extremity_bin) - 1, data = tiebreak_data)
+summary(lmm_newsideol)
+confint(lmm_newsideol)
 
 
 
