@@ -169,12 +169,17 @@ pwr.t.test(d = effect_size,
 ####################
 # Bayesian group mean estimation
 ####################
+# Population mean and SD
+population_mean <- mean(tiebreak_data$delta_tiebreak_freq, na.rm = TRUE)
+population_sd <- sd(tiebreak_data$delta_tiebreak_freq, na.rm = TRUE)
+
 # Compute bayesian estimation
 file_fit_infoeco <- paste0(dir_brms_fits, "infoeco_relfreq.rds")
 if (file.exists(file_fit_infoeco)) {
   blm_infoecosystem <- readRDS(file_fit_infoeco)
 } else {
-  prior <- c(set_prior("normal(0, 0.3)", class = "b")) #population mean = 0.0156, sd = 0.3195
+  prior_form <- paste0("normal(", as.character(population_mean), ",",  population_sd,")")
+  prior <- c(set_prior(prior_form, class = "b")) #population mean = 0.0156, sd = 0.3195
   blm_infoecosystem <- brm(bf(delta_tiebreak_freq ~ 0 + info_ecosystem), 
                            data = tiebreak_data,
                            prior = prior, 
@@ -187,8 +192,8 @@ if (file.exists(file_fit_infoeco)) {
 }
 
 # Hypothesis test that each group's mean is different than zero
-hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0") #prob = 1, BF = 887.89
-hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0") #prob = 0.78, BF = 3.45
+hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > 0") #prob = 1, BF = 850.56
+hypothesis(blm_infoecosystem, "info_ecosystemHighcorrelation > 0") #prob = 0.78, BF = 3.4
 
 # Plot posterior estimates of each group
 posterior_infoecosystem <- posterior_samples(blm_infoecosystem)
@@ -207,11 +212,12 @@ gg_infoeco_post <- ggplot(posterior_infoecosystem_estimates, aes(x = posterior_s
                     values = info_corr_pal) +
   theme_ctokita()
 gg_infoeco_post
-ggsave(gg_infoeco_post, filename = paste0(outpath_tiebreaks, "posteriorest_relativefreq_infoeco.pdf"), width = 70, height = 45, units = "mm")
+ggsave(gg_infoeco_post, filename = paste0(outpath_tiebreaks, "posteriorest_relativefreq_infoeco.pdf"), width = 80, height = 47.5, units = "mm") #fine-tuned dimensions for figure
 
 # Hypothesis test that Low_correlation > high_correlation ecoystem
 hypothesis_infoecosystem <- hypothesis(blm_infoecosystem, "info_ecosystemLowcorrelation > info_ecosystemHighcorrelation")
 hypothesis_infoecosystem$hypothesis$Post.Prob
+hypothesis_infoecosystem
 
 # Plot posterior of group difference
 posterior_infoeco_contrast <- posterior_infoecosystem %>% 
@@ -266,7 +272,8 @@ file_fit_newssource <- paste0(dir_brms_fits, "newssource_relfreq.rds")
 if (file.exists(file_fit_newssource)) {
   blm_newssource <- readRDS(file_fit_newssource)
 } else {
-  prior <- c(set_prior("normal(0, 0.3)", class = "b")) #population mean = 0.0156, sd = 0.3195
+  prior_form <- paste0("normal(", as.character(population_mean), ",",  population_sd,")")
+  prior <- c(set_prior(prior_form, class = "b")) #population mean = 0.0156, sd = 0.3195
   blm_newssource <- brm(bf(delta_tiebreak_freq ~ 0 + news_source), 
                            data = tiebreak_data,
                            prior = prior, 
@@ -280,9 +287,9 @@ if (file.exists(file_fit_newssource)) {
 
 # Hypothesis test that each group's mean is different than zero
 hypothesis(blm_newssource, "news_sourceusatoday > 0") #prob = 0.36, BF = 0.57
-hypothesis(blm_newssource, "news_sourcecbsnews > 0") #prob = 0.92, BF = 10.79
-hypothesis(blm_newssource, "news_sourcedcexaminer > 0") #prob = 0.97, BF = 29.86
-hypothesis(blm_newssource, "news_sourcevoxdotcom > 0") #prob = 0.99, BF = 148.25
+hypothesis(blm_newssource, "news_sourcecbsnews > 0") #prob = 0.91, BF = 10.6
+hypothesis(blm_newssource, "news_sourcedcexaminer > 0") #prob = 0.97, BF = 30.08
+hypothesis(blm_newssource, "news_sourcevoxdotcom > 0") #prob = 0.99, BF = 150.52
 
 # Plot posterior estimates of each group
 posterior_newssource <- posterior_samples(blm_newssource)
@@ -301,8 +308,8 @@ gg_newssource_post <- ggplot(posterior_newssource_estimates, aes(x = posterior_s
 gg_newssource_post
 
 # Hypothesis test that low corr is higher than higher corr for given ideology group
-hypothesis(blm_newssource, "news_sourcevoxdotcom > news_sourcecbsnews") #prob = 0.78, BF = 3.6
-hypothesis(blm_newssource, "news_sourcedcexaminer > news_sourceusatoday") #prob = 0.93, BF = 14.15
+hypothesis(blm_newssource, "news_sourcevoxdotcom > news_sourcecbsnews") #prob = 0.78, BF = 3.53
+hypothesis(blm_newssource, "news_sourcedcexaminer > news_sourceusatoday") #prob = 0.93, BF = 14.19
 
 
 
