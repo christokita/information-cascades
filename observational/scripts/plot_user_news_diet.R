@@ -167,9 +167,9 @@ news_diet_summary <- user_news_diet_means %>%
 gg_newsdiet_raw <- user_news_diet_means %>% 
   mutate(news_source_group = factor(news_source_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer"))) %>% 
   ggplot(., aes(x = news_source_group, y = mean_news_ideology, color = news_source_group)) +
-  geom_point(size = 0.4,
+  geom_point(size = 0.5,
              stroke = 0,
-             alpha = 0.05,
+             alpha = 0.1,
              position = position_jitter(width = 0.2)) +
   geom_errorbar(data = news_diet_summary,
                 aes(y = NULL, ymin = Q25, ymax = Q75, color = news_source_group),
