@@ -115,7 +115,7 @@ if (file.exists(file_fit_newsdiet)) {
   blm_newsdiet <- brm(bf(mean_news_ideology ~ 0 + news_source_group), 
                       data = user_news_diet_means,
                       prior = prior, 
-                      family = gaussian(),
+                      family = skew_normal(),
                       sample_prior = TRUE,
                       warmup = 5000, 
                       chains = 4, 
@@ -137,11 +137,9 @@ mean_news_sources_ideol <- mean(news_source_ideologies$ideology)
 
 # Plot
 gg_news_ideology <- ggplot(news_source_ideologies, aes(x = ideology)) +
-  geom_vline(xintercept = 0, 
-             linetype = "dotted", 
-             size = 0.3) +
   geom_histogram(binwidth = 0.25, 
                  alpha = 0.7, 
+                 fill = "grey30",
                  color = "white",
                  size = 0.6) +
   scale_y_continuous(breaks = seq(0, 20, 5),
@@ -158,20 +156,38 @@ ggsave(gg_news_ideology, filename = paste0(out_path, "news_ideology_histogram.pd
 ####################
 # Plot news diet data
 ####################
+news_diet_summary <- user_news_diet_means %>% 
+  group_by(news_source_group) %>% 
+  summarise(group_mean = mean(mean_news_ideology, na.rm = TRUE),
+            Q25 = quantile(mean_news_ideology, probs = c(0.25)),
+            Q75 = quantile(mean_news_ideology, probs = c(0.75))) %>% 
+  mutate(news_source_group = factor(news_source_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer")))
+
+# Plot raw with means +/- quartiles
 gg_newsdiet_raw <- user_news_diet_means %>% 
   mutate(news_source_group = factor(news_source_group, levels = c("voxdotcom", "cbsnews", "usatoday", "dcexaminer"))) %>% 
   ggplot(., aes(x = news_source_group, y = mean_news_ideology, color = news_source_group)) +
-  geom_hline(yintercept = 0, 
-             linetype = "dotted", 
-             size = 0.3) +
-  geom_point(size = 0.5,
+  geom_point(size = 0.4,
              stroke = 0,
-             alpha = 0.4,
-             position = position_jitter(width = 0.05)) +
+             alpha = 0.05,
+             position = position_jitter(width = 0.2)) +
+  geom_errorbar(data = news_diet_summary,
+                aes(y = NULL, ymin = Q25, ymax = Q75, color = news_source_group),
+                size = 0.6,
+                width = 0) +
+  geom_point(data = news_diet_summary,
+             aes(y = group_mean, fill = news_source_group),
+             size = 2,
+             stroke = 0.3,
+             color = "white",
+             shape = 21) +
   scale_color_manual(values = news_pal) +
+  scale_fill_manual(values = news_pal) +
   scale_x_discrete(labels = c("Vox", "CBS", "USA\nToday", "Wash.\nExam.")) +
-  scale_y_continuous(breaks = seq(-2, 2, 1)) +
-  xlab("Twitter followers of") +
+  scale_y_continuous(breaks = seq(-2, 2, 1),
+                     limits = c(-1, 2),
+                     expand = c(0, 0)) +
+  xlab("Monitored followers of") +
   ylab("News diet ideology") +
   theme_ctokita() +
   theme(legend.position = "none")
@@ -210,12 +226,9 @@ estimates <- posterior_samples(blm_newsdiet) %>%
 # Plot
 gg_newsdiet <- ggplot(estimates, 
                       aes(x = user_group, y = Estimate, color = user_group)) +
-  geom_hline(yintercept = 0, 
-             linetype = "dotted", 
-             size = 0.3) +
-  geom_violin(data = posteriors,
-              aes(y = posterior_sample, fill = user_group),
-              color = NA, alpha = 0.15, width = 1) +
+  # geom_hline(yintercept = 0, 
+  #            linetype = "dotted", 
+  #            size = 0.3) +
   geom_errorbar(aes(ymin = CI_low, ymax = CI_high),
                 width = 0, 
                 size = 0.5) +
@@ -223,9 +236,9 @@ gg_newsdiet <- ggplot(estimates,
   scale_fill_manual(values = news_pal) +
   scale_color_manual(values = news_pal) +
   scale_x_discrete(labels = c("Vox", "CBS", "USA\nToday", "Wash.\nExam.")) +
-  scale_y_continuous(breaks = round(seq(-0.6, 0.3, 0.1), 1), 
-                     limits = c(-0.6, 0.3),
-                     expand = c(0, 0)) +
+  # scale_y_continuous(breaks = round(seq(-0.6, 0.3, 0.1), 1), 
+  #                    limits = c(-0.6, 0.3),
+  #                    expand = c(0, 0)) +
   xlab("Twitter followers of") +
   ylab("Mean news diet ideology") +
   theme_ctokita() +
