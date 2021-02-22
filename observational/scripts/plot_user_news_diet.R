@@ -115,7 +115,7 @@ if (file.exists(file_fit_newsdiet)) {
   blm_newsdiet <- brm(bf(mean_news_ideology ~ 0 + news_source_group), 
                       data = user_news_diet_means,
                       prior = prior, 
-                      family = skew_normal(),
+                      family = gaussian(),
                       sample_prior = TRUE,
                       warmup = 5000, 
                       chains = 4, 
