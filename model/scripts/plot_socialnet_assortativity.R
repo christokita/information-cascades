@@ -58,7 +58,7 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
               fill = pal_type) +
   # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
-  ylab("Ideological assortativity") +
+  ylab("Political assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   scale_y_continuous(limits = c(-0.04, 0.43)) + 
   theme_ctokita() 
@@ -77,7 +77,7 @@ gg_assorttypeD <- ggplot(data = assort_type_change, aes(x = gamma, y = mean)) +
               fill = pal_type) +
   # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
-  ylab(expression( paste(Delta, " ideological assortativity")) ) +
+  ylab(expression( paste(Delta, " political assortativity")) ) +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
   theme_ctokita() 
 gg_assorttypeD #show plot before saving
@@ -163,6 +163,7 @@ network_change_sum <- network_change_data %>%
 net_type_data <- network_change_sum %>% 
   filter(metric %in% c("net_same", "net_diff")) %>% 
   mutate(metric = factor(metric, levels = c("net_same", "net_diff")))
+
 gg_type_change <- ggplot(net_type_data, aes(x = gamma, y = mean, group = metric)) +
   geom_hline(yintercept = 0, 
              size = 0.3, 
@@ -259,7 +260,7 @@ gg_type_change_FIG <- ggplot(net_type_data, aes(x = gamma, y = mean, group = met
   scale_y_continuous(breaks = seq(-2, 2, 1),
                      limits = c(-2, 2), 
                      expand = c(0, 0)) +
-  scale_x_continuous(breaks = seq(-1, 1, 1), labels = scales::number_format(accuracy = 0.1)) +
+  scale_x_continuous(breaks = seq(-1, 1, 0.5), labels = scales::number_format(accuracy = 0.1)) +
   scale_shape_manual(values = c(19, 21),
                      labels = c("Same ideology",
                                 "Diff. ideology")) +
@@ -280,7 +281,7 @@ gg_breaks_FIG <- ties_data %>%
   scale_y_continuous(limits = c(0, 3),
                      breaks = seq(0, 3,1),
                      expand = c(0, 0)) +
-  scale_x_continuous(breaks = seq(-1, 1, 1), labels = scales::number_format(accuracy = 0.1)) +
+  scale_x_continuous(breaks = seq(-1, 1, 0.5), labels = scales::number_format(accuracy = 0.1)) +
   scale_shape_manual(values = c(16, 21),
                      labels = c("Same ideology",
                                 "Diff. ideology")) +
@@ -292,7 +293,9 @@ gg_breaks_FIG <- ties_data %>%
 
 # Plot using ggpubr
 gg_network_change_summary_fig <- ggpubr::ggarrange(gg_type_change_FIG, gg_breaks_FIG, 
-                                           ncol = 1, nrow = 2)
+                                           ncol = 2, nrow = 1)
 
 gg_network_change_summary_fig
-ggsave(gg_network_change_summary_fig, filename = paste0(out_path, "tie_change_summary", plot_tag, ".pdf"), width = 40, height = 75, units = "mm", dpi = 400)
+ggsave(gg_network_change_summary_fig, filename = paste0(out_path, "tie_change_summary", plot_tag, ".pdf"), width = 90, height = 45, units = "mm", dpi = 400)
+# ggsave(gg_network_change_summary_fig, filename = paste0(out_path, "tie_change_summary", plot_tag, ".pdf"), width = 40, height = 75, units = "mm", dpi = 400)
+
