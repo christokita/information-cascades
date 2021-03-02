@@ -60,10 +60,12 @@ gg_assorttype <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   geom_point(size = 0.8, color = pal_type) +
   ylab("Political assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
-  scale_y_continuous(limits = c(-0.04, 0.43)) + 
+  scale_y_continuous(limits = c(-0.1, 0.5), 
+                     breaks = seq(-0.1, 0.5, 0.1), 
+                     expand = c(0, 0)) + 
   theme_ctokita() 
 gg_assorttype #show plot before saving
-ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".pdf"), width = 45, height = 45, units = "mm", dpi = 600)
+ggsave(plot = gg_assorttype, filename = paste0(out_path, "assortativity_type", plot_tag, ".pdf"), width = 47, height = 45, units = "mm", dpi = 600) #slightly larger for plot
 
 # Change in assortativity
 assort_type_change <- assort_sum %>% 
