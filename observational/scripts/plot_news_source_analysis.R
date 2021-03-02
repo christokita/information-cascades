@@ -118,16 +118,18 @@ gg_assort_with_news <- ggplot(data = assort_type, aes(x = gamma, y = mean)) +
   # geom_line(size = 0.3, color = pal_type) +
   geom_point(size = 0.8, color = pal_type) +
   # Plot parameters
-  ylab("Ideological assortativity") +
+  ylab("Political assortativity") +
   xlab(expression( paste("Information ecosystem ", italic(gamma)) )) +
-  scale_y_continuous(limits = c(-0.04, 0.43)) + 
+  scale_y_continuous(limits = c(-0.1, 0.5), 
+                     breaks = seq(-0.1, 0.5, 0.1), 
+                     expand = c(0, 0)) +
   scale_color_manual(name = "",
                      values = news_pal,
                      guide = FALSE) +
   theme_ctokita() 
 gg_assort_with_news
 
-ggsave(gg_assort_with_news, filename = paste0(outpath, "model_assort_with_newsestimantes.pdf"), width = 45, height = 45, units = "mm", dpi = 400)
+ggsave(gg_assort_with_news, filename = paste0(outpath, "model_assort_with_newsestimantes.pdf"), width = 46, height = 45, units = "mm", dpi = 400)
 
 
 ####################
