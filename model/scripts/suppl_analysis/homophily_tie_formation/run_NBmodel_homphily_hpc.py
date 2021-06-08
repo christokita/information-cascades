@@ -32,7 +32,7 @@ psi = 0.1 #proportion of samplers
 timesteps = 3 * 1000000 #number of rounds simulation will run
 rep = int(sys.argv[2]) #replicate ID number
 
-outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/__suppl_sims/homphily_tie_formation/'
+outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/__suppl_sims/homophily_tie_formation/'
 
 
 ##########
