@@ -102,7 +102,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
 def adjust_tie(network, states, correct_behavior):
     """
     Randomly selects active individual and breaks tie if incorrect.
-    Another individual randomly forms like iff a tie is broken in that round.
+    Another individual randomly forms tie iff a tie is broken in that round.
 
     INPUTS:
     - network:      the network connecting individuals (numpy array).

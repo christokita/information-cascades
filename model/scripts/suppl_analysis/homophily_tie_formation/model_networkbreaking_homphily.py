@@ -107,7 +107,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
 def adjust_tie_homophily(network, states, correct_behavior):
     """
     Randomly selects active individual and breaks tie if incorrect.
-    Another individual randomly forms like iff a tie is broken in that round.
+    Another individual forms new tie according to choice homophily iff a tie is broken in that round.
 
     INPUTS:
     - network:      the network connecting individuals (numpy array).
