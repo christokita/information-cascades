@@ -17,7 +17,7 @@ See: directory slurm_scripts/ for the specific scripts used to call this python 
 ####################
 # Load libraries and packages
 ####################
-import model_networkbreaking_homphily as model_homphily
+import model_networkbreaking_homphily as model_homophily
 import sys
 
 #NOTE: sys.argv[0] is name of script
@@ -38,11 +38,11 @@ outpath = '/scratch/gpfs/ctokita/information-cascades/network_break/__suppl_sims
 ##########
 # Run model
 ##########
-model_homphily.sim_adjusting_network(replicate = rep, 
-                                     n = n, 
-                                     k = k, 
-                                     gamma = gamma, 
-                                     psi = psi, 
-                                     timesteps = timesteps,
-                                     outpath = outpath)
+model_homophily.sim_adjusting_network(replicate = rep, 
+                                      n = n, 
+                                      k = k, 
+                                      gamma = gamma, 
+                                      psi = psi, 
+                                      timesteps = timesteps,
+                                      outpath = outpath)
         
