@@ -110,8 +110,8 @@ def adjust_tie_homophily(network, states, correct_behavior):
     Another individual forms new tie according to choice homophily iff a tie is broken in that round.
 
     INPUTS:
-    - network:      the network connecting individuals (numpy array).
-    - states:       matrix listing the behavioral state of every individual (numpy array).
+    - network:            the network connecting individuals (numpy array).
+    - states:             matrix listing the behavioral state of every individual (numpy array).
     - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
     """
     

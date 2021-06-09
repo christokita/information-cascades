@@ -105,8 +105,8 @@ def adjust_tie(network, states, correct_behavior):
     Another individual randomly forms tie iff a tie is broken in that round.
 
     INPUTS:
-    - network:      the network connecting individuals (numpy array).
-    - states:       matrix listing the behavioral state of every individual (numpy array).
+    - network:            the network connecting individuals (numpy array).
+    - states:             matrix listing the behavioral state of every individual (numpy array).
     - correct_behavior:   array indicating whether each individual behaved correctly (numpy array).
     """
     
