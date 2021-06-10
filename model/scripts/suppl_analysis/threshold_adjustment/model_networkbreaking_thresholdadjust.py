@@ -52,6 +52,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     np.random.seed(seed)
     # Seed individual's thresholds
     thresh_mat = th.seed_thresholds(n = n, lower = 0, upper = 1)
+    thresh_mat_initial = thresh_mat.copy()
     # Assign type
     type_mat = th.assign_type(n = n)
     # Set up social network
@@ -101,6 +102,7 @@ def sim_adjusting_network(replicate, n, k, gamma, psi, timesteps, outpath, netwo
     np.save(output_dirs[0] + "sn_final_rep" + rep_label + ".npy", adjacency)
     np.save(output_dirs[0] + "sn_initial_rep" + rep_label + ".npy", adjacency_initial)
     np.save(output_dirs[1] + "thresh_rep" + rep_label + ".npy", thresh_mat)
+    np.save(output_dirs[1] + "thresh_initial_rep" + rep_label + ".npy", thresh_mat_initial)
     np.save(output_dirs[2] + "type_rep" + rep_label + ".npy", type_mat)
     
 ####################
