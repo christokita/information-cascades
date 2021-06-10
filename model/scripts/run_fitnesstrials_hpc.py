@@ -34,7 +34,7 @@ directory = '/scratch/gpfs/ctokita/information-cascades/network_break/'
 fit_trial_length = 10000
 psi = 0.1
 gamma_trial_value = None #if we want to test all networks under same gamma value (instead of gamma of model simulation)
-trial_tags = "" #leave empty unless you are manually setting gamma_trial_value to a 'highcorr' or 'lowcorr' info ecosystem
+trial_tags = "" #leave empty unless you are manually setting gamma_trial_value to a 'highcorr' or 'lowcorr' info ecosystem (lowcorr = -0.9; highcorr = 0.9)
 
 # Prep trial tags
 if len(trial_tags) > 0:
