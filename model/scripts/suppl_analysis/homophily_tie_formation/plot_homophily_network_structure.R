@@ -52,7 +52,7 @@ assort_sum_normal <- assort_data_normal %>%
   summarise(mean = mean(value),
             sd = sd(value),
             ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) )) %>% 
-  mutate(model = "random")
+  mutate(model = "Random (default)")
 
 # Load homophily tie formation model data and summarise
 assort_data_homophily <- read.csv(assort_file_homophily, header = TRUE)
@@ -65,7 +65,7 @@ assort_sum_homphily <- assort_data_homophily %>%
   summarise(mean = mean(value),
             sd = sd(value),
             ci95 = qnorm(0.975) * sd(value)/ sqrt( sum(!is.na(value)) )) %>% 
-mutate(model = "choice homophily")
+mutate(model = "Choice homophily")
 
 # Bind together
 assort_sum <- rbind(assort_sum_normal, assort_sum_homphily)
