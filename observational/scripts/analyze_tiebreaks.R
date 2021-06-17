@@ -30,7 +30,7 @@ dir_compiled_data <- paste0(data_directory, "data_derived/_analysis/") #save com
 dir_brms_fits <- paste0(dir_compiled_data, "brms_fits/") #save our brms fits
 
 # Parameters for plots
-plot_color <- "#1B3B6F"
+plot_color <- "#495867"
 ideol_pal <- c("#006195", "#d9d9d9", "#d54c54")
 news_pal <- c("#006195", "#829bb7", "#df9694", "#d54c54")
 info_corr_pal <- brewer.pal(5, "PuOr")[c(1, 5)]
@@ -46,6 +46,26 @@ follower_ideologies <- read.csv(follower_ideology_file) %>%
 tie_changes <- read.csv(tiechange_file) %>% 
   mutate(user_id = gsub("\"", "", user_id_str),
          follower_id = gsub("\"", "", follower_id_str))
+
+####################
+# Calculate: rate of unfollowing
+####################
+rate_of_unfollows <- tie_changes %>% 
+  filter(tie_change == "broken") %>%
+  group_by(user_id) %>% 
+  summarise(n_tiebreaks = length(ideology_corresp)) %>% 
+  merge(monitored_users[ , c("user_id", "user_name", "friends", "followers", "news_source", "ideology_corresp")], by = "user_id", all = T) %>% 
+  replace_na(list(n_tiebreaks = 0)) %>% 
+  mutate(rate_unfollows = n_tiebreaks / followers)
+
+gg_unfollow_rate <- ggplot(rate_of_unfollows, aes(x = rate_unfollows)) +
+  geom_histogram(binwidth = 0.01, fill = plot_color) +
+  xlab("Proportion of followers lost\nin six weeks") +
+  ylab("Count") +
+  scale_x_continuous(expand = c(0.025, 0)) +
+  scale_y_continuous(breaks = seq(0, 1500, 500), limits = c(0, 1500), expand = c(0.025, 0)) +
+  theme_ctokita()
+ggsave(gg_unfollow_rate, filename = paste0(outpath_tiebreaks, "unfollow_rate.pdf"), height = 45, width = 45, units = "mm")
 
 
 ####################
