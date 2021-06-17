@@ -74,6 +74,7 @@ man_checked_files = ['handcheck_liberal_users_DONE.xlsx', 'handcheck_conservativ
 eligibile_ids = np.array([])
 for file in man_checked_files:
     checked_users = pd.read_excel(data_directory + 'data_derived/monitored_users/handcheck_users/' + file, 
+                                  engine = 'openpyxl',
                                   dtype = {'user_id': object})
     checked_users['user_id'] = checked_users['user_id_str'].str.replace("\"", "")
     checked_users = checked_users[pd.isna(checked_users.handcheck_remove)] #those not selected for removal
@@ -100,7 +101,28 @@ for source in news_sources:
     replacement_users = eligible_news_followers.sample(n = n_replacements, random_state = 90041)
     updated_final_users = updated_final_users.append(replacement_users, ignore_index = True)
     
+    
+####################
+# Get actual friend/follower count at time of friend/follower list sampling
+####################
+'''
+This step is necessary because we sampled user info directly from the Twitter API before pulling friend/follower lists and therefore that information might have been out of date. 
+We will loop thorugh each of our monitored users and get the length of each of their friend/follower lists
+'''
+for i, row in updated_final_users.iterrows():
+    user_id = row.user_id
+    friend_list = pd.read_csv(data_directory + '/data_derived/monitored_users/friend_lists/FriendIDs_' + user_id + '.csv')
+    follower_list = pd.read_csv(data_directory + '/data_derived/user_followers_initial/followerIDs_' + user_id + '.csv')
+    n_friends = friend_list.shape[0]
+    n_followers = follower_list.shape[0]
+    updated_final_users.loc[i, 'friends'] = n_friends
+    updated_final_users.loc[i, 'followers'] = n_followers
+    del friend_list, follower_list, n_friends, n_followers
+
+
+####################
 # Save
+####################
 updated_final_users = updated_final_users.sort_values(by = 'news_source')    
 updated_final_users.to_csv(output_name, index = False)
 
