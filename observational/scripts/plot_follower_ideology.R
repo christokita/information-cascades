@@ -28,7 +28,7 @@ follower_ideology_file <- paste0(data_directory, 'data_derived/monitored_users/f
 outpath_ideology <- "observational/output/ideology/"
 
 # Parameters for plots
-plot_color <- "#1B3B6F"
+plot_color <- "#495867"
 ideol_pal <- c("#006195", "#d9d9d9", "#d54c54")
 
 

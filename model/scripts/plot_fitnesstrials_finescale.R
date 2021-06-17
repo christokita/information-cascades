@@ -25,7 +25,6 @@ if (plot_tag != "") {
 }
 
 # Plot color
-plot_color <- "#1B3B6F"
 pal <- brewer.pal(4, "PuOr")
 
 
