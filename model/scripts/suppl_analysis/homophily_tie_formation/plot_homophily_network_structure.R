@@ -160,7 +160,7 @@ gg_centrality_select <- centrality_data %>%
   scale_x_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1), expand = c(0, 0)) +
   scale_y_continuous(breaks = seq(0.1, 0.6, 0.1), limits = c(0.1, 0.6), expand = c(0, 0)) +
   scale_color_manual(name = "Tie formation", values = models_pal) +
-  ylab("Mean centrality") +
+  ylab("Centrality") +
   xlab(expression(paste("Threshold ", theta[i]))) +
   theme_ctokita() +
   theme(panel.spacing = unit(1.1,  "lines"),
@@ -191,7 +191,7 @@ gg_degree_select <- degree_data %>%
   scale_x_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1), expand = c(0, 0)) +
   scale_y_continuous(breaks = seq(3, 12, 2), limits = c(3, 12), expand = c(0, 0)) +
   scale_color_manual(name = "Tie formation", values = models_pal) +
-  ylab("Mean degree") +
+  ylab("Degree") +
   xlab(expression(paste("Threshold ", theta[i]))) +
   theme_ctokita() +
   theme(panel.spacing = unit(1.1, "lines"),
@@ -203,3 +203,32 @@ gg_degree_select
 ggsave(gg_degree_select, filename = paste0(out_path, "degree_by_tie_formation", plot_tag, ".pdf"), width = 90, height = 32.5, units = "mm", dpi = 600)
 
 
+
+####################
+# Filter to local assortativity, calculate binned means, and plot
+####################
+#Summarize
+localassort_data <- network_change_data %>% 
+  filter(metric == "local_assortativity") %>% 
+  mutate(threshold_bin = cut(threshold, breaks = seq(0, 1, 0.1), labels = seq(0.05, 0.95, 0.1))) %>% 
+  mutate(threshold_bin = as.numeric( as.character(threshold_bin) ) ) %>% 
+  group_by(tie_formation, gamma, threshold_bin) %>% 
+  summarise(mean_localassort = mean(value, na.rm = TRUE))
+
+# Plot
+gg_localassort_select <- localassort_data %>% 
+  filter(gamma %in% seq(-1, 1, 1)) %>% 
+  ggplot(., aes(x = threshold_bin, y = mean_localassort, color = tie_formation)) +
+  geom_point(size = 0.8) +
+  scale_x_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1), expand = c(0, 0)) +
+  # scale_y_continuous(breaks = seq(3, 12, 2), limits = c(3, 12), expand = c(0, 0)) +
+  scale_color_manual(name = "Tie formation", values = models_pal) +
+  ylab("Local assort.") +
+  xlab(expression(paste("Threshold ", theta[i]))) +
+  theme_ctokita() +
+  theme(panel.spacing = unit(1.1, "lines"),
+        legend.position = "none") +
+  facet_grid(.~gamma,
+             labeller = label_bquote(cols = gamma == .(gamma))) 
+gg_localassort_select
+ggsave(gg_localassort_select, filename = paste0(out_path, "localassort_by_tie_formation", plot_tag, ".pdf"), width = 90, height = 32.5, units = "mm", dpi = 600)
