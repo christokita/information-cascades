@@ -21,3 +21,9 @@ Red - #EB4756
 # From eduardo's figure
 Blue - #317fca
 Red - #e00203
+
+# From economist
+Blue - #026ca1
+Red - #e3130d
+
+
