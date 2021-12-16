@@ -6,7 +6,7 @@ Focusing on information cascades and the news environment, we explore a potentia
 ## Overview
 These are the scripts and simulated data (the empirical data is stored on an external harddrive) for:
 
-> Tokita CK, Guess AM, & Tarnita CE. (Submitted). How polarized information ecosystems can reorganize social networks.
+> Tokita CK, Guess AM, & Tarnita CE. (2021). Polarized information ecosystems can reorganize social networks via information cascades. _Proceedings of the National Academy of Sciences_, 118(50). doi:[10.1073/pnas.2102147118](https://doi.org/10.1073/pnas.2102147118)
 
 Most of this project is written in Python. Python scripts are used to construct the model, simulate the model, and analyze model outputs. R is used exclusively for plotting purposes, because I feel that ggplot2 is still an unmatched plotting package when compared to alternatives in Python.
 
