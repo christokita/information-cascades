@@ -1,13 +1,15 @@
-# Information cascade model of politically polarized social networks
-Focusing on information cascades and the news environment, we explore a potentially overlooked driver of political polarization that could be reorganizing social networks along political lines. Specifically, we explore how the information ecosystem (i.e., the collection of news outlets available to society) can create information cascades that cause individuals to adjust their social ties and sort into political "echo chambers"---even when people do not know each other's political identities. A quick rundown of this project from the significance statement in our paper:
+# Polarized information ecosystems can reorganize social networks via information cascades
 
->Prominent accounts argue that the media is an important driver of political polarization, but evidence is mixed on whether partisan media coverage pushes people’s opinions to the extreme. We instead propose another way that partisan media can foster polarization: by altering people’s social connections and reorganizing social networks along political lines. Specifically, using computational modeling and social media data, we explore how people may adjust their social ties to avoid conflicting information presented by their preferred news source and the behavior of friends who may be reacting to other news sources. We show that polarized media causes people to lose opposite-ideology social connections and sort into information-depriving “echo chambers,” even when they do not know each other’s political identity.
-
-## Overview
 These are the scripts and simulated data (the empirical data is stored on an external harddrive) for:
 
 > Tokita CK, Guess AM, & Tarnita CE. (2021). Polarized information ecosystems can reorganize social networks via information cascades. _Proceedings of the National Academy of Sciences_, 118(50). doi:[10.1073/pnas.2102147118](https://doi.org/10.1073/pnas.2102147118)
 
+## Project abstract
+Focusing on information cascades and the news environment, we explore a potentially overlooked driver of political polarization that could be reorganizing social networks along political lines. Specifically, we explore how the information ecosystem (i.e., the collection of news outlets available to society) can create information cascades that cause individuals to adjust their social ties and sort into political "echo chambers"---even when people do not know each other's political identities. A quick rundown of this project from the significance statement in our paper:
+
+>Prominent accounts argue that the media is an important driver of political polarization, but evidence is mixed on whether partisan media coverage pushes people’s opinions to the extreme. We instead propose another way that partisan media can foster polarization: by altering people’s social connections and reorganizing social networks along political lines. Specifically, using computational modeling and social media data, we explore how people may adjust their social ties to avoid conflicting information presented by their preferred news source and the behavior of friends who may be reacting to other news sources. We show that polarized media causes people to lose opposite-ideology social connections and sort into information-depriving “echo chambers,” even when they do not know each other’s political identity.
+
+## Repository overview
 Most of this project is written in Python. Python scripts are used to construct the model, simulate the model, and analyze model outputs. R is used exclusively for plotting purposes, because I feel that ggplot2 is still an unmatched plotting package when compared to alternatives in Python.
 
 This project had three main components that can be found in different subdirectories within this repository:
