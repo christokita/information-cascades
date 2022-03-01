@@ -1,4 +1,4 @@
-# [Polarized information ecosystems can reorganize social networks via information cascades](https://doi.org/10.1073/pnas.2102147118)
+# Information cascade model for the formation of politically polarized social networks
 
 These are the scripts and simulated data (the empirical data is stored on an external harddrive) for:
 
